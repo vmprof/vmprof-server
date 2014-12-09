@@ -27,8 +27,8 @@ class TestAddrSpace(object):
         profiles = addr_space.filter(profiles)
         assert profiles == [
             (["py:one"], 1),
-            (["py:one", "py:two"], 1),
+            (["py:two", "py:one"], 1),
             ]
         p = Profiles(profiles)
         assert p.functions == {"py:one": 2, "py:two": 1}
-        assert p.generate_per_function("py:one") == ({"py:two": 1}, 2)
+        assert p.generate_per_function("py:two") == ({'py:one': 1}, 1)

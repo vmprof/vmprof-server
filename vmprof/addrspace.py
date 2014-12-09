@@ -34,6 +34,7 @@ class AddressSpace(object):
                     current.append(name)
             if current:
                 filtered_profiles.append((current, prof[1]))
+            current.reverse()
         return filtered_profiles
 
     def dump_stack(self, stacktrace):
