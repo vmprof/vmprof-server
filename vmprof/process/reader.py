@@ -3,6 +3,7 @@ import re
 import commands
 import struct
 
+
 class LibraryData(object):
     def __init__(self, name, start, end, is_virtual=False, symbols=None):
         self.name = name
@@ -16,6 +17,7 @@ class LibraryData(object):
             return
         self.symbols = read_object(reader, self.name)
         return self.symbols
+
 
 def read_object(reader, name, repeat=True):
     if reader is None:
@@ -36,6 +38,7 @@ def read_object(reader, name, repeat=True):
         return read_object(reader, '/usr/lib/debug' + name, False)
     return symbols
 
+
 def read_ranges(data):
     ranges = []
     for line in data.splitlines():
@@ -46,6 +49,7 @@ def read_ranges(data):
         end = int('0x' + end, 16)
         ranges.append(LibraryData(name, start, end))
     return ranges
+
 
 def read_sym_file(sym):
     syms = {}
@@ -62,6 +66,7 @@ def read_sym_file(sym):
     syms.sort()
     return syms
 
+
 def read_slots(f):
     slots = []
     while True:
@@ -71,6 +76,7 @@ def read_slots(f):
         val = struct.unpack('Q', data)[0]
         slots.append(val)
     return slots
+
 
 def read_prof(fname):
     f = open(fname, 'rb')

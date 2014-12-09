@@ -3,8 +3,8 @@ import cgi, sys
 import tornado.ioloop
 import tornado.web
 
-from vmprof.reader import read_prof, read_ranges, read_sym_file, LibraryData
-from vmprof.addrspace import AddressSpace, Profiles
+from vmprof.process.reader import read_prof, read_ranges, read_sym_file, LibraryData
+from vmprof.process.addrspace import AddressSpace, Profiles
 
 period, profiles, symmap = read_prof(sys.argv[1])
 libs = read_ranges(symmap)
@@ -12,7 +12,7 @@ for lib in libs:
     lib.read_object_data()
 libs.append(
     LibraryData('<virtual>', 0x8000000000000000L, 0x8fffffffffffffffL, True,
-            symbols=read_sym_file(sys.argv[1] + '.sym')))
+                symbols=read_sym_file(sys.argv[1] + '.sym')))
 libs.sort()
 profiles = Profiles(AddressSpace(libs).filter(profiles))
 
@@ -22,7 +22,7 @@ class MainHandler(tornado.web.RequestHandler):
         items.sort(key = lambda i : -i[1])
         for name, count in items:
             names = name.split(":")
-            funcname = cgi.escape(names[2])
+            funcname = cgi.escape(names[1])
             self.write('<a href="/show?function=%s">%s</a>    %d%%<br/>' % (name, funcname, int(float(count) /
                                           len(profiles.profiles) * 100)))
 
@@ -34,7 +34,7 @@ class ShowHandler(tornado.web.RequestHandler):
         items.sort(key = lambda i : -i[1])
         for name, count in items:
             names = name.split(":")
-            funcname = cgi.escape(names[2])
+            funcname = cgi.escape(names[1])
             self.write('<a href="/show?function=%s">%s</a>    %d%%<br/>' % (name, funcname, int(float(count) /
                                           total * 100)))
 

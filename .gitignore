@@ -1,4 +1,6 @@
 # Byte-compiled / optimized / DLL files
+*.sqlite3
+*.virtualenv
 __pycache__/
 *.py[cod]
 

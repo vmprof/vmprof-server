@@ -1,8 +1,9 @@
-
 import bisect
+
 
 def fmtaddr(x):
     return '0x%016x' % x
+
 
 class AddressSpace(object):
     def __init__(self, libs):
@@ -43,6 +44,7 @@ class AddressSpace(object):
         for addr in stacktrace:
             print fmtaddr(addr), self.lookup(addr)[0]
 
+
 class Profiles(object):
     def __init__(self, profiles):
         self.profiles = profiles
@@ -53,7 +55,7 @@ class Profiles(object):
         for profile in self.profiles:
             current_iter = {}
             for name in profile[0]:
-                if name not in current_iter: # count only topmost
+                if name not in current_iter:  # count only topmost
                     self.functions[name] = self.functions.get(name, 0) + 1
                     current_iter[name] = None
 
@@ -64,7 +66,7 @@ class Profiles(object):
         result = {}
         total = 0
         for profile in self.profiles:
-            current_iter = {} # don't count twice
+            current_iter = {}  # don't count twice
             counting = False
             for name in profile[0]:
                 if counting:
