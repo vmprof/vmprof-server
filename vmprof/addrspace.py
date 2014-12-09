@@ -6,8 +6,10 @@ def fmtaddr(x):
 
 class AddressSpace(object):
     def __init__(self, libs):
-        self.libs = libs
-        self.lib_lookup = [lib.start for lib in libs]
+        all = [(lib.start, lib) for lib in libs]
+        all.sort()
+        self.libs = [lib for _, lib in all]
+        self.lib_lookup = [lib.start for lib in self.libs]
 
     def lookup(self, arg):
         addr = arg + 1
@@ -33,8 +35,8 @@ class AddressSpace(object):
                 if is_virtual:
                     current.append(name)
             if current:
+                current.reverse()
                 filtered_profiles.append((current, prof[1]))
-            current.reverse()
         return filtered_profiles
 
     def dump_stack(self, stacktrace):
