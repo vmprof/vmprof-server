@@ -24,6 +24,53 @@ class AddressSpace(object):
         is_virtual = lib.is_virtual
         return name, is_virtual
 
+    def filter(self, profiles):
+        filtered_profiles = []
+        for prof in profiles:
+            current = []
+            for addr in prof[0]:
+                name, is_virtual = self.lookup(addr)
+                if is_virtual:
+                    current.append(name)
+            if current:
+                filtered_profiles.append((current, prof[1]))
+        return filtered_profiles
+
     def dump_stack(self, stacktrace):
         for addr in stacktrace:
             print fmtaddr(addr), self.lookup(addr)[0]
+
+class Profiles(object):
+    def __init__(self, profiles):
+        self.profiles = profiles
+        self.functions = {}
+        self.generate_top()
+
+    def generate_top(self):
+        for profile in self.profiles:
+            current_iter = {}
+            for name in profile[0]:
+                if name not in current_iter: # count only topmost
+                    self.functions[name] = self.functions.get(name, 0) + 1
+                    current_iter[name] = None
+
+    def generate_per_function(self, top_function):
+        """ Show functions that we call (directly or indirectly) under
+        a given name
+        """
+        result = {}
+        total = 0
+        for profile in self.profiles:
+            current_iter = {} # don't count twice
+            counting = False
+            for name in profile[0]:
+                if counting:
+                    if name in current_iter:
+                        continue
+                    current_iter[name] = None
+                    result[name] = result.get(name, 0) + 1
+                else:
+                    if name == top_function:
+                        counting = True
+                        total += 1
+        return result, total

@@ -33,7 +33,7 @@ def read_object(reader, name, repeat=True):
         symbols.append((start_addr, name))
     symbols.sort()
     if repeat and not symbols:
-        return read_object('/usr/lib/debug' + name, False)
+        return read_object(reader, '/usr/lib/debug' + name, False)
     return symbols
 
 def read_ranges(data):
@@ -108,6 +108,7 @@ def read_prof(fname):
             pcs.add(pc)
             stacktrace.append(pc)
         stacktrace = tuple(stacktrace)
+        assert n == 1 # support n != 1 a bit everywhere, notably Profiles()
         profiles.append((stacktrace, n))
         i += d
     #
