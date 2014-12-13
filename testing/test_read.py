@@ -1,4 +1,5 @@
-import py
+import os
+import pytest
 
 from vmprof.process.reader import read_ranges, read_prof, read_sym_file, LibraryData, read_slots
 from vmprof.process.addrspace import AddressSpace
@@ -28,6 +29,9 @@ FAKE_NM = """0000000000004ff0 t _ufc_dofinalperm_r
 """
 
 
+here = pytest.fixture(lambda: os.path.dirname(__file__))
+
+
 def test_read_ranges():
     def fake_reader(name):
         return FAKE_NM
@@ -48,16 +52,23 @@ def test_read_ranges():
                        (2195840, '_ufc_foobar')]
 
 
-def test_read_profile():
-    srcname = str(py.path.local(__file__).join('..', 'test.prof'))
-    symfile = str(py.path.local(__file__).join('..', 'test.prof.sym'))
+def test_read_profile(here):
 
-    period, profiles, symmap = read_prof(open(srcname, 'rb').read())
+    prof_path = os.path.join(here, 'test.prof')
+    prof_content = open(prof_path, 'rb').read()
+
+    prof_sym_path = os.path.join(here, 'test.prof.sym')
+    prof_sym_content = open(prof_sym_path).read()
+
+    period, profiles, symmap = read_prof(prof_content)
     ranges = read_ranges(symmap)
+
     assert ranges[5].name == '/lib/x86_64-linux-gnu/libcrypto.so.1.0.0'
     assert ranges[5].start == 140315236548608
     assert ranges[5].end == 140315238330368
-    symbols = read_sym_file(open(symfile).read())
+
+    symbols = read_sym_file(prof_sym_content)
+
     assert symbols == [
         (9223512352144476464L, 'py:x.py:<module>:1'),
         (9223512352144796976L, 'py:x.py:testx:18'),
@@ -77,9 +88,11 @@ def test_read_profile():
     assert is_virtual
 
 
-def test_read_slots():
-    f = str(py.path.local(__file__).join('..', 'test.prof'))
-    slots = read_slots(open(f, 'rb').read())
+def test_read_slots(here):
+    prof_path = os.path.join(here, 'test.prof')
+    prof_content = open(prof_path, 'rb').read()
+
+    slots = read_slots(prof_content)
 
     assert slots == [0,
                      3,
