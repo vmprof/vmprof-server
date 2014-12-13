@@ -53,34 +53,39 @@ def read_ranges(data):
 
 def read_sym_file(sym):
     syms = {}
-    with open(sym) as f:
-        for line in f:
-            if not line.startswith('0x'):
-                continue
-            addr, name = line.split(': ')
-            addr = int(addr, 16)
-            name = name.strip()
-            syms[(addr, name)] = None
+    for line in sym.splitlines():
+        if not line.startswith('0x'):
+            continue
+        addr, name = line.split(': ')
+        addr = int(addr, 16)
+        name = name.strip()
+        syms[(addr, name)] = None
 
     syms = syms.keys()
     syms.sort()
     return syms
 
 
-def read_slots(f):
+def read_slots(content):
     slots = []
+    bottom = 0
+    top = 8
     while True:
-        data = f.read(8)
+        data = content[bottom:top]
+        bottom = top
+        top += 8
+
         if len(data) < 8:
             break
         val = struct.unpack('Q', data)[0]
         slots.append(val)
+
     return slots
 
 
-def read_prof(fname):
-    f = open(fname, 'rb')
-    slots = read_slots(f)
+def read_prof(content): #
+    # f = open(fname, 'rb') # to jest czytane do konca
+    slots = read_slots(content)
     assert slots[0] == 0 # header count
     i = 2 + slots[1]     # header words
     version = slots[2]
@@ -119,6 +124,5 @@ def read_prof(fname):
         i += d
     #
     # now, read also the symbol map, as a string
-    f.seek(i*8)
-    symmap = f.read()
+    symmap = content[i*8:]
     return period, profiles, symmap
