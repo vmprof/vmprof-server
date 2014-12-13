@@ -1,0 +1,7 @@
+Django==1.7.1
+pdbpp==0.7.2
+pytest==2.6.4
+pytest-django==2.7.0
+requests==2.5.0
+tornado==4.0.2
+
