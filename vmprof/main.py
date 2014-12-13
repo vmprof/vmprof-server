@@ -78,18 +78,7 @@ def present_function_items(log, func=None):
 
 
 class LogView(View):
-    def get(self, request, checksum):
-        try:
-            log = Log.objects.get(checksum=checksum)
-            response = present_function_items(log)
-
-            return JsonResponse(response)
-        except Log.DoesNotExist:
-            return HttpResponseNotFound()
-
-
-class LogFuncView(View):
-    def get(self, request, checksum, func):
+    def get(self, request, checksum, func=None):
         try:
             log = Log.objects.get(checksum=checksum)
             response = present_function_items(log, func)
@@ -102,9 +91,7 @@ class LogFuncView(View):
 urlpatterns = [
     url(r'^submit/$', csrf_exempt(Submit.as_view())),
 
-    url(r'^(?P<checksum>[0-9a-f]{32})/$',
-        LogView.as_view()),
-    url(r'^(?P<checksum>[0-9a-f]{32})/(?P<func>.+)/$',
-        LogFuncView.as_view()),
+    url(r'^(?P<checksum>[0-9a-f]{32})/$', LogView.as_view()),
+    url(r'^(?P<checksum>[0-9a-f]{32})/(?P<func>.+)/$', LogView.as_view()),
     url(r'^$', views.serve, {'path': 'index.html', 'insecure': True}),
 ]
