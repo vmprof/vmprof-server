@@ -4,7 +4,7 @@
 Virtual Machine profiler (so far restricted to pypy and cpython)
 
 
-## developemnt
+## development
 
 	pip install -r requirements.txt
 
