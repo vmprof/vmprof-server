@@ -15,10 +15,6 @@ app.config(['$routeProvider', function($routeProvider) {
 			templateUrl: '/static/details.html',
 			controller: 'details'
 		})
-		.when('/:log/:func', {
-			templateUrl: '/static/details.html',
-			controller: 'details'
-		})
 		.otherwise({
 			redirectTo: '/'
 		});
@@ -33,7 +29,7 @@ app.controller('list', function ($scope, $http) {
 
 app.controller('details', function ($scope, $http, $routeParams) {
 
-	$scope.func = $routeParams.func;
+	$scope.function = $routeParams.function;
 
 	if ($routeParams.func) {
 		$http.get('/api/log/' + $routeParams.log + '/?function=' + $routeParams.func)
