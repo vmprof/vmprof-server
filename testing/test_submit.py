@@ -1,12 +1,9 @@
 import os
-import json
 import pytest
-import hashlib
+from base64 import b64encode
 
 from rest_framework.test import APIClient
 
-
-from base64 import b64encode
 from vmprof.models import Log
 
 
