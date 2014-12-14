@@ -1,5 +1,8 @@
 import os
+import json
+import zlib
 import pytest
+
 from base64 import b64encode
 
 from rest_framework.test import APIClient
@@ -19,10 +22,10 @@ def read_log(name):
 
 @pytest.mark.django_db
 def test_submit(c):
+    from .submit import data
 
     data = {
-        'prof': b64encode(read_log('test.prof')),
-        'prof_sym': b64encode(read_log('test.prof.sym'))
+        'data': b64encode(zlib.compress(json.dumps(data)))
     }
 
     response = c.post('/api/log/', data=data)
@@ -32,12 +35,11 @@ def test_submit(c):
 
 
 @pytest.mark.django_db
-def test_log(client):
-    prof = read_log('test.prof')
-    prof_sym = read_log('test.prof.sym')
+def test_log(c):
+    from .submit import data
 
-    log = Log.objects.create(prof=prof, prof_sym=prof_sym)
+    log = Log.objects.create(data=zlib.compress(json.dumps(data)))
 
-    response = client.get('/api/log/%s/' % log.checksum)
+    response = c.get('/api/log/%s/' % log.checksum)
 
     assert log.checksum == response.data['checksum']
