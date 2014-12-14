@@ -3,11 +3,12 @@ import hashlib
 
 from base64 import b64decode
 
-from django.conf.urls import url
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.conf.urls import url, include
 from django.contrib.staticfiles import views
-from django.views.generic import View
+
+from rest_framework import routers
+from rest_framework.response import Response
+from rest_framework import viewsets, serializers
 
 from .models import Log
 
@@ -15,22 +16,6 @@ from vmprof.process.addrspace import AddressSpace, Profiles
 from vmprof.process.reader import (
     read_prof, read_ranges, read_sym_file, LibraryData
 )
-
-
-class Submit(View):
-
-    def post(self, request):
-        prof = b64decode(request.POST['prof'])
-        prof_sym = b64decode(request.POST['prof_sym'])
-
-        checksum = hashlib.md5(prof + prof_sym).hexdigest()
-
-        try:
-            log = Log.objects.get(checksum=checksum)
-        except Log.DoesNotExist:
-            log = Log.objects.create(prof=prof, prof_sym=prof_sym)
-
-        return HttpResponse(log.checksum)
 
 
 def present_function_items(log, func=None):
@@ -76,25 +61,6 @@ def present_function_items(log, func=None):
     return functions
 
 
-class LogView(View):
-    def get(self, request, checksum, func=None):
-        try:
-            log = Log.objects.get(checksum=checksum)
-            response = present_function_items(log, func)
-
-            return JsonResponse(response)
-        except Log.DoesNotExist:
-            return HttpResponseNotFound()
-
-
-
-from django.conf.urls import url, include
-from rest_framework import routers
-from rest_framework.response import Response
-from rest_framework import viewsets, serializers
-from django.contrib.auth.models import User, Group
-
-
 class LogSerializer(serializers.ModelSerializer):
     functions = serializers.SerializerMethodField()
 
@@ -110,6 +76,19 @@ class LogSerializer(serializers.ModelSerializer):
 class LogViewSet(viewsets.ModelViewSet):
     queryset = Log.objects.all()
     serializer_class = LogSerializer
+
+    def create(self, request):
+        prof = b64decode(request.POST['prof'])
+        prof_sym = b64decode(request.POST['prof_sym'])
+
+        checksum = hashlib.md5(prof + prof_sym).hexdigest()
+
+        try:
+            log = self.queryset.get(checksum=checksum)
+        except Log.DoesNotExist:
+            log = self.queryset.create(prof=prof, prof_sym=prof_sym)
+
+        return Response(log.checksum)
 
     def retrieve(self, request, pk=None):
         try:
@@ -127,9 +106,5 @@ router.register(r'log', LogViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
-    url(r'^submit/$', csrf_exempt(Submit.as_view())),
-
-    url(r'^(?P<checksum>[0-9a-f]{32})/$', LogView.as_view()),
-    url(r'^(?P<checksum>[0-9a-f]{32})/(?P<func>.+)/$', LogView.as_view()),
     url(r'^$', views.serve, {'path': 'index.html', 'insecure': True}),
 ]

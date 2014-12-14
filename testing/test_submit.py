@@ -3,9 +3,14 @@ import json
 import pytest
 import hashlib
 
-from base64 import b64encode
+from rest_framework.test import APIClient
 
+
+from base64 import b64encode
 from vmprof.models import Log
+
+
+c = pytest.fixture(lambda: APIClient())
 
 
 def read_log(name):
@@ -16,16 +21,16 @@ def read_log(name):
 
 
 @pytest.mark.django_db
-def test_submit(client):
+def test_submit(c):
 
     data = {
         'prof': b64encode(read_log('test.prof')),
         'prof_sym': b64encode(read_log('test.prof.sym'))
     }
 
-    response = client.post('/submit/', data=data)
+    response = c.post('/api/log/', data=data)
 
-    assert Log.objects.get(checksum=response.content)
+    assert Log.objects.get(checksum=response.data)
     assert Log.objects.count() == 1
 
 
@@ -35,7 +40,7 @@ def test_log(client):
     prof_sym = read_log('test.prof.sym')
 
     log = Log.objects.create(prof=prof, prof_sym=prof_sym)
-    response = client.get('/%s/' % log.checksum)
-    response_json = json.loads(response.content)
 
-    assert response_json['checksum'] == log.checksum
+    response = client.get('/api/log/%s/' % log.checksum)
+
+    assert log.checksum == response.data['checksum']
