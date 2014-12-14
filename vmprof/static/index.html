@@ -1,47 +1,38 @@
-<html lang="en">
+<html lang="en" ng-app="vmprof">
 
   <head>
     <meta charset="utf-8"/>
     <title>vmprof</title>
-    
+
     <link href="/static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/static/libs/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+
+    <script src="/static/libs/jquery-2.1.1.min.js"></script>
     <script src="/static/libs/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/libs/angular.min.js"></script>
+    <script src="/static/libs/angular-resource.min.js"></script>
+    <script src="/static/libs/angular-route.min.js"></script>
+    <script src="/static/main.js"></script>
 
   </head>
 
   <body>
-     <div class="container">
 
-      <div class="starter-template">
-        <h1>VMProf</h1>
-        <p class="lead">
-	  <pre>
-import os
-import sys
-import base64
-import requests
-
-
-here = os.path.dirname(__file__)
-
-prof = base64.b64encode(open(sys.argv[1], 'rb').read())
-prof_sym = base64.b64encode(open(sys.argv[2], 'rb').read())
-
-response = requests.post("http://127.0.0.1:8000/submit/", data={
-    "prof": prof,
-    "prof_sym": prof_sym
-})
-
-print response.content
-	  </pre>
-
-	  <pre>
-$> python clinet.py testing/test.prof testing/test.prof.sym
-9a663c5f1d8a217e26e06c729e35fe4a</pre>
-	</p>
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+	  <a class="navbar-brand" ng-href="#/">VMprof</a>
+	  <a class="navbar-text" ng-href="#help">Help</a>
+        </div>
       </div>
+    </nav>
+    
+    <div class="container">
+      
+      <div ng-view></div>
 
+      <hr/>      
+      
     </div>
   </body>
 
