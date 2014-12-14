@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import hashlib
-
+import json
+import zlib
 from base64 import b64decode
 
 from django.conf.urls import url, include
@@ -19,22 +20,18 @@ from vmprof.process.reader import (
 
 
 def present_function_items(log, func=None):
-    period, profiles, symmap = read_prof(log.prof)
-    libs = read_ranges(symmap)
-
-    for lib in libs:
-        lib.read_object_data()
-    libs.append(
-        LibraryData(
-            '<virtual>',
-            0x8000000000000000L,
-            0x8fffffffffffffffL,
-            True,
-            symbols=read_sym_file(str(log.prof_sym)))
-    )
-
-    libs.sort()
-    profiles = Profiles(AddressSpace(libs).filter(profiles))
+    data = json.loads(zlib.decompress(log.data))
+    profiles = data['profiles']
+    raw_addresses = data['addresses']
+    addresses = {}
+    for k, v in raw_addresses.iteritems():
+        addresses[int(k)] = v
+    for profile in profiles:
+        cur = []
+        for item in profile[0]:
+            cur.append(addresses[item])
+        profile[0] = cur
+    profiles = Profiles(profiles)
 
     functions = []
 
@@ -78,15 +75,13 @@ class LogViewSet(viewsets.ModelViewSet):
     serializer_class = LogSerializer
 
     def create(self, request):
-        prof = b64decode(request.POST['prof'])
-        prof_sym = b64decode(request.POST['prof_sym'])
-
-        checksum = hashlib.md5(prof + prof_sym).hexdigest()
+        data = b64decode(request.POST['data'])
+        checksum = hashlib.md5(data).hexdigest()
 
         try:
             log = self.queryset.get(checksum=checksum)
         except Log.DoesNotExist:
-            log = self.queryset.create(prof=prof, prof_sym=prof_sym)
+            log = self.queryset.create(data=data, checksum=checksum)
 
         return Response(log.checksum)
 

@@ -40,6 +40,22 @@ class AddressSpace(object):
                 filtered_profiles.append((current, prof[1]))
         return filtered_profiles
 
+    def filter_addr(self, profiles):
+        filtered_profiles = []
+        addr_set = set()
+        for prof in profiles:
+            current = []
+            for addr in prof[0]:
+                name, is_virtual = self.lookup(addr)
+                if is_virtual:
+                    new_addr = addr & (~0x8000000000000000L)
+                    current.append(new_addr)
+                    addr_set.add(new_addr)
+            if current:
+                current.reverse()
+                filtered_profiles.append((current, prof[1]))
+        return filtered_profiles, addr_set
+
     def dump_stack(self, stacktrace):
         for addr in stacktrace:
             print fmtaddr(addr), self.lookup(addr)[0]
