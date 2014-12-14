@@ -51,10 +51,7 @@ def present_function_items(log, func=None):
     libs.sort()
     profiles = Profiles(AddressSpace(libs).filter(profiles))
 
-    response = {
-        "checksum": log.checksum,
-        "functions": []
-    }
+    functions = []
 
     if func:
         items, total = profiles.generate_per_function(func)
@@ -66,15 +63,17 @@ def present_function_items(log, func=None):
         total = len(profiles.profiles)
 
     for name, count in items:
-        names = name.split(":")
+        segments = name.split(":")
 
-        response["functions"].append({
-            "name": name,
-            "funcname": names[2],
+        functions.append({
+            "id": name,
+            "file": segments[1],
+            "name": segments[2],
+            "line": segments[3],
             "time": int(float(count) / total * 100)
         })
 
-    return response
+    return functions
 
 
 class LogView(View):
@@ -88,7 +87,46 @@ class LogView(View):
             return HttpResponseNotFound()
 
 
+
+from django.conf.urls import url, include
+from rest_framework import routers
+from rest_framework.response import Response
+from rest_framework import viewsets, serializers
+from django.contrib.auth.models import User, Group
+
+
+class LogSerializer(serializers.ModelSerializer):
+    functions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Log
+        fields = ('checksum', 'functions')
+
+    def get_functions(self, obj):
+        function = self.context['request'].GET.get('function')
+        return present_function_items(obj, function)
+
+
+class LogViewSet(viewsets.ModelViewSet):
+    queryset = Log.objects.all()
+    serializer_class = LogSerializer
+
+    def retrieve(self, request, pk=None):
+        try:
+            log = self.queryset.get(pk=pk)
+            return Response(self.serializer_class(
+                log, context={'request': request}
+            ).data)
+        except Log.DoesNotExist:
+            return Response(status=404)
+
+
+router = routers.DefaultRouter()
+router.register(r'log', LogViewSet)
+
+
 urlpatterns = [
+    url(r'^api/', include(router.urls)),
     url(r'^submit/$', csrf_exempt(Submit.as_view())),
 
     url(r'^(?P<checksum>[0-9a-f]{32})/$', LogView.as_view()),
