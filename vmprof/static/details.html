@@ -1,0 +1,35 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+
+    <div ng-if="!func">
+      <a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a>
+    </div>
+    
+    <div ng-if="func">
+      <a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a> :
+      <a ng-href="#/{{ log.checksum }}/{{ func }}">{{ func }}</a>
+    </div>
+    
+  </div>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>name</th>
+        <th>file</th>
+        <th>time</th>
+      </tr>
+    </thead>
+    
+    <tbody>
+      <tr ng-repeat="function in log.functions">
+        <td>
+	  <a href="#{{ log.checksum }}/{{ function.id }}">{{ function.name }}</a>
+	</td>
+	<td>{{ function.file }}:{{ function.line }}</td>
+	<td>{{ function.time }}%</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
