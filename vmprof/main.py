@@ -11,12 +11,9 @@ from rest_framework import routers
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 
-from .models import Log
+from vmprof.process.addrspace import Profiles
 
-from vmprof.process.addrspace import AddressSpace, Profiles
-from vmprof.process.reader import (
-    read_prof, read_ranges, read_sym_file, LibraryData
-)
+from .models import Log
 
 
 def present_function_items(log, func=None):
