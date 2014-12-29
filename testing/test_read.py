@@ -1,8 +1,8 @@
 import os
 import pytest
 
-from vmprof.process.reader import read_ranges, read_prof, read_sym_file, LibraryData, read_slots
-from vmprof.process.addrspace import AddressSpace
+from server.process.reader import read_ranges, read_prof, read_sym_file, LibraryData, read_slots
+from server.process.addrspace import AddressSpace
 
 RANGES = """0400000-005a1000 r-xp 00000000 08:01 5389781                            /home/fijal/.virtualenvs/cffi3/bin/python
 007a0000-007a1000 r--p 001a0000 08:01 5389781                            /home/fijal/.virtualenvs/cffi3/bin/python

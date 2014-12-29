@@ -18,7 +18,7 @@ INSTALLED_APPS = (
 
     'rest_framework',
 
-    'vmprof'
+    'server'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -31,8 +31,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'vmprof.main'
-WSGI_APPLICATION = 'vmprof.wsgi.application'
+ROOT_URLCONF = 'server.main'
+WSGI_APPLICATION = 'server.wsgi.app'
 
 DATABASES = {
     'default': {

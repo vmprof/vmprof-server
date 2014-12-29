@@ -1,5 +1,5 @@
-from vmprof.process.reader import LibraryData
-from vmprof.process.addrspace import AddressSpace, Profiles
+from server.process.reader import LibraryData
+from server.process.addrspace import AddressSpace, Profiles
 
 
 class TestAddrSpace(object):

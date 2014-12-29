@@ -11,7 +11,7 @@ from rest_framework import routers
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 
-from vmprof.process.addrspace import Profiles
+from server.process.addrspace import Profiles
 
 from .models import Log
 

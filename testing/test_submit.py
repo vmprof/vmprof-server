@@ -7,7 +7,7 @@ from base64 import b64encode
 
 from rest_framework.test import APIClient
 
-from vmprof.models import Log
+from server.models import Log
 
 
 c = pytest.fixture(lambda: APIClient())
