@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+static/*
 *.sqlite3
 *.virtualenv
 __pycache__/
