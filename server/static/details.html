@@ -1,41 +1,41 @@
 <div class="panel panel-default">
-  <div class="panel-heading">
+	<div class="panel-heading">
 
-    <div ng-if="!function">
-      <a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a>
-    </div>
-    
-    <div ng-if="function">
-      <a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a> :
-      <a ng-href="#/{{ log.checksum }}/?function={{ function }}">{{ function }}</a>
-    </div>
-    
-  </div>
+		<div ng-if="!function">
+			<a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a>
+		</div>
 
-  <p ng-if="log.functions.length == 0" class="lead text-center" style="padding-top: 15px">
-    no profiles
-  </p>
-  
-  <table class="table table-hover" ng-if="log.functions.length > 0 ">
-    <thead>
-      <tr>
-        <th>name</th>
-        <th>file</th>
-        <th>time</th>
-      </tr>
-    </thead>
-    
-    <tbody>
-      <tr ng-repeat="function in log.functions">
-        <td>
-	  <a href="#{{ log.checksum }}/?function={{ function.id }}">
-	    {{ function.name }}
-	  </a>
-	</td>
-	<td>{{ function.file }}:{{ function.line }}</td>
-	<td>{{ function.time }}%</td>
-      </tr>
-    </tbody>
-  </table>
+		<div ng-if="function">
+			<a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a> :
+			<a ng-href="#/{{ log.checksum }}/?function={{ function }}">{{ function }}</a>
+		</div>
+
+	</div>
+
+	<p ng-if="log.functions.length == 0" class="lead text-center" style="padding-top: 15px">
+		no profiles
+	</p>
+
+	<table class="table table-hover" ng-if="log.functions.length > 0 ">
+		<thead>
+			<tr>
+				<th>name</th>
+				<th>file</th>
+				<th>time</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			<tr ng-repeat="function in log.functions">
+				<td>
+					<a href="#{{ log.checksum }}/?function={{ function.id }}">
+						{{ function.name }}
+					</a>
+				</td>
+				<td>{{ function.file }}:{{ function.line }}</td>
+				<td>{{ function.time }}%</td>
+			</tr>
+		</tbody>
+	</table>
 
 </div>
