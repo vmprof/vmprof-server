@@ -1,4 +1,6 @@
-<div class="list-group">
+<img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
+
+<div ng-show="!loading" class="list-group">
 	<a ng-href="#{{ log.checksum }}" class="list-group-item" ng-repeat="log in logs">
 		{{ log.checksum }}
 	</a>
