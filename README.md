@@ -12,3 +12,9 @@ Virtual Machine profiler (so far restricted to pypy and cpython)
 
 	python manage.py runserver
 
+
+## deployment
+
+	fab deploy -H {HOST} -u {USER}
+
+
