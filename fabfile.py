@@ -28,7 +28,11 @@ def deploy():
         run("mkdir vmprof")
 
         run("tar -xf %s -C vmprof --strip-components=1" % target)
-        run("virtualenv virtualenv")
+
+        run("rm %s" % target)
+
+        if not files.exists("virtualenv"):
+            run("virtualenv virtualenv")
 
         run("%s install -r vmprof/requirements/production.txt" % ENV_PIP)
 
