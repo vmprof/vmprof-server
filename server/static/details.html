@@ -3,13 +3,13 @@
 <div ng-show="!loading" class="panel panel-default">
 	<div class="panel-heading">
 
-		<div ng-if="!function">
+		<div ng-if="!function_name">
 			<a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a>
 		</div>
 
-		<div ng-if="function">
-			<a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a> :
-			<a ng-href="#/{{ log.checksum }}/?function={{ function }}">{{ function }}</a>
+		<div ng-if="function_name">
+			<a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a>:
+			<a ng-href="#/{{ log.checksum }}/?function={{ function_name }}">{{ function_name }}</a>
 		</div>
 
 	</div>

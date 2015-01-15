@@ -32,12 +32,13 @@ app.controller('list', function ($scope, $http) {
 });
 
 app.controller('details', function ($scope, $http, $routeParams) {
+	var function_name = $routeParams.function;
+
 	$scope.loading = true;
+	$scope.function_name = function_name;
 
-	$scope.function = $routeParams.function;
-
-	if ($routeParams.func) {
-		$http.get('/api/log/' + $routeParams.log + '/?function=' + $routeParams.func)
+	if (function_name) {
+		$http.get('/api/log/' + $routeParams.log + '/?function=' + function_name)
 			.then(function(response) {
 				$scope.log = response.data;
 				$scope.loading = false;
