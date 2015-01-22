@@ -162,4 +162,20 @@ def test_function():
     data = process(copy.deepcopy(RAW_DATA))
     key = u'py:/src/vmprof-python/vmprof/__init__.py:func:47'
 
-    assert data[key] == [{'line': u'12', 'time': 100, 'id': u'py:vmprof-python/example.py:main:12', 'file': u'vmprof-python/example.py', 'name': u'main'}, {'line': u'8', 'time': 76, 'id': u'py:vmprof-python/example.py:test_2:8', 'file': u'vmprof-python/example.py', 'name': u'test_2'}, {'line': u'4', 'time': 6, 'id': u'py:vmprof-python/example.py:test_1:4', 'file': u'vmprof-python/example.py', 'name': u'test_1'}]
+    assert data[key] == [
+        {'line': u'12',
+         'time': 100,
+         'id': u'py:vmprof-python/example.py:main:12',
+         'file': u'vmprof-python/example.py',
+         'name': u'main'},
+
+        {'line': u'8',
+         'time': 76,
+         'id': u'py:vmprof-python/example.py:test_2:8',
+         'file': u'vmprof-python/example.py', 'name': u'test_2'},
+
+        {'line': u'4',
+         'time': 6,
+         'id': u'py:vmprof-python/example.py:test_1:4',
+         'file': u'vmprof-python/example.py', 'name': u'test_1'}
+    ]
