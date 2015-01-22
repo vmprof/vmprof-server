@@ -1,24 +1,18 @@
 <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
 
+
 <div ng-show="!loading" class="panel panel-default">
 	<div class="panel-heading">
 
-		<div ng-if="!function_name">
-			<a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a>
-		</div>
-
-		<div ng-if="function_name">
-			<a ng-href="#/{{ log.checksum }}">{{ log.checksum }}</a>:
-			<a ng-href="#/{{ log.checksum }}/?function={{ function_name }}">{{ function_name }}</a>
-		</div>
+		<a ng-click="setFunction(null)" href="">{{ log.checksum }}</a><span ng-if="func">: {{ func.id }}</span>
 
 	</div>
 
-	<p ng-if="log.functions.length == 0" class="lead text-center" style="padding-top: 15px">
+	<p ng-if="profiles.length == 0" class="lead text-center" style="padding-top: 15px">
 		no profiles
 	</p>
 
-	<table class="table table-hover" ng-if="log.functions.length > 0 ">
+	<table class="table table-hover" ng-if="profiles.length > 0 ">
 		<thead>
 			<tr>
 				<th>name</th>
@@ -28,9 +22,9 @@
 		</thead>
 
 		<tbody>
-			<tr ng-repeat="function in log.functions">
+			<tr ng-repeat="function in profiles">
 				<td>
-					<a href="#{{ log.checksum }}/?function={{ function.id }}">
+					<a ng-click="setFunction(function)" href="">
 						{{ function.name }}
 					</a>
 				</td>

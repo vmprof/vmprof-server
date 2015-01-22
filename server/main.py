@@ -11,60 +11,21 @@ from rest_framework import routers
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 
-from server.process.addrspace import Profiles
+from server.process import process
 
 from .models import Log
 
 
-def present_function_items(log, func=None):
-    data = json.loads(zlib.decompress(log.data))
-    profiles = data['profiles']
-    raw_addresses = data['addresses']
-    addresses = {}
-    for k, v in raw_addresses.iteritems():
-        addresses[int(k)] = v
-    for profile in profiles:
-        cur = []
-        for item in profile[0]:
-            cur.append(addresses[item])
-        profile[0] = cur
-    profiles = Profiles(profiles)
-
-    functions = []
-
-    if func:
-        items, total = profiles.generate_per_function(func)
-        items = items.items()
-        items.sort(key=lambda i: -i[1])
-    else:
-        items = profiles.functions.items()
-        items.sort(key=lambda i: -i[1])
-        total = len(profiles.profiles)
-
-    for name, count in items:
-        segments = name.split(":")
-
-        functions.append({
-            "id": name,
-            "file": segments[1],
-            "name": segments[2],
-            "line": segments[3],
-            "time": int(float(count) / total * 100)
-        })
-
-    return functions
-
-
 class LogSerializer(serializers.ModelSerializer):
-    functions = serializers.SerializerMethodField()
+    data = serializers.SerializerMethodField()
 
     class Meta:
         model = Log
-        fields = ('checksum', 'functions')
+        fields = ('checksum', 'data')
 
-    def get_functions(self, obj):
-        function = self.context['request'].GET.get('function')
-        return present_function_items(obj, function)
+    def get_data(self, obj):
+        data = json.loads(zlib.decompress(obj.data))
+        return process(data)
 
 
 class LogViewSet(viewsets.ModelViewSet):

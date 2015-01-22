@@ -35,20 +35,26 @@ app.controller('details', function ($scope, $http, $routeParams) {
 	var function_name = $routeParams.function;
 
 	$scope.loading = true;
-	$scope.function_name = function_name;
 
-	if (function_name) {
-		$http.get('/api/log/' + $routeParams.log + '/?function=' + function_name)
-			.then(function(response) {
-				$scope.log = response.data;
-				$scope.loading = false;
-			});
-	} else {
-		$http.get('/api/log/' + $routeParams.log)
-			.then(function(response) {
-				$scope.log = response.data;
-				$scope.loading = false;
+	$http.get('/api/log/' + $routeParams.log)
+		.then(function(response) {
+
+			var profiles = response.data.data;
+
+			$scope.func = null;
+			$scope.log = response.data;
+			$scope.loading = false;
+			$scope.profiles = profiles.top;
+
+			$scope.setFunction = function(func) {
+				$scope.func = func;
+				if (func) {
+					$scope.profiles = profiles[func.id];
+				} else {
+					$scope.profiles = profiles.top;
+				}
+			}
+
 		});
-	}
 });
 
