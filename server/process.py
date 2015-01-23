@@ -1,6 +1,18 @@
 
 
-def generate_top(profiles):
+def serialize(name, count, total):
+    segments = name.split(":")
+
+    return {
+        "id": name,
+        "file": segments[1],
+        "name": segments[2],
+        "line": segments[3],
+        "time": int(float(count) / total * 100)
+    }
+
+
+def get_top(profiles):
 
     top_functions = {}
     for profile in profiles:
@@ -16,40 +28,16 @@ def generate_top(profiles):
 
     top = []
     for name, count in top_items:
-        segments = name.split(":")
-
-        top.append({
-            "id": name,
-            "file": segments[1],
-            "name": segments[2],
-            "line": segments[3],
-            "time": int(float(count) / total * 100)
-        })
+        top.append(serialize(name, count, total))
 
     return top
 
 
-def process(raw_data):
+def get_functions(profiles, top_functions):
 
-    profiles = raw_data['profiles']
-    raw_addresses = raw_data['addresses']
+    functions = {}
 
-    addresses = {}
-    for k, v in raw_addresses.iteritems():
-        addresses[int(k)] = v
-    for profile in profiles:
-        cur = []
-        for item in profile[0]:
-            cur.append(addresses[item])
-        profile[0] = cur
-
-    top = generate_top(profiles)
-
-    data = {
-        "top": top
-    }
-
-    for top_function in top:
+    for top_function in top_functions:
         key = top_function['id']
 
         result = {}
@@ -71,17 +59,35 @@ def process(raw_data):
         items = result.items()
         items.sort(key=lambda i: -i[1])
 
-        data[key] = []
+        functions[key] = []
 
         for name, count in items:
-            segments = name.split(":")
+            functions[key].append(serialize(name, count, total))
 
-            data[key].append({
-                "id": name,
-                "file": segments[1],
-                "name": segments[2],
-                "line": segments[3],
-                "time": int(float(count) / total * 100)
-            })
+    return functions
+
+
+def process(raw_data):
+
+    profiles = raw_data['profiles']
+    raw_addresses = raw_data['addresses']
+
+    addresses = {}
+    for k, v in raw_addresses.iteritems():
+        addresses[int(k)] = v
+    for profile in profiles:
+        cur = []
+        for item in profile[0]:
+            cur.append(addresses[item])
+        profile[0] = cur
+
+    top = get_top(profiles)
+    functions = get_functions(profiles, top)
+
+    data = {
+        "top": top
+    }
+
+    data.update(functions)
 
     return data
