@@ -1,7 +1,6 @@
 var app = angular.module('vmprof', ['ngRoute']);
 
 app.config(['$routeProvider', function($routeProvider) {
-	// $locationProvider.html5Mode(true).hashPrefix('!');
 
 	$routeProvider
 		.when('/', {
@@ -32,7 +31,7 @@ app.controller('list', function ($scope, $http) {
 });
 
 app.controller('details', function ($scope, $http, $routeParams) {
-	var function_name = $routeParams.function;
+	var function_id = $routeParams.id;
 
 	$scope.loading = true;
 
@@ -40,21 +39,21 @@ app.controller('details', function ($scope, $http, $routeParams) {
 		cache: true
 	}).then(function(response) {
 
-			var profiles = response.data.data;
+		$scope.log = response.data;
 
-			$scope.func = null;
-			$scope.log = response.data;
-			$scope.loading = false;
-			$scope.profiles = profiles.top;
+		var data = response.data.data;
 
-			$scope.setFunction = function(func) {
-				$scope.func = func;
-				if (func) {
-					$scope.profiles = profiles[func.id];
-				} else {
-					$scope.profiles = profiles.top;
-				}
-			}
+		$scope.profiles = data.profiles;
+
+		if(function_id) {
+			$scope.currentProfiles = data.calls[function_id];
+			$scope.currentFunction = data.profiles[function_id];
+		} else {
+			$scope.currentProfiles = data.head;
+			$scope.currentFunction = null;
+		}
+
+		$scope.loading = false;
 
 		});
 });

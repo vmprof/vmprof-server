@@ -122,60 +122,47 @@ RAW_DATA = {
 }
 
 
-def test_top():
+def test_head():
     data = process(copy.deepcopy(RAW_DATA))
 
-    assert data['top'] == [
-        {'line': u'1',
-         'time': 100,
-         'id': u'py:vmprof-python/example.py:<module>:1',
-         'file': u'vmprof-python/example.py', 'name': u'<module>'},
-
-        {'line': u'47',
-         'time': 100,
-         'id': u'py:/src/vmprof-python/vmprof/__init__.py:func:47',
-         'file': u'/src/vmprof-python/vmprof/__init__.py',
-         'name': u'func'},
-
-        {'line': u'12',
-         'time': 100,
-         'id': u'py:vmprof-python/example.py:main:12',
-         'file': u'vmprof-python/example.py',
-         'name': u'main'},
-
-        {'line': u'8',
-         'time': 76,
-         'id': u'py:vmprof-python/example.py:test_2:8',
-         'file': u'vmprof-python/example.py',
-         'name': u'test_2'},
-
-        {'line': u'4',
-         'time': 6,
-         'id': u'py:vmprof-python/example.py:test_1:4',
-         'file': u'vmprof-python/example.py',
-         'name': u'test_1'}
+    assert data['head'] == [
+        (u'py:vmprof-python/example.py:<module>:1', 100),
+        (u'py:/src/vmprof-python/vmprof/__init__.py:func:47', 100),
+        (u'py:vmprof-python/example.py:main:12', 100),
+        (u'py:vmprof-python/example.py:test_2:8', 76),
+        (u'py:vmprof-python/example.py:test_1:4', 6)
     ]
 
 
-def test_function():
-
+def test_profiles():
     data = process(copy.deepcopy(RAW_DATA))
+
+    profiles = data['profiles']
+
+    assert profiles['py:vmprof-python/example.py:main:12'] == {
+        'line': u'12',
+        'id': u'py:vmprof-python/example.py:main:12',
+        'file': u'vmprof-python/example.py',
+        'name': u'main'
+    }
+
+    assert profiles['py:vmprof-python/example.py:test_2:8'] == {
+        'line': u'8',
+        'id': u'py:vmprof-python/example.py:test_2:8',
+        'file': u'vmprof-python/example.py',
+        'name': u'test_2'
+    }
+
+
+def test_calls():
+    data = process(copy.deepcopy(RAW_DATA))
+
+    calls = data['calls']
+
     key = u'py:/src/vmprof-python/vmprof/__init__.py:func:47'
 
-    assert data[key] == [
-        {'line': u'12',
-         'time': 100,
-         'id': u'py:vmprof-python/example.py:main:12',
-         'file': u'vmprof-python/example.py',
-         'name': u'main'},
-
-        {'line': u'8',
-         'time': 76,
-         'id': u'py:vmprof-python/example.py:test_2:8',
-         'file': u'vmprof-python/example.py', 'name': u'test_2'},
-
-        {'line': u'4',
-         'time': 6,
-         'id': u'py:vmprof-python/example.py:test_1:4',
-         'file': u'vmprof-python/example.py', 'name': u'test_1'}
+    assert calls[key] == [
+        (u'py:vmprof-python/example.py:main:12', 100),
+        (u'py:vmprof-python/example.py:test_2:8', 76),
+        (u'py:vmprof-python/example.py:test_1:4', 6)
     ]

@@ -1,18 +1,17 @@
 
 
-def serialize(name, count, total):
+def serialize(name):
     segments = name.split(":")
 
-    return {
+    return name, {
         "id": name,
         "file": segments[1],
         "name": segments[2],
         "line": segments[3],
-        "time": int(float(count) / total * 100)
     }
 
 
-def get_top(profiles):
+def get_head(profiles):
 
     top_functions = {}
     for profile in profiles:
@@ -26,19 +25,25 @@ def get_top(profiles):
     top_items.sort(key=lambda i: -i[1])
     total = len(profiles)
 
+    functions = {}
     top = []
+    top_calls = []
+
     for name, count in top_items:
-        top.append(serialize(name, count, total))
+        name, profile = serialize(name)
 
-    return top
+        functions[name] = profile
+        top.append(name)
+        top_calls.append((name, int(float(count) / total * 100)))
+
+    return top, top_calls, functions
 
 
-def get_functions(profiles, top_functions):
+def get_calls(profiles, head_calls):
 
     functions = {}
 
-    for top_function in top_functions:
-        key = top_function['id']
+    for key in head_calls:
 
         result = {}
         total = 0
@@ -62,7 +67,9 @@ def get_functions(profiles, top_functions):
         functions[key] = []
 
         for name, count in items:
-            functions[key].append(serialize(name, count, total))
+            functions[key].append(
+                (name, int(float(count) / total * 100))
+            )
 
     return functions
 
@@ -81,13 +88,13 @@ def process(raw_data):
             cur.append(addresses[item])
         profile[0] = cur
 
-    top = get_top(profiles)
-    functions = get_functions(profiles, top)
+    top, top_calls, _profiles = get_head(profiles)
+    calls = get_calls(profiles, top)
 
     data = {
-        "top": top
+        "head": top_calls,
+        "profiles": _profiles,
+        "calls": calls
     }
-
-    data.update(functions)
 
     return data
