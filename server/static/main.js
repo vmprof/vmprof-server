@@ -24,7 +24,7 @@ app.config(['$routeProvider', function($routeProvider) {
 app.controller('list', function ($scope, $http) {
 	$scope.loading = true;
 
-	$http.get('/api/log').then(function(response) {
+	$http.get('/api/log/').then(function(response) {
 		$scope.logs = response.data;
 
 		$scope.loading = false;
@@ -36,8 +36,9 @@ app.controller('details', function ($scope, $http, $routeParams) {
 
 	$scope.loading = true;
 
-	$http.get('/api/log/' + $routeParams.log)
-		.then(function(response) {
+	$http.get('/api/log/' + $routeParams.log + '/', {
+		cache: true
+	}).then(function(response) {
 
 			var profiles = response.data.data;
 
