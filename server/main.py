@@ -21,7 +21,6 @@ class LogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Log
-        fields = ('checksum', 'data')
 
     def get_data(self, obj):
         data = json.loads(zlib.decompress(obj.data))
@@ -36,10 +35,7 @@ class LogViewSet(viewsets.ModelViewSet):
         data = b64decode(request.POST['data'])
         checksum = hashlib.md5(data).hexdigest()
 
-        try:
-            log = self.queryset.get(checksum=checksum)
-        except Log.DoesNotExist:
-            log = self.queryset.create(data=data, checksum=checksum)
+        log = self.queryset.create(data=data, checksum=checksum)
 
         return Response(log.checksum)
 

@@ -2,6 +2,7 @@
 
 <div ng-show="!loading" class="list-group">
 	<a ng-href="#{{ log.checksum }}" class="list-group-item" ng-repeat="log in logs">
+		<div class="pull-right">{{ log.created }}</div>
 		{{ log.checksum }}
 	</a>
 </div>
