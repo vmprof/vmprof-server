@@ -30,7 +30,7 @@ app.controller('list', function ($scope, $http) {
 	});
 });
 
-app.controller('details', function ($scope, $http, $routeParams) {
+app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 	var function_id = $routeParams.id;
 
 	$scope.loading = true;
@@ -52,9 +52,33 @@ app.controller('details', function ($scope, $http, $routeParams) {
 			$scope.currentProfiles = data.head;
 			$scope.currentFunction = null;
 		}
-
 		$scope.loading = false;
 
-		});
+		if ($scope.currentProfiles.length > 0) {
+			$timeout(function () {
+				var times = $.map($scope.currentProfiles, function(val, i) {
+					return val[1];
+				});
+
+				var labels = $.map($scope.currentProfiles, function(val, i) {
+					return data.profiles[val[0]].name;
+				});
+
+				var height = $('.table').height();
+				var width = $("#treemap").width();
+
+				var boxFormatter = function (coordinates, index) {
+
+					var color = 255 - times[index[0]] - 123;
+					color = "rgb("+ color + ","+ color +","+ color +")";
+					return { "fill" : color };
+				};
+
+				Treemap.draw("treemap", width, height,
+							 times, labels, {'box' : boxFormatter});
+
+			});
+		}
+	});
 });
 
