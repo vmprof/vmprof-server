@@ -5,3 +5,7 @@ img.loading {
 	left: 50%;
 	transform: translate(-50%, -50%);
 }
+
+.table {
+	margin-bottom: 0;
+}
