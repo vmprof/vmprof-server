@@ -5,8 +5,9 @@ from django.db import models
 
 class Log(models.Model):
     checksum = models.CharField(max_length=32, primary_key=True)
-    data = models.BinaryField()
     created = models.DateTimeField(auto_now_add=True)
+
+    data = models.TextField()
 
     class Meta:
         ordering = ['-created']

@@ -23,8 +23,7 @@ class LogSerializer(serializers.ModelSerializer):
         model = Log
 
     def get_data(self, obj):
-        data = json.loads(zlib.decompress(obj.data))
-        return process(data)
+        return json.loads(obj.data)
 
 
 class LogViewSet(viewsets.ModelViewSet):
@@ -32,10 +31,12 @@ class LogViewSet(viewsets.ModelViewSet):
     serializer_class = LogSerializer
 
     def create(self, request):
-        data = b64decode(request.POST['data'])
+        data = json.dumps(request.data)
         checksum = hashlib.md5(data).hexdigest()
-
-        log = self.queryset.create(data=data, checksum=checksum)
+        log, _ = self.queryset.get_or_create(
+            data=data,
+            checksum=checksum
+        )
 
         return Response(log.checksum)
 

@@ -13,7 +13,7 @@
 
 	<div ng-if="currentProfiles.length > 0" class="row">
 		<div class="col-md-7">
-			<table class="table table-hover" ng-if="currentProfiles.length > 0 ">
+			<table class="table table-hover">
 				<thead>
 					<tr>
 						<th>name</th>
@@ -23,15 +23,14 @@
 				</thead>
 
 				<tbody>
-					<tr ng-repeat="call in currentProfiles"
-						ng-init="profile = profiles[call[0]]; time = call[1]">
+					<tr ng-repeat="profile in currentProfiles">
 						<td>
-							<a ng-href="/#/{{ log.checksum }}/?id={{ profile.id }}">
+							<a ng-href="/#/{{ log.checksum }}/?id={{ profile.name }}">
 								{{ profile.name }}
 							</a>
 						</td>
 						<td>{{ profile.file }}:{{ profile.line }}</td>
-						<td>{{ time }}%</td>
+						<td>{{ profile.times.toFixed(2) }}%</td>
 					</tr>
 				</tbody>
 			</table>
