@@ -3,7 +3,10 @@
 <div ng-show="!loading" class="panel panel-default">
 	<div class="panel-heading">
 
-		<a ng-href="/#/{{ log.checksum }}/">{{ log.checksum }}</a><span ng-if="currentFunction">: {{ currentFunction.id }}</span>
+		<span class="pull-right"> {{ log.created }} </span>
+		<a ng-href="/#/{{ log.checksum }}/">{{ log.data.argv }}</a>
+		<span ng-if="currentFunction">: {{ currentFunction.id }}</span>
+
 
 	</div>
 

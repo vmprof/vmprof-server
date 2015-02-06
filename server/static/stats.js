@@ -3,7 +3,7 @@ var Stats = function (data) {
 	this.addresses = data.addresses;
 };
 
-Stats.prototype.process = function(functions) {
+Stats.prototype.process = function(functions, total) {
 
 	if(Object.keys(functions).length == 0) {
 		return []
@@ -25,7 +25,7 @@ Stats.prototype.process = function(functions) {
 	top.sort(function(a, b) {
 		return b.times - a.times;
 	})
-	var max = top[0].times;
+	var max = total || top[0].times;
 
 	return top.map(function(a) {
 		a.times = a.times / max * 100;
@@ -80,5 +80,5 @@ Stats.prototype.profile = function(topAddress) {
 
 	}, this);
 
-	return this.process(functions);
+	return this.process(functions, total);
 };
