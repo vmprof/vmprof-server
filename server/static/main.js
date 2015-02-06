@@ -7,9 +7,6 @@ app.config(['$routeProvider', function($routeProvider) {
 			templateUrl: '/static/list.html',
 			controller: 'list'
 		})
-		.when('/help', {
-			templateUrl: '/static/help.html',
-		})
 		.when('/:log', {
 			templateUrl: '/static/details.html',
 			controller: 'details'
