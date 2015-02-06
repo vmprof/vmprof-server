@@ -38,107 +38,42 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 	$http.get('/api/log/' + $routeParams.log + '/', {
 		cache: true
 	}).then(function(response) {
+		$scope.log = response.data;
 
-		var log = response.data;
+		var stats = new Stats(response.data.data);
 
-		$scope.log = log;
-
-		var profiles = log.data.profiles;
-		var addresses = log.data.addresses;
-
-		var functions = {};
-
-		profiles.forEach(function(profile) {
-			var currentIteration = {};
-			profile[0].forEach(function(address) {
-				if(!(address in currentIteration)) {
-					if(address in functions) {
-						functions[address] += 1;
-					} else {
-						functions[address] = 1;
-					}
-					currentIteration[address] = null;
-				}
-			});
-		});
-
-		var top = [];
-		for (address in functions) {
-			var nameSegments = addresses[address].split(":");
-			top.push({
-				address: address,
-				name: nameSegments[1],
-				line: nameSegments[2],
-				file: nameSegments[3],
-				times: functions[address],
-			});
+		if ($routeParams.id) {
+			$scope.currentProfiles = stats.profile($routeParams.id);
+		} else {
+			$scope.currentProfiles = stats.top();
 		}
 
-		top.sort(function(a, b) {
-			return b.times - a.times;
-		})
+		if ($scope.currentProfiles.length > 0) {
 
-		var max = top[0].times;
+			$timeout(function () {
+				var drawProfiles = $scope.currentProfiles
+				var times = $.map(drawProfiles, function(val, i) {
+					return val.times;
+				});
 
-		top = top.map(function(a) {
-			a.times = a.times / max * 100;
-			return a;
-		})
+				var labels = $.map(drawProfiles, function(val, i) {
+					return val.name;
+				});
 
-		$scope.currentProfiles = top;
+				var height = $('.table').height();
+				var width = $("#treemap").width();
 
-			 // functions.forEach(function(func) {
-			// debugger
-			// if() {
-			// }
-		// })
-		// for(var i=0; i<profiles.length; i++) {
-		// 	var profile = profiles[i];
+				var boxFormatter = function (coordinates, index) {
 
-		// 	for(var j=0; j<profile[0].length) {
-		// 		var address =
-		// 	}
-		// })
+					var color = 255 - times[index[0]] - 123;
+					color = "rgb("+ color + ","+ color +","+ color +")";
+					return { "fill" : color };
+				};
 
-
-		// var data = response.data.data;
-
-		// $scope.profiles = data.profiles;
-
-		// if(function_id) {
-		// 	$scope.currentProfiles = data.calls[function_id];
-		// 	$scope.currentFunction = data.profiles[function_id];
-		// } else {
-		// 	$scope.currentProfiles = data.head;
-		// 	$scope.currentFunction = null;
-		// }
-
-		// if ($scope.currentProfiles.length > 0) {
-
-		$timeout(function () {
-			var drawProfiles = $scope.currentProfiles.slice(1);
-			var times = $.map(drawProfiles, function(val, i) {
-				return val.times;
+				Treemap.draw("treemap", width, height,
+							 times, labels, {'box' : boxFormatter});
 			});
-
-			var labels = $.map(drawProfiles, function(val, i) {
-				return val.name;
-			});
-
-			var height = $('.table').height();
-			var width = $("#treemap").width();
-
-			var boxFormatter = function (coordinates, index) {
-
-				var color = 255 - times[index[0]] - 123;
-				color = "rgb("+ color + ","+ color +","+ color +")";
-				return { "fill" : color };
-			};
-
-			Treemap.draw("treemap", width, height,
-						 times, labels, {'box' : boxFormatter});
-
-		});
+		}
 
 		$scope.loading = false;
 	});
