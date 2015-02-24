@@ -4,8 +4,7 @@
 	<div class="panel-heading">
 
 		<span class="pull-right"> {{ log.created }} </span>
-		<a ng-href="/#/{{ log.checksum }}/">{{ log.data.argv }}</a>
-		<span ng-if="currentFunction">: {{ currentFunction.id }}</span>
+		<a ng-href="/#/{{ log.checksum }}/">{{ log.data.argv }}</a><span ng-if="name">: {{ name }}</span>
 
 
 	</div>
