@@ -34,7 +34,7 @@ Stats.prototype.process = function(functions, total) {
 
 };
 
-Stats.prototype.top = function() {
+Stats.prototype.getTopProfiles = function() {
 	var functions = {};
 
 	this.profiles.forEach(function(profile) {
@@ -54,7 +54,7 @@ Stats.prototype.top = function() {
 	return this.process(functions);
 };
 
-Stats.prototype.profile = function(topAddress) {
+Stats.prototype.getSubProfiles = function(topAddress) {
 	var functions = {}
 	var total = 0
 	this.profiles.forEach(function(profile) {

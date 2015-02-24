@@ -1,7 +1,7 @@
 /*
  * treemap-squarify.js - open source implementation of squarified treemaps
  *
- * Treemap Squared 0.5 - Treemap Charting library 
+ * Treemap Squared 0.5 - Treemap Charting library
  *
  * https://github.com/imranghory/treemap-squared/
  *
@@ -10,9 +10,9 @@
  *
  *
  * Implementation of the squarify treemap algorithm described in:
- * 
- * Bruls, Mark; Huizing, Kees; van Wijk, Jarke J. (2000), "Squarified treemaps" 
- * in de Leeuw, W.; van Liere, R., Data Visualization 2000: 
+ *
+ * Bruls, Mark; Huizing, Kees; van Wijk, Jarke J. (2000), "Squarified treemaps"
+ * in de Leeuw, W.; van Liere, R., Data Visualization 2000:
  * Proc. Joint Eurographics and IEEE TCVG Symp. on Visualization, Springer-Verlag, pp. 33–42.
  *
  * Paper is available online at: http://www.win.tue.nl/~vanwijk/stm.pdf
@@ -22,7 +22,7 @@
  * an array of cartesian coordinates that represent the rectangles that make up the treemap.
  *
  * The library also supports multidimensional data (nested treemaps) and performs normalization on the data.
- * 
+ *
  * See the README file for more details.
  */
 
@@ -34,7 +34,7 @@ var Treemap = {};
 
         function Container(xoffset, yoffset, width, height) {
             this.xoffset = xoffset; // offset from the the top left hand corner
-            this.yoffset = yoffset; // ditto 
+            this.yoffset = yoffset; // ditto
             this.height = height;
             this.width = width;
 
@@ -42,7 +42,7 @@ var Treemap = {};
                 return Math.min(this.height, this.width);
             };
 
-            // getCoordinates - for a row of boxes which we've placed 
+            // getCoordinates - for a row of boxes which we've placed
             //                  return an array of their cartesian coordinates
             this.getCoordinates = function (row) {
                 var coordinates = [];
@@ -65,7 +65,7 @@ var Treemap = {};
                 return coordinates;
             };
 
-            // cutArea - once we've placed some boxes into an row we then need to identify the remaining area, 
+            // cutArea - once we've placed some boxes into an row we then need to identify the remaining area,
             //           this function takes the area of the boxes we've placed and calculates the location and
             //           dimensions of the remaining space and returns a container box defined by the remaining area
             this.cutArea = function (area) {
@@ -86,8 +86,8 @@ var Treemap = {};
 
 
 
-        // normalize - the Bruls algorithm assumes we're passing in areas that nicely fit into our 
-        //             container box, this method takes our raw data and normalizes the data values into  
+        // normalize - the Bruls algorithm assumes we're passing in areas that nicely fit into our
+        //             container box, this method takes our raw data and normalizes the data values into
         //             area values so that this assumption is valid.
         function normalize(data, area) {
             var normalizeddata = [];
@@ -104,10 +104,10 @@ var Treemap = {};
         // treemapMultidimensional - takes multidimensional data (aka [[23,11],[11,32]] - nested array)
         //                           and recursively calls itself using treemapSingledimensional
         //                           to create a patchwork of treemaps and merge them
-        function treemapMultidimensional(data, width, height, xoffset, yoffset) {
+        function treemapMultidimensional(addresses, lables, data, width, height, xoffset, yoffset) {
             xoffset = (typeof xoffset === "undefined") ? 0 : xoffset;
             yoffset = (typeof yoffset === "undefined") ? 0 : yoffset;
-            
+
             var mergeddata = [];
             var mergedtreemap;
             var results = [];
@@ -118,14 +118,28 @@ var Treemap = {};
                     mergeddata[i] = sumMultidimensionalArray(data[i]);
                 }
                 mergedtreemap = treemapSingledimensional(mergeddata, width, height, xoffset, yoffset);
-                
+
                 for(i=0; i<data.length; i++) {
                     results.push(treemapMultidimensional(data[i], mergedtreemap[i][2] - mergedtreemap[i][0], mergedtreemap[i][3] - mergedtreemap[i][1], mergedtreemap[i][0], mergedtreemap[i][1]));
                 }
             } else {
                 results = treemapSingledimensional(data,width,height, xoffset, yoffset);
             }
-            return results;
+
+			var resultsZiped = [];
+
+			for (var i = 0; i < lables.length; i++) {
+				// data
+				// debugger
+				resultsZiped.push({
+					address: addresses[i],
+					name: lables[i],
+					square: results[i],
+					time: data[i],
+				});
+			}
+
+            return resultsZiped;
         }
 
 
@@ -154,9 +168,9 @@ var Treemap = {};
             return flattreemap;
         }
 
-        // squarify  - as per the Bruls paper 
-        //             plus coordinates stack and containers so we get 
-        //             usable data out of it 
+        // squarify  - as per the Bruls paper
+        //             plus coordinates stack and containers so we get
+        //             usable data out of it
         function squarify(data, currentrow, container, stack) {
             var length;
             var nextdatapoint;
@@ -169,7 +183,7 @@ var Treemap = {};
 
             length = container.shortestEdge();
             nextdatapoint = data[0];
-            
+
             if (improvesRatio(currentrow, nextdatapoint, length)) {
                 currentrow.push(nextdatapoint);
                 squarify(data.slice(1), currentrow, container, stack);
@@ -182,23 +196,23 @@ var Treemap = {};
         }
 
         // improveRatio - implements the worse calculation and comparision as given in Bruls
-        //                (note the error in the original paper; fixed here) 
+        //                (note the error in the original paper; fixed here)
         function improvesRatio(currentrow, nextnode, length) {
-            var newrow; 
+            var newrow;
 
             if (currentrow.length === 0) {
                 return true;
             }
-            
+
             newrow = currentrow.slice();
             newrow.push(nextnode);
-            
+
             var currentratio = calculateRatio(currentrow, length);
             var newratio = calculateRatio(newrow, length);
-            
+
             // the pseudocode in the Bruls paper has the direction of the comparison
             // wrong, this is the correct one.
-            return currentratio >= newratio; 
+            return currentratio >= newratio;
         }
 
         // calculateRatio - calculates the maximum width to height ratio of the
@@ -212,10 +226,10 @@ var Treemap = {};
 
         // isArray - checks if arr is an array
         function isArray(arr) {
-            return arr && arr.constructor === Array; 
+            return arr && arr.constructor === Array;
         }
 
-        // sumArray - sums a single dimensional array 
+        // sumArray - sums a single dimensional array
         function sumArray(arr) {
             var sum = 0;
             var i;
@@ -239,7 +253,6 @@ var Treemap = {};
             }
             return total;
         }
-
-        return treemapMultidimensional; 
+        return treemapMultidimensional;
     }();
 })();

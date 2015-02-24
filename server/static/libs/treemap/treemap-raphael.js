@@ -12,6 +12,34 @@
 
 (function() {
     "use strict";
+
+    Treemap.drawTreemap = function(paper, boxes, labels, styles, index) {
+        var i,j;
+        var newindex; // the index to the next box to draw
+        var label; // label of current box
+
+        if(isArray(boxes[0][0])) {
+            for(i=0; i<boxes.length; i++) {
+                newindex = index.slice();
+                newindex.push(i);
+                drawTreemap(paper, boxes[i],labels, styles, newindex);
+            }
+        } else {
+            for(i=0; i<boxes.length; i++) {
+                newindex = index.slice();
+                newindex.push(i);
+
+                // figure out the matching label using the index
+                label = labels;
+                for(j=0; j<newindex.length; j++){
+                    label = label[newindex[j]];
+                }
+
+                // draw box & label
+                styles.draw(boxes[i], label, newindex);
+            }
+        }
+    }
     Treemap.draw = function(){
 
         // some utility functions
@@ -37,33 +65,6 @@
 
         // drawTreemap - recursively iterate through the nested array of boxes
         //               and call the styles['draw'] method on them
-        function drawTreemap(paper, boxes, labels, styles, index) {
-            var i,j;
-            var newindex; // the index to the next box to draw
-            var label; // label of current box
-
-            if(isArray(boxes[0][0])) {
-                for(i=0; i<boxes.length; i++) {
-                    newindex = index.slice();
-                    newindex.push(i);
-                    drawTreemap(paper, boxes[i],labels, styles, newindex);
-                }
-            } else {
-                for(i=0; i<boxes.length; i++) {
-                    newindex = index.slice();
-                    newindex.push(i);
-
-                    // figure out the matching label using the index
-                    label = labels;
-                    for(j=0; j<newindex.length; j++){
-                        label = label[newindex[j]];
-                    }
-
-                    // draw box & label
-                    styles.draw(boxes[i], label, newindex);
-                }
-            }
-        }
 
 
         function draw(element, width, height, data, labels, styles) {
@@ -191,7 +192,7 @@
             nodes = Treemap.generate(data, width, height);
 
             // draw the generated treemap
-            drawTreemap(paper, nodes, labels, styles, []);
+            Treemap.drawTreemap(paper, nodes, labels, styles, []);
         }
 
         return draw;
