@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import hashlib
 import json
-import zlib
-from base64 import b64decode
 
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views
@@ -10,8 +8,6 @@ from django.contrib.staticfiles import views
 from rest_framework import routers
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
-
-from server.process import process
 
 from .models import Log
 
