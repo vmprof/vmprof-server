@@ -41,7 +41,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 
 		if ($routeParams.id) {
 			$scope.currentProfiles = stats.getSubProfiles($routeParams.id);
-			// debugger
+			$scope.name = stats.addresses[$routeParams.id];
 		} else {
 			$scope.currentProfiles = stats.getTopProfiles();
 		}
@@ -59,7 +59,6 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 				var y = $treemap.offset().top;
 
 				var profiles = $scope.currentProfiles
-
 				var paper = Raphael(x, y, width, height);
 
 				function draw(x, y, width, height, profiles, time) {
@@ -78,7 +77,6 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 						addresses, names, times, width, height);
 
 					$.each(boxes, function(i, box) {
-						// debugger
 						var x1=box.square[0],
 							y1=box.square[1],
 							x2=box.square[2],
@@ -89,10 +87,6 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 						boxes
 
 						var rect = paper.rect(x1, y1, x2 - x1, y2 - y1);
-						// rect.attr({
-						// 	fill: '#9cf',
-						// 	stroke: '#ddd'
-						// });
 						var text = paper.text(
 							(x1 + x2) / 2, (y1 + y2) / 2, box.name);
 
@@ -102,36 +96,16 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 						}
 
 						console.log(box.name, x+x1, y+y1, x1+x2, y1+y2)
+
 						var subProfiles = stats.getSubProfiles(box.address);
 						if (subProfiles.length) {
 							draw(x+x1, y+y1, x1+x2, y1+y2, subProfiles);
 						}
-						// debugger
-						// console.log("=============")
-						// return true
 					});
 				}
 
-				// draw(0, 0, width, height, profiles.slice(0, 1));
 				draw(0, 0, width, height, profiles);
 
-				// var boxFormatter = function (coordinates, index) {
-				// 	var color = 255 - times[index[0]] - 123;
-				// 	color = "rgb("+ color + ","+ color +","+ color +")";
-				// 	return { "fill" : color };
-				// };
-
-
-					// stats.profile(box.address);
-					// debugger
-
-
-				// debugger
-
-				// var paper = Raphael(10, 50, 320, 200);
-
-				// Treemap.draw("treemap", width, height,
-							 // times, labels, {'box' : boxFormatter});
 			});
 		}
 
