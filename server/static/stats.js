@@ -82,3 +82,39 @@ Stats.prototype.profile = function(topAddress) {
 
 	return this.process(functions, total);
 };
+
+var Node = function(addr, name) {
+	this.children = [];
+	this.addr = addr;
+	this.name = name;
+	this.total = 0;
+	this.self = 0;
+};
+
+Node.prototype.add_child = function(addr, name, is_leaf) {
+	var child = this.children[addr];
+	if (!child) {
+		child = new Node(addr, name);
+		this.children[addr] = child;
+	}
+	child.total++;
+	if (is_leaf) {
+		child.self++;
+	}
+	return child;
+}
+
+Stats.prototype.get_tree = function() {
+	var addr = this.profiles[0][0][0];
+	var name = this.addresses[addr];
+	var top = new Node(addr, name);
+	for (var index in this.profiles) {
+		var cur = top;
+		profile = this.profiles[index][0];
+		for (var i = 1; i < profile.length; i++) {
+			var v = profile[i];
+			cur = cur.add_child(v, this.addresses[v], i == profile.length - 1);
+		}
+	}
+	return top;
+};
