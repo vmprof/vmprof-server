@@ -4,7 +4,7 @@
 	<div class="panel-heading">
 
 		<span class="pull-right"> {{ log.created }} </span>
-		<a ng-href="/#/{{ log.checksum }}/">{{ log.data.argv }}</a><span ng-if="name">: {{ name }}</span>
+		<a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}">{{ log.data.argv }}</a><span ng-if="name">: {{ name }}</span>
 
 	</div>
 
@@ -26,7 +26,7 @@
 				<tbody>
 					<tr ng-repeat="profile in currentProfiles" ng-class="{active: address==profile.address}">
 						<td>
-							<a ng-href="/#/{{ log.checksum }}/?id={{ profile.address }}">
+							<a ng-href="/#/{{ log.checksum }}/?id={{ profile.address }}&view={{ visualization }}">
 								{{ profile.name }}
 							</a>
 						</td>
@@ -38,7 +38,6 @@
 		</div>
 
 		<div class="col-md-5">
-			{{ visualization }}
 			<div class="btn-group" role="group" aria-label="...">
 				<button type="button" class="btn btn-default"
 						ng-click="visualizationChange('squares')"

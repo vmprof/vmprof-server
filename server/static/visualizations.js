@@ -39,7 +39,10 @@ var Visualization = {};
 			);
 
 			rect.click(function () {
-				$location.search({id: this.data('address')});
+				$location.search({
+					id: this.data('address'),
+					view: 'flames'
+				});
 			});
 
 			if (_.keys(node.children).length == 1) {
@@ -106,7 +109,10 @@ var Visualization = {};
 			);
 
 			rect.click(function () {
-				$location.search({id: this.data('address')});
+				$location.search({
+					id: this.data('address'),
+					view: 'squares'
+				});
 			});
 
 			if (node.total == node.self) {

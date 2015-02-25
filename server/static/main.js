@@ -49,21 +49,17 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		} else {
 			$scope.currentProfiles = stats.getTopProfiles();
 		}
-
-		$scope.visualization = 'squares';
+		$scope.visualization = $routeParams.view || 'squares';
 		var root = stats.getTree(addresses);
-
 
 		$timeout(function () {
 
 			var height = $('.table').height();
-
-			Visualization.squareChart($("#visualization"), height, root, stats,
-									  $scope, $location);
+			var $visualization = $("#visualization");
+			if ($visualization.length < 1)
+				return
 
 			$scope.visualizationChange = function(visualization) {
-				if ($scope.visualization == visualization)
-					return
 
 				$scope.visualization = visualization;
 				if (visualization == 'squares') {
@@ -84,6 +80,8 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 					);
 				}
 			}
+
+			$scope.visualizationChange($scope.visualization);
 		});
 
 		$scope.loading = false;
