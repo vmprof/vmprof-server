@@ -10,7 +10,7 @@ img.loading {
 	margin-bottom: 0;
 }
 
-svg rect {
+svg rect, svg text {
 	cursor: pointer;
 	cursor: hand;
 }

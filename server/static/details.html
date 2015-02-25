@@ -38,7 +38,21 @@
 		</div>
 
 		<div class="col-md-5">
-			<div id="treemap"></div>
+			{{ visualization }}
+			<div class="btn-group" role="group" aria-label="...">
+				<button type="button" class="btn btn-default"
+						ng-click="visualizationChange('squares')"
+						ng-class="{active: visualization=='squares'}"}>
+					<span class="glyphicon glyphicon-th" aria-hidden="true"></span>
+				</button>
+				<button type="button" class="btn btn-default"
+						ng-click="visualizationChange('flames')"
+						ng-class="{active: visualization=='flames'}"}>
+					<span class="glyphicon glyphicon-align-center" aria-hidden="true"></span>
+				</button>
+			</div>
+
+			<div id="visualization"></div>
 		</div>
 	</div>
 </div>
