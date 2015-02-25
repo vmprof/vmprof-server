@@ -9,3 +9,8 @@ img.loading {
 .table {
 	margin-bottom: 0;
 }
+
+svg rect {
+	cursor: pointer;
+	cursor: hand;
+}

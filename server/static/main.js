@@ -29,7 +29,7 @@ app.controller('list', function ($scope, $http) {
 	});
 });
 
-app.controller('details', function ($scope, $http, $routeParams, $timeout) {
+app.controller('details', function ($scope, $http, $routeParams, $timeout, $location) {
 	angular.element('svg').remove();
 
 	$scope.loading = true;
@@ -90,6 +90,10 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 						});
 					}
 				);
+
+				rect.click(function () {
+					$location.search({id: this.data('address')});
+				});
 
 				if (node.total == node.self) {
 					var scale = 1;
