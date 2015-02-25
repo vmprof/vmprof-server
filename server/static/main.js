@@ -18,6 +18,8 @@ app.config(['$routeProvider', function($routeProvider) {
 
 
 app.controller('list', function ($scope, $http) {
+	angular.element('svg').remove();
+
 	$scope.loading = true;
 
 	$http.get('/api/log/').then(function(response) {
@@ -28,7 +30,7 @@ app.controller('list', function ($scope, $http) {
 });
 
 app.controller('details', function ($scope, $http, $routeParams, $timeout) {
-	var function_id = $routeParams.id;
+	angular.element('svg').remove();
 
 	$scope.loading = true;
 
@@ -37,77 +39,112 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout) {
 	}).then(function(response) {
 		$scope.log = response.data;
 
+		var addresses = $routeParams.id;
+
 		var stats = new Stats(response.data.data);
 
-		if ($routeParams.id) {
+		if (addresses) {
 			$scope.currentProfiles = stats.getSubProfiles($routeParams.id);
 			$scope.name = stats.addresses[$routeParams.id];
 		} else {
 			$scope.currentProfiles = stats.getTopProfiles();
 		}
 
-		if ($scope.currentProfiles.length > 0) {
+		$scope.paper = null
 
-			$timeout(function () {
+		$timeout(function () {
 
-				var $table = $('.table');
-				var $treemap = $("#treemap");
+			var $treemap = $("#treemap");
+			if ($treemap.length == 0)
+				return
 
-				var height = $table.height();
-				var width = $treemap.width();
-				var x = $treemap.offset().left;
-				var y = $treemap.offset().top;
+			var node = stats.getTree(addresses);
+			var $table = $('.table');
 
-				var profiles = $scope.currentProfiles
-				var paper = Raphael(x, y, width, height);
+			var height = $table.height();
+			var width = $treemap.width();
+			var x = $treemap.offset().left;
+			var y = $treemap.offset().top;
 
-				function draw(x, y, width, height, profiles, time) {
-					var time = time || 100;
+			$scope.paper = Raphael(x, y, width, height);
+
+			function draw(x, y, width, height, node, scale) {
+				var scale = scale || scale;
+
+				var rect = $scope.paper.rect(x, y, width, height);
+				rect.attr({fill: '#9cf', stroke: '#888', 'stroke-width': 2});
+				rect.data('address', node.addr);
+
+				rect.hover(
+					function(e) {
+						var address = this.data('address');
+						$scope.$apply(function () {
+							$scope.address = address;
+						});
+						this.attr({'fill': 'red'});
+					},
+					function(e) {
+						this.attr({'fill': '#9cf'});
+						$scope.$apply(function () {
+							$scope.address = null;
+						});
+					}
+				);
+
+				if (node.total == node.self) {
+					var scale = 1;
+				} else {
+					var scale = 1 - (node.self / node.total);
+				}
+
+				if (_.keys(node.children).length == 1) {
+					var node = node.children[Object.keys(node.children)[0]];
+					var box = rect.getBBox();
+
+					draw(box.x, box.y, box.width, box.height, node);
+
+				} else if (_.keys(node.children).length > 1) {
 					var times = [];
 					var names = [];
 					var addresses = [];
+					var children = [];
 
-					$.each(profiles, function(_, val) {
-						times.push(val.times);
-						names.push(val.name);
-						addresses.push(val.address);
-					});
+					for (var child in node.children) {
+						var child = node.children[child];
+						times.push(child.self);
+						addresses.push(child.addr);
+						names.push(stats.addresses[child.addr]);
+						children.push(child);
+					}
+
+					var xd = (width - (width * scale)) / 2;
+					var yd = (height - (height * scale)) / 2;
+
+
+					var width = width * scale;
+					var height = height * scale;
 
 					var boxes = Treemap.generate(
-						addresses, names, times, width, height);
+						addresses, names, times,
+						width,
+						height, x+xd, y+yd
+					);
 
-					$.each(boxes, function(i, box) {
+
+					for (var i = 0; i < boxes.length; i++) {
+						var box = boxes[i];
 						var x1=box.square[0],
 							y1=box.square[1],
 							x2=box.square[2],
 							y2=box.square[3];
-						console.log(box)
-						times
-						time
-						boxes
 
-						var rect = paper.rect(x1, y1, x2 - x1, y2 - y1);
-						var text = paper.text(
-							(x1 + x2) / 2, (y1 + y2) / 2, box.name);
-
-						if(text.getBBox().width > x2-x1 &&
-						   text.getBBox().width <= y2-y1) {
-							text.rotate(-90);
-						}
-
-						console.log(box.name, x+x1, y+y1, x1+x2, y1+y2)
-
-						var subProfiles = stats.getSubProfiles(box.address);
-						if (subProfiles.length) {
-							draw(x+x1, y+y1, x1+x2, y1+y2, subProfiles);
-						}
-					});
+						draw(x1, y1, x2-x1, y2-y1, children[i]);
+					}
 				}
+			}
+			draw(0, 0, width, height, node);
 
-				draw(0, 0, width, height, profiles);
-
-			});
-		}
+		});
 
 		$scope.loading = false;
 	});

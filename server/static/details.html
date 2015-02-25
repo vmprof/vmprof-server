@@ -6,7 +6,6 @@
 		<span class="pull-right"> {{ log.created }} </span>
 		<a ng-href="/#/{{ log.checksum }}/">{{ log.data.argv }}</a><span ng-if="name">: {{ name }}</span>
 
-
 	</div>
 
 	<p ng-if="currentProfiles.length == 0" class="lead text-center" style="padding-top: 15px">
@@ -25,7 +24,7 @@
 				</thead>
 
 				<tbody>
-					<tr ng-repeat="profile in currentProfiles">
+					<tr ng-repeat="profile in currentProfiles" ng-class="{active: address==profile.address}">
 						<td>
 							<a ng-href="/#/{{ log.checksum }}/?id={{ profile.address }}">
 								{{ profile.name }}
@@ -42,6 +41,4 @@
 			<div id="treemap"></div>
 		</div>
 	</div>
-
-
 </div>

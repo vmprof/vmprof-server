@@ -1,7 +1,30 @@
 var Stats = function (data) {
 	this.profiles = data.profiles;
 	this.addresses = data.addresses;
+	this.nodes = this.generateTree();
 };
+
+
+Stats.prototype.generateTree = function() {
+	var nodes = {};
+	var addr = this.profiles[0][0][0];
+	var name = this.addresses[addr];
+	var top = new Node(addr, name);
+
+	nodes[addr] = top;
+
+	for (var index in this.profiles) {
+		var cur = top;
+		profile = this.profiles[index][0];
+		for (var i = 1; i < profile.length; i++) {
+			var v = profile[i];
+			cur = cur.addChild(v, this.addresses[v], i == profile.length - 1);
+			nodes[v] = cur;
+		}
+	}
+	return nodes;
+};
+
 
 Stats.prototype.process = function(functions, total) {
 
@@ -83,15 +106,17 @@ Stats.prototype.getSubProfiles = function(topAddress) {
 	return this.process(functions, total);
 };
 
+
 var Node = function(addr, name) {
-	this.children = [];
+	this.children = {};
 	this.addr = addr;
 	this.name = name;
 	this.total = 0;
 	this.self = 0;
 };
 
-Node.prototype.add_child = function(addr, name, is_leaf) {
+
+Node.prototype.addChild = function(addr, name, is_leaf) {
 	var child = this.children[addr];
 	if (!child) {
 		child = new Node(addr, name);
@@ -104,17 +129,8 @@ Node.prototype.add_child = function(addr, name, is_leaf) {
 	return child;
 }
 
-Stats.prototype.get_tree = function() {
-	var addr = this.profiles[0][0][0];
-	var name = this.addresses[addr];
-	var top = new Node(addr, name);
-	for (var index in this.profiles) {
-		var cur = top;
-		profile = this.profiles[index][0];
-		for (var i = 1; i < profile.length; i++) {
-			var v = profile[i];
-			cur = cur.add_child(v, this.addresses[v], i == profile.length - 1);
-		}
-	}
-	return top;
-};
+
+Stats.prototype.getTree = function(address) {
+	var address = address || this.profiles[0][0][0];
+	return this.nodes[address];
+}

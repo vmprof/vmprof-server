@@ -104,7 +104,8 @@ var Treemap = {};
         // treemapMultidimensional - takes multidimensional data (aka [[23,11],[11,32]] - nested array)
         //                           and recursively calls itself using treemapSingledimensional
         //                           to create a patchwork of treemaps and merge them
-        function treemapMultidimensional(addresses, lables, data, width, height, xoffset, yoffset) {
+        function treemapMultidimensional(addresses, lables, data, width, height,
+										 xoffset, yoffset) {
             xoffset = (typeof xoffset === "undefined") ? 0 : xoffset;
             yoffset = (typeof yoffset === "undefined") ? 0 : yoffset;
 
