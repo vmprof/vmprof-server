@@ -8,6 +8,7 @@ Virtual Machine profiler (so far restricted to pypy and cpython)
 
 	pip install -r requirements/development.txt
 
+	python manage.py syncdb --noinput
 	python manage.py migrate
 
 	python manage.py runserver
