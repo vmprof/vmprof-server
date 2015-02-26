@@ -1,6 +1,5 @@
 import os
 import json
-import zlib
 import pytest
 
 from base64 import b64encode
@@ -25,7 +24,7 @@ def test_submit(c):
     from .submit import data
 
     data = {
-        'data': b64encode(zlib.compress(json.dumps(data)))
+        'data': b64encode(json.dumps(data))
     }
 
     response = c.post('/api/log/', data=data)
@@ -38,7 +37,7 @@ def test_submit(c):
 def test_log(c):
     from .submit import data
 
-    log = Log.objects.create(data=zlib.compress(json.dumps(data)))
+    log = Log.objects.create(data=json.dumps(data))
 
     response = c.get('/api/log/%s/' % log.checksum)
 
