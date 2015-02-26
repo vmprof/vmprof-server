@@ -13,6 +13,9 @@ Virtual Machine profiler (so far restricted to pypy and cpython)
 
 	python manage.py runserver
 
+## test
+
+	py.test tests/
 
 ## deployment
 
