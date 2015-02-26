@@ -1,0 +1,12 @@
+language: python
+
+python: 2.7
+
+install:
+  - pip install -r requirements/development.txt
+  - python manage.py syncdb --noinput
+  - python manage.py migrate
+
+
+script:
+  - py.test tests/
