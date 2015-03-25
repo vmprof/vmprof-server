@@ -5,6 +5,10 @@
 
 		<span class="pull-right"> {{ log.created }} </span>
 		<a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}">{{ log.data.argv }}</a><span ng-if="name">: {{ name }}</span>
+		<span class="paths" ng-repeat="path in paths">
+		  <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}&id={{ path.path }}">{{ path.name }}
+		  </a> {{ "(" + (path.percentage * 100).toFixed(2) + "%)" }} ->
+		</span>
 
 	</div>
 
@@ -13,31 +17,36 @@
 	</p>
 
 	<div ng-if="currentProfiles.length > 0" class="row">
-		<div class="col-md-7">
+		<div class="col-md-10">
 			<table class="table table-hover">
 				<thead>
 					<tr>
 						<th>name</th>
 						<th>file</th>
-						<th>time</th>
+						<th>% of parent</th>
+						<th>% of total</th>
+						<th>self</th>
 					</tr>
 				</thead>
 
 				<tbody>
 					<tr ng-repeat="profile in currentProfiles" ng-class="{active: address==profile.address}">
 						<td>
-							<a ng-href="/#/{{ log.checksum }}/?id={{ profile.address }}&view={{ visualization }}">
+							<a ng-href="/#/{{ log.checksum }}/?id={{ profile.path }}&view={{ visualization }}">
 								{{ profile.name }}
 							</a>
 						</td>
 						<td>{{ profile.file }}:{{ profile.line }}</td>
 						<td>{{ profile.times.toFixed(2) }}%</td>
+						<td>{{ profile.total.toFixed(2) }}%</td>
+						<td>{{ profile.self.toFixed(2) }}%</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 
-		<div class="col-md-5">
+	</div>
+		<div ng-if="currentProfiles.length > 0" class="row">
 			<div class="btn-group" role="group" aria-label="...">
 				<button type="button" class="btn btn-default"
 						ng-click="visualizationChange('squares')"
@@ -53,5 +62,4 @@
 
 			<div id="visualization"></div>
 		</div>
-	</div>
 </div>

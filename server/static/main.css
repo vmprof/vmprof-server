@@ -6,6 +6,10 @@ img.loading {
 	transform: translate(-50%, -50%);
 }
 
+.paths {
+	margin-left: 10px;
+}
+
 .table {
 	margin-bottom: 0;
 }

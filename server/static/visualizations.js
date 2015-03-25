@@ -78,7 +78,7 @@ var Visualization = {};
 
 	}
 
-	Visualization.squareChart = function($element, height, node, stats,
+	Visualization.squareChart = function($element, height, node,
 										 $scope, $location) {
 
 		$element.empty();
@@ -90,30 +90,30 @@ var Visualization = {};
 
 			var rect = paper.rect(x, y, width, height);
 			rect.attr({fill: '#9cf', stroke: '#888', 'stroke-width': 2});
-			rect.data('address', node.addr);
+			rect.data('name', node.name);
 
 			rect.hover(
 				function(e) {
-					var address = this.data('address');
-					$scope.$apply(function () {
-						$scope.address = address;
-					});
+					var name = this.data('name');
+					//$scope.$apply(function () {
+					//	$scope.address = address;
+					//});
 					this.attr({'fill': 'red'});
 				},
 				function(e) {
 					this.attr({'fill': '#9cf'});
-					$scope.$apply(function () {
-						$scope.address = null;
-					});
+					//$scope.$apply(function () {
+					//	$scope.address = null;
+					//});
 				}
 			);
 
-			rect.click(function () {
-				$location.search({
-					id: this.data('address'),
-					view: 'squares'
-				});
-			});
+			//rect.click(function () {
+			//	$location.search({
+			//		id: this.data('address'),
+			//		view: 'squares'
+			//	});
+			//});
 
 			if (node.total == node.self) {
 				var scale = 1;
@@ -125,7 +125,7 @@ var Visualization = {};
 				var node = node.children[Object.keys(node.children)[0]];
 				var box = rect.getBBox();
 
-				draw(box.x, box.y, box.width, box.height, node);
+				//draw(box.x, box.y, box.width, box.height, node);
 
 			} else if (_.keys(node.children).length > 1) {
 				var times = [];
@@ -137,7 +137,7 @@ var Visualization = {};
 					var child = node.children[child];
 					times.push(child.self);
 					addresses.push(child.addr);
-					names.push(stats.addresses[child.addr]);
+					names.push(child.name);
 					children.push(child);
 				}
 
@@ -162,7 +162,7 @@ var Visualization = {};
 						x2=box.square[2],
 						y2=box.square[3];
 
-					draw(x1, y1, x2-x1, y2-y1, children[i]);
+					//draw(x1, y1, x2-x1, y2-y1, children[i]);
 				}
 			}
 		}

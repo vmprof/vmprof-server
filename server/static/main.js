@@ -29,7 +29,7 @@ app.controller('list', function ($scope, $http) {
 	});
 });
 
-app.controller('details', function ($scope, $http, $routeParams, $timeout, $location) {
+app.controller('details', function ($scope, $http, $routeParams, $timeout, $location, $rootScope) {
 	angular.element('svg').remove();
 
 	$scope.loading = true;
@@ -40,48 +40,45 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		$scope.log = response.data;
 
 		var addresses = $routeParams.id;
-
-		var stats = new Stats(response.data.data);
-
-		if (addresses) {
-			$scope.currentProfiles = stats.getSubProfiles($routeParams.id);
-			$scope.name = stats.addresses[$routeParams.id];
-		} else {
-			$scope.currentProfiles = stats.getTopProfiles();
+		if (!$rootScope.stats) {
+			$rootScope.stats = new Stats(response.data.data);
 		}
-		$scope.visualization = $routeParams.view || 'squares';
-		var root = stats.getTree(addresses);
+		var stats = $rootScope.stats;
+		var root = stats.nodes;
+		$scope.visualization = 'squares';
+		var d = stats.getProfiles($routeParams.id);
+		$scope.currentProfiles = d.profiles;
+		$scope.paths = d.paths;
 
 		$timeout(function () {
 
-			var height = $('.table').height();
+			var height = 800; //$('.table').height();
 			var $visualization = $("#visualization");
 			if ($visualization.length < 1)
-				return
-
+		 		return;
+			return;
 			$scope.visualizationChange = function(visualization) {
+				
+		 		$scope.visualization = visualization;
+		 		if (visualization == 'squares') {
+		 			Visualization.squareChart(
+		 				$("#visualization"),
+		 				height,
+		 				root,
+		 				$scope, $location
+		 			);
+		 		}
+		 		if (visualization == 'flames') {
+		 			Visualization.flameChart(
+		 				$("#visualization"),
+		 				height,
+		 				root,
+		 				$scope, $location
+		 			);
+		 		}
+		 	};
 
-				$scope.visualization = visualization;
-				if (visualization == 'squares') {
-					Visualization.squareChart(
-						$("#visualization"),
-						height,
-						root,
-						stats,
-						$scope, $location
-					);
-				}
-				if (visualization == 'flames') {
-					Visualization.flameChart(
-						$("#visualization"),
-						height,
-						root,
-						$scope, $location
-					);
-				}
-			}
-
-			$scope.visualizationChange($scope.visualization);
+		 	$scope.visualizationChange($scope.visualization);
 		});
 
 		$scope.loading = false;

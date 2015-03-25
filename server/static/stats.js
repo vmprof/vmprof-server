@@ -1,9 +1,107 @@
 var Stats = function (data) {
-	this.profiles = data.profiles;
-	this.addresses = data.addresses;
-	this.nodes = this.generateTree();
+	this.argv = data.argv;
+	this.nodes = this.makeTree(data.profiles);
 };
 
+
+Stats.prototype.makeTree = function(t) {
+	var n = new Node(t[0], t[1], t[2], t[3]);
+	return n;
+};
+
+function Node(name, addr, total, children) {
+	this.total = total;
+	this.name = name;
+	this.addr = addr;
+	this.children = [];
+	for (var i in children) {
+		c = children[i];
+		this.children[i] = new Node(c[0], c[1], c[2], c[3]);
+	}
+	this.self = this.count_self();
+}
+
+Node.prototype.count_self = function () {
+	var s = this.total;
+	for (var i in this.children) {
+		c = this.children[i];
+		s -= c.total;
+	}
+	return s;
+};
+
+Stats.prototype.getProfiles = function(path) {
+	var total = this.nodes.total;
+	var nodes = this.nodes;
+	if (!path) {
+		path = [];
+	} else {
+		path = path.split(",");
+	}
+	var path_so_far = [];
+	var paths = [];
+	for (var i in path) {
+		var elem = path[i];
+		total = nodes.total;
+		paths.push({'name': nodes.name.split(":", 2)[1],
+					'path':path_so_far.toString(),
+					"percentage": nodes.total / this.nodes.total});
+		path_so_far.push(elem);
+		nodes = nodes.children[elem];
+	}
+	paths.push({'name': nodes.name.split(":", 2)[1],
+				'path':path_so_far.toString(),
+				"percentage": nodes.total / this.nodes.total });
+	return this.process(nodes.children, total, this.nodes.total, path, paths);
+};
+
+
+Stats.prototype.process = function(functions, parent, total, path_so_far, paths) {
+	if(Object.keys(functions).length == 0) {
+		return []
+	}
+
+	var top = [];
+
+	for (var i in functions) {
+		var func = functions[i];
+		var nameSegments = func.name.split(":");
+		var file;
+		if (nameSegments.length > 4) {
+			file = nameSegments.slice(4, nameSegments.length).join(":");
+		} else {
+			file = nameSegments[3];
+		}
+		var path;
+		if (path_so_far.length == 0) {
+			path = i.toString();
+		} else {
+			path = path_so_far + "," + i.toString();
+		}
+		top.push({
+			path: path,
+			name: nameSegments[1],
+			line: nameSegments[2],
+			file: file,
+			times: func.total,
+			self: func.self / total * 100,
+		});
+	}
+
+	top.sort(function(a, b) {
+		return b.times - a.times;
+	})
+	var max = parent || top[0].times;
+
+	return {'profiles': top.map(function(a) {
+		a.total = a.times / total * 100;
+		a.times = a.times / max * 100;
+		return a;
+	}), 'paths': paths};
+
+};
+
+///////////////////////
 
 Stats.prototype.generateTree = function() {
 	var nodes = {};
@@ -23,38 +121,6 @@ Stats.prototype.generateTree = function() {
 		}
 	}
 	return nodes;
-};
-
-
-Stats.prototype.process = function(functions, total) {
-
-	if(Object.keys(functions).length == 0) {
-		return []
-	}
-
-	var top = [];
-
-	for (address in functions) {
-		var nameSegments = this.addresses[address].split(":");
-		top.push({
-			address: address,
-			name: nameSegments[1],
-			line: nameSegments[2],
-			file: nameSegments[3],
-			times: functions[address],
-		});
-	}
-
-	top.sort(function(a, b) {
-		return b.times - a.times;
-	})
-	var max = total || top[0].times;
-
-	return top.map(function(a) {
-		a.times = a.times / max * 100;
-		return a;
-	})
-
 };
 
 Stats.prototype.getTopProfiles = function() {
@@ -107,7 +173,7 @@ Stats.prototype.getSubProfiles = function(topAddress) {
 };
 
 
-var Node = function(addr, name) {
+var XxNode = function(addr, name) {
 	this.children = {};
 	this.addr = addr;
 	this.name = name;
@@ -116,7 +182,7 @@ var Node = function(addr, name) {
 };
 
 
-Node.prototype.addChild = function(addr, name, is_leaf) {
+XxNode.prototype.addChild = function(addr, name, is_leaf) {
 	var child = this.children[addr];
 	if (!child) {
 		child = new Node(addr, name);
