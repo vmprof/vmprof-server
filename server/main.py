@@ -21,10 +21,21 @@ class LogSerializer(serializers.ModelSerializer):
     def get_data(self, obj):
         return json.loads(obj.data)
 
+class LogListSerializer(serializers.ModelSerializer):
+    data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Log
+
+    def get_data(self, obj):
+        j = json.loads(obj.data)
+        del j['profiles']
+        return j
 
 class LogViewSet(viewsets.ModelViewSet):
     queryset = Log.objects.all()
     serializer_class = LogSerializer
+    list_serializer_class = LogListSerializer
 
     def create(self, request):
         data = json.dumps(request.data)
@@ -35,6 +46,10 @@ class LogViewSet(viewsets.ModelViewSet):
         )
 
         return Response(log.checksum)
+
+    def list(self, request):
+        serializer = self.list_serializer_class(self.queryset, many=True)
+        return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         try:
