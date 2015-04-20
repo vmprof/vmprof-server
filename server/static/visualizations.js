@@ -14,31 +14,36 @@ var Visualization = {};
 			var text = paper.text(x + width / 2,
 								  y + height / 2,
 								  node.name.split(':')[1]);
-
+            var st = paper.set();
+            st.push(rect, text);
+            
 			if (text.getBBox().width > rect.getBBox().width) {
 				text.remove();
 			}
 
-			var color = colors[Math.floor(Math.random()*colors.length)];
+			var color = colors[(parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length];
 			rect.attr({fill: color});
-			rect.data('color', color);
-			rect.data('node', node);
+			st.data('color', color);
+			st.data('node', node);
+            st.data('rect', rect);
             var cur_path = path.toString();
 
-			rect.hover(
+			st.hover(
 				function(e) {
 					var node = this.data('node');
-					this.attr({'fill': '#99CCFF'});
+                    var rect = this.data('rect');
+					rect.attr({'fill': '#99CCFF'});
                     var name = split_name(node.name);
                     $("#visualization-data").text("Function: " + name.funcname + " file: " + name.file + " line: " + name.line);
 				},
 				function(e) {
-					this.attr({'fill': this.data('color'),
+                    var rect = this.data('rect');
+					rect.attr({'fill': this.data('color'),
                                "title": ""});
 				}
 			);
 
-			rect.click(function () {
+			st.click(function () {
 				$location.search({
 					id: cur_path,
 					view: 'flames'
