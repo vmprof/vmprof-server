@@ -34,7 +34,7 @@
           <span class="red">
             Interpreting: {{ (root.red() * 100).toFixed(2) }}%
           </span>
-          <span class="blue">
+          <span class="blue" data-toggle="tooltip" data-placement="top" title="Minor: {{ (root.gc_minor() * 100).toFixed(2) }}% major: {{ (root.gc_major() * 100).toFixed(2) }}%">
             GC: {{ (root.gc() * 100).toFixed(2) }}%
           </span>
         </div>

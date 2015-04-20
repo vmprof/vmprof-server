@@ -34,6 +34,7 @@ Stats.prototype.makeTree = function(t) {
     }, []);
     n.walk(function (elem, ignored) {
         allStats[elem.addr].self += elem.self;
+        return 1;
     });
     this.allStats = allStats;
 	return n;
@@ -104,6 +105,14 @@ Node.prototype.yellow = function() {
 
 Node.prototype.gc = function() {
     return (dict_get(this.cumulative_meta, "gc:major", 0) + dict_get(this.cumulative_meta, "gc:minor", 0)) / this.total;
+};
+
+Node.prototype.gc_minor = function() {
+    return dict_get(this.cumulative_meta, "gc:minor", 0) / this.total;
+};
+
+Node.prototype.gc_major = function() {
+    return dict_get(this.cumulative_meta, "gc:major", 0) / this.total;
 };
 
 function clone(a) {
