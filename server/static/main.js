@@ -29,7 +29,8 @@ app.controller('list', function ($scope, $http) {
 	});
 });
 
-app.controller('details', function ($scope, $http, $routeParams, $timeout, $location) {
+app.controller('details', function ($scope, $http, $routeParams, $timeout,
+                                    $location) {
 	angular.element('svg').remove();
 
 	$scope.loading = true;
@@ -40,6 +41,12 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		$scope.log = response.data;
 
 		var addresses = $routeParams.id;
+        var path_so_far;
+        if (addresses) {
+            path_so_far = addresses.split(",");
+        } else {
+            path_so_far = [];
+        }
 		var stats = new Stats(response.data.data);
         global_stats = stats;
 		var root = stats.nodes;
@@ -66,7 +73,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		 				$("#visualization"),
 		 				height,
 		 				d.root,
-		 				$scope, $location
+		 				$scope, $location, path_so_far
 		 			);
 		 		}
 		 		if (visualization == 'flames') {
@@ -75,7 +82,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		 				height,
 		 				d.root,
 		 				$scope, $location,
-                        cutoff
+                        cutoff, path_so_far
 		 			);
 		 		}
 		 	};

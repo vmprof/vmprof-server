@@ -171,6 +171,16 @@ Stats.prototype.getProfiles = function(path) {
     return res;
 };
 
+function split_name(name) {
+	var nameSegments = name.split(":");
+	var file;
+	if (nameSegments.length > 4) {
+		file = nameSegments.slice(4, nameSegments.length).join(":");
+	} else {
+		file = nameSegments[3];
+	}
+    return {file: file, funcname:nameSegments[1], line: nameSegments[2]};
+}
 
 Stats.prototype.process = function(functions, parent, total, path_so_far, paths) {
 	if(Object.keys(functions).length == 0) {

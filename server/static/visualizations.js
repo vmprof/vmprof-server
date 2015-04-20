@@ -3,9 +3,10 @@ var Visualization = {};
 (function() {
     "use strict";
 
-	Visualization.flameChart = function($element, height, node, $scope, $location, cutoff) {
+	Visualization.flameChart = function($element, height, node, $scope,
+                                        $location, cutoff, path_so_far) {
 
-		function draw(x, y, width, height, node) {
+		function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
                 return;
             }
@@ -21,30 +22,28 @@ var Visualization = {};
 			var color = colors[Math.floor(Math.random()*colors.length)];
 			rect.attr({fill: color});
 			rect.data('color', color);
-			rect.data('address', node.addr);
+			rect.data('node', node);
+            var cur_path = path.toString();
 
 			rect.hover(
 				function(e) {
-					var address = this.data('address');
-					$scope.$apply(function () {
-						$scope.address = address;
-					});
+					var node = this.data('node');
 					this.attr({'fill': '#99CCFF'});
+                    var name = split_name(node.name);
+                    $("#visualization-data").text("Function: " + name.funcname + " file: " + name.file + " line: " + name.line);
 				},
 				function(e) {
-					this.attr({'fill': this.data('color')});
-
-					$scope.$apply(function () {
-						$scope.address = null;
-					});
+					this.attr({'fill': this.data('color'),
+                               "title": ""});
 				}
 			);
 
 			rect.click(function () {
 				$location.search({
-					id: this.data('address'),
+					id: cur_path,
 					view: 'flames'
 				});
+                $scope.$apply();
 			});
 
 			if (_.keys(node.children).length == 1) {
@@ -54,13 +53,16 @@ var Visualization = {};
 					var scale = 1 - (node.self / node.total);
 				}
 				var child = node.children[Object.keys(node.children)[0]];
-				draw(x, y + height + 2, width * scale, height, child);
+                path.push(0);
+				draw(x, y + height + 2, width * scale, height, child, path);
 			} else if (_.keys(node.children).length > 1) {
 				var y = y + height + 2;
 				for (var child in node.children) {
+                    var c_path = path.slice();
+                    c_path.push(child);
 					var child = node.children[child];
 					var _width = child.total / node.total * width;
-					draw(x,  y, _width, height, child)
+					draw(x,  y, _width, height, child, c_path)
 					x = x + _width;
 				}
 			}
@@ -76,7 +78,7 @@ var Visualization = {};
 		var width = $element.width();
 		var paper = Raphael($element[0], width, height);
 
-		draw(0, 0, width, 25, node);
+		draw(0, 0, width, 25, node, path_so_far);
 
 	}
 
