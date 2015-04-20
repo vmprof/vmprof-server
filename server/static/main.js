@@ -52,7 +52,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		$scope.paths = d.paths;
 
 		$timeout(function () {
-
+            $('[data-toggle=tooltip]').tooltip();
 			var height = 800; //$('.table').height();
 			var $visualization = $("#visualization");
 			if ($visualization.length < 1)

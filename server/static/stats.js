@@ -90,6 +90,18 @@ Node.prototype.yellow = function() {
     return (dict_get(this.cumulative_meta, "tracing", 0) + dict_get(this.cumulative_meta, "blackhole", 0)) / this.total;
 };
 
+Node.prototype.blackhole = function() {
+    return dict_get(this.cumulative_meta, "blackhole", 0) / this.total;
+};
+
+Node.prototype.tracing = function() {
+    return dict_get(this.cumulative_meta, "tracing", 0) / this.total;
+};
+
+Node.prototype.yellow = function() {
+    return (dict_get(this.cumulative_meta, "tracing", 0) + dict_get(this.cumulative_meta, "blackhole", 0)) / this.total;
+};
+
 Node.prototype.gc = function() {
     return (dict_get(this.cumulative_meta, "gc:major", 0) + dict_get(this.cumulative_meta, "gc:minor", 0)) / this.total;
 };

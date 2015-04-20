@@ -28,9 +28,15 @@
           <span class="green">
             Jitted: {{ (root.green() * 100).toFixed(2) }}%
           </span>
-          <span class="yellow">Warming up: {{ (root.yellow() * 100).toFixed(2) }}%</span>
-          <span class="red">Interpreting: {{ (root.red() * 100).toFixed(2) }}%</span>
-          <span class="blue">GC: {{ (root.gc() * 100).toFixed(2) }}%</span>
+          <span class="yellow"  data-toggle="tooltip" data-placement="top" title="Blackhole: {{ (root.blackhole() * 100).toFixed(2) }}% tracing: {{ (root.tracing() * 100).toFixed(2) }}%">
+            Warming up: {{ (root.yellow() * 100).toFixed(2) }}%
+          </span>
+          <span class="red">
+            Interpreting: {{ (root.red() * 100).toFixed(2) }}%
+          </span>
+          <span class="blue">
+            GC: {{ (root.gc() * 100).toFixed(2) }}%
+          </span>
         </div>
 	  </div>
 	</div>
