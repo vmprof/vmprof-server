@@ -20,5 +20,6 @@ Virtual Machine profiler (so far restricted to pypy and cpython)
 ## deployment
 
 	fab deploy -H {HOST} -u {USER}
+    host: baroquesoftware.com, user: www-data
 
 
