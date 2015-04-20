@@ -3,10 +3,12 @@ var Visualization = {};
 (function() {
     "use strict";
 
-	Visualization.flameChart = function($element, height, node, $scope, $location) {
+	Visualization.flameChart = function($element, height, node, $scope, $location, cutoff) {
 
 		function draw(x, y, width, height, node) {
-
+            if (node.total < cutoff) {
+                return;
+            }
 			var rect = paper.rect(x, y, width, height, 5);
 			var text = paper.text(x + width / 2,
 								  y + height / 2,

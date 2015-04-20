@@ -43,7 +43,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		var stats = new Stats(response.data.data);
         global_stats = stats;
 		var root = stats.nodes;
-		$scope.visualization = 'squares';
+		$scope.visualization = $routeParams.view || 'flames';
 		var d = stats.getProfiles($routeParams.id);
 		$scope.currentProfiles = d.profiles;
         $scope.root = d.root;
@@ -57,15 +57,15 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 			var $visualization = $("#visualization");
 			if ($visualization.length < 1)
 		 		return;
-			return;
 			$scope.visualizationChange = function(visualization) {
 				
 		 		$scope.visualization = visualization;
+                var cutoff = d.root.total / 100;
 		 		if (visualization == 'squares') {
 		 			Visualization.squareChart(
 		 				$("#visualization"),
 		 				height,
-		 				root,
+		 				d.root,
 		 				$scope, $location
 		 			);
 		 		}
@@ -73,8 +73,9 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		 			Visualization.flameChart(
 		 				$("#visualization"),
 		 				height,
-		 				root,
-		 				$scope, $location
+		 				d.root,
+		 				$scope, $location,
+                        cutoff
 		 			);
 		 		}
 		 	};
