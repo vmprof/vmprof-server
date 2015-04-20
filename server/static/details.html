@@ -16,8 +16,26 @@
 		no profiles
 	</p>
 
+	<div class="row">
+	  <div class="col-md-1">
+	  </div>
+	  <div class="col-md-10">
+        <div class="row">
+		  <span>Total time spent in this function: {{ (total_time * 100).toFixed(2) }}% self: {{ (self_time * 100).toFixed(2) }}%</span>
+        </div>
+        <div class="row" ng-if="root.cumulative_meta">
+          Meta data (cumulative for this callsite):
+          <span class="green">
+            Jitted: {{ (root.green() * 100).toFixed(2) }}%
+          </span>
+          <span class="yellow">Warming up: {{ (root.yellow() * 100).toFixed(2) }}%</span>
+          <span class="red">Interpreting: {{ (root.red() * 100).toFixed(2) }}%</span>
+          <span class="blue">GC: {{ (root.gc() * 100).toFixed(2) }}%</span>
+        </div>
+	  </div>
+	</div>
 	<div ng-if="currentProfiles.length > 0" class="row">
-		<div class="col-md-10">
+		<div class="col-md-12">
 			<table class="table table-hover">
 				<thead>
 					<tr>

@@ -3,23 +3,115 @@ var Stats = function (data) {
 	this.nodes = this.makeTree(data.profiles);
 };
 
+var FunctionData = function (elem) {
+    this.total = 0;
+    this.self = 0;
+    this.name = elem.name;
+    this.update(elem);
+};
+
+FunctionData.prototype.update = function(node) {
+    if (this.name != node.name) {
+        debugger;
+    }
+    this.total += node.total;
+};
 
 Stats.prototype.makeTree = function(t) {
-	var n = new Node(t[0], t[1], t[2], t[3]);
+	var n = new Node(t[0], t[1], t[2], t[3], t[4]);
+    allStats = [];
+    n.walk(function (elem, accum) {
+        if (accum[elem.addr]) {
+            return 0;
+        }
+        accum[elem.addr] = "a"; // non-zero length
+        if (allStats[elem.addr] === undefined) {
+            allStats[elem.addr] = new FunctionData(elem);
+        } else {
+            allStats[elem.addr].update(elem);
+        }
+        return 1;
+    }, []);
+    n.walk(function (elem, ignored) {
+        allStats[elem.addr].self += elem.self;
+    });
+    this.allStats = allStats;
 	return n;
 };
 
-function Node(name, addr, total, children) {
+function Node(name, addr, total, meta, children) {
 	this.total = total;
 	this.name = name;
 	this.addr = addr;
+    this.meta = meta;
 	this.children = [];
 	for (var i in children) {
 		c = children[i];
-		this.children[i] = new Node(c[0], c[1], c[2], c[3]);
+		this.children[i] = new Node(c[0], c[1], c[2], c[3], c[4]);
 	}
+    var c = {};
+    this.cumulative_meta = this.countCumulativeMeta(c);
 	this.self = this.count_self();
+};
+
+Node.prototype.countCumulativeMeta = function (c) {
+    for (var key in this.meta) {
+        var value = this.meta[key];
+        if (c[key]) {
+            c[key] += value;
+        } else {
+            c[key] = value;
+        }
+    }
+    for (var i in this.children) {
+        this.children[i].countCumulativeMeta(c);
+    }
+    return c;
+};
+
+function dict_get(d, v, _default)
+{
+    var item = d[v];
+    if (item === undefined) {
+        return _default;
+    }
+    return item;
 }
+
+Node.prototype.green = function() {
+    return dict_get(this.cumulative_meta, "jit", 0) / this.total;
+};
+
+Node.prototype.red = function() {
+    return 1 - this.green() - this.yellow();
+};
+
+Node.prototype.yellow = function() {
+    return (dict_get(this.cumulative_meta, "tracing", 0) + dict_get(this.cumulative_meta, "blackhole", 0)) / this.total;
+};
+
+Node.prototype.gc = function() {
+    return (dict_get(this.cumulative_meta, "gc:major", 0) + dict_get(this.cumulative_meta, "gc:minor", 0)) / this.total;
+};
+
+function clone(a) {
+    // JS is idiotic
+    var new_a = [];
+    for (var i in a) {
+        new_a[i] = a[i];
+    }
+    return new_a;
+}
+
+Node.prototype.walk = function(cb, accum) {
+    if (!cb(this, accum)) {
+        return;
+    }
+    for (var i in this.children) {
+        c = this.children[i];
+        c.walk(cb, clone(accum));
+    }
+};
 
 Node.prototype.count_self = function () {
 	var s = this.total;
@@ -52,7 +144,10 @@ Stats.prototype.getProfiles = function(path) {
 	paths.push({'name': nodes.name.split(":", 2)[1],
 				'path':path_so_far.toString(),
 				"percentage": nodes.total / this.nodes.total });
-	return this.process(nodes.children, total, this.nodes.total, path, paths);
+	var res = this.process(nodes.children, total, this.nodes.total, path,
+                           paths);
+    res.root = nodes;
+    return res;
 };
 
 
@@ -100,103 +195,3 @@ Stats.prototype.process = function(functions, parent, total, path_so_far, paths)
 	}), 'paths': paths};
 
 };
-
-///////////////////////
-
-Stats.prototype.generateTree = function() {
-	var nodes = {};
-	var addr = this.profiles[0][0][0];
-	var name = this.addresses[addr];
-	var top = new Node(addr, name);
-
-	nodes[addr] = top;
-
-	for (var index in this.profiles) {
-		var cur = top;
-		profile = this.profiles[index][0];
-		for (var i = 1; i < profile.length; i++) {
-			var v = profile[i];
-			cur = cur.addChild(v, this.addresses[v], i == profile.length - 1);
-			nodes[v] = cur;
-		}
-	}
-	return nodes;
-};
-
-Stats.prototype.getTopProfiles = function() {
-	var functions = {};
-
-	this.profiles.forEach(function(profile) {
-		var currentIteration = {};
-		profile[0].forEach(function(address) {
-			if(!(address in currentIteration)) {
-				if(address in functions) {
-					functions[address] += 1;
-				} else {
-					functions[address] = 1;
-				}
-				currentIteration[address] = null;
-			}
-		}, this);
-	}, this);
-
-	return this.process(functions);
-};
-
-Stats.prototype.getSubProfiles = function(topAddress) {
-	var functions = {}
-	var total = 0
-	this.profiles.forEach(function(profile) {
-		var currentIteration = {};
-		var counting = false;
-		profile[0].forEach(function(address) {
-			if (counting) {
-				if(!(address in currentIteration)) {
-					currentIteration[address] = null;
-					if(address in functions) {
-						functions[address] += 1;
-					} else {
-						functions[address] = 1;
-					}
-				}
-			} else {
-				if (address == topAddress) {
-					counting = true
-					total += 1;
-				}
-			}
-		}, this);
-
-	}, this);
-
-	return this.process(functions, total);
-};
-
-
-var XxNode = function(addr, name) {
-	this.children = {};
-	this.addr = addr;
-	this.name = name;
-	this.total = 0;
-	this.self = 0;
-};
-
-
-XxNode.prototype.addChild = function(addr, name, is_leaf) {
-	var child = this.children[addr];
-	if (!child) {
-		child = new Node(addr, name);
-		this.children[addr] = child;
-	}
-	child.total++;
-	if (is_leaf) {
-		child.self++;
-	}
-	return child;
-}
-
-
-Stats.prototype.getTree = function(address) {
-	var address = address || this.profiles[0][0][0];
-	return this.nodes[address];
-}

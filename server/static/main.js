@@ -29,7 +29,7 @@ app.controller('list', function ($scope, $http) {
 	});
 });
 
-app.controller('details', function ($scope, $http, $routeParams, $timeout, $location, $rootScope) {
+app.controller('details', function ($scope, $http, $routeParams, $timeout, $location) {
 	angular.element('svg').remove();
 
 	$scope.loading = true;
@@ -40,14 +40,15 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout, $loca
 		$scope.log = response.data;
 
 		var addresses = $routeParams.id;
-		if (!$rootScope.stats) {
-			$rootScope.stats = new Stats(response.data.data);
-		}
-		var stats = $rootScope.stats;
+		var stats = new Stats(response.data.data);
+        global_stats = stats;
 		var root = stats.nodes;
 		$scope.visualization = 'squares';
 		var d = stats.getProfiles($routeParams.id);
 		$scope.currentProfiles = d.profiles;
+        $scope.root = d.root;
+        $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
+        $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
 		$scope.paths = d.paths;
 
 		$timeout(function () {

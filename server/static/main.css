@@ -14,6 +14,31 @@ img.loading {
 	margin-bottom: 0;
 }
 
+.red {
+    padding: 2px;
+    margin-left: 10px;
+    background-color: #F44;
+}
+
+.green {
+    padding: 2px;
+    margin-left: 10px;
+    background-color: #00AA00;
+}
+
+.yellow {
+    padding: 2px;
+    margin-left: 10px;
+    background-color: yellow;
+}
+
+.blue {
+    padding: 2px;
+    margin-left: 20px;
+    background-color: blue;
+    color: #DDD;
+}
+
 svg rect, svg text {
 	cursor: pointer;
 	cursor: hand;
