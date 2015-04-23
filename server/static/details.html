@@ -1,45 +1,64 @@
 <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
 
+<div id="item" ng-show="!loading">
+
+    <ol class="breadcrumb">
+        <li>
+            <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}">{{ log.data.argv }}</a>
+            <span ng-if="name">: {{ name }}</span>
+        </li>
+        <li ng-repeat="path in paths">
+            <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}&id={{ path.path }}">
+                {{ path.name }} {{ "(" + (path.percentage * 100).toFixed(2) + "%)" }}
+            </a>
+        </li>
+    </ol>
+
+    <header>
+
+        <div class="times">
+            <span data-toggle="tooltip" title="Total time spent">
+                <i class="fa fa-clock-o"></i>
+                <strong>{{ (total_time * 100).toFixed(2) }}%</strong>
+            </span>
+
+            <span data-toggle="tooltip" title="Time spent in this function">
+                <i class="fa fa-arrow-down"></i>
+                <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
+            </span>
+        </div>
+
+        <div class="metadata" ng-if="root.cumulative_meta">
+            <span class="label label-success">
+                Jitted: {{ (root.green() * 100).toFixed(2) }}%
+            </span>
+
+            <span class="label label-warning" data-toggle="tooltip"
+                  title="Blackhole: {{ (root.blackhole() * 100).toFixed(2) }}% tracing: {{ (root.tracing() * 100).toFixed(2) }}%">
+                  Warming up: {{ (root.yellow() * 100).toFixed(2) }}%
+            </span>
+
+            <span class="label label-danger">
+                Interpreting: {{ (root.red() * 100).toFixed(2) }}%
+            </span>
+
+            <span class="label label-info" data-toggle="tooltip"
+                  title="Minor: {{ (root.gc_minor() * 100).toFixed(2) }}% major: {{ (root.gc_major() * 100).toFixed(2) }}%">
+                  GC: {{ (root.gc() * 100).toFixed(2) }}%
+            </span>
+            <i class="fa fa-question-circle" data-toggle="tooltip" title="Meta data (cumulative for this callsite)"></i>
+        </div>
+    </header>
+
+</div>
+
+
 <div ng-show="!loading" class="panel panel-default">
-    <div class="panel-heading">
-
-        <span class="pull-right"> {{ log.created }} </span>
-        <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}">{{ log.data.argv }}</a><span ng-if="name">: {{ name }}</span>
-        <span class="paths" ng-repeat="path in paths">
-            <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}&id={{ path.path }}">{{ path.name }}
-            </a> {{ "(" + (path.percentage * 100).toFixed(2) + "%)" }} ->
-        </span>
-
-    </div>
 
     <p ng-if="currentProfiles.length == 0" class="lead text-center" style="padding-top: 15px">
         no profiles
     </p>
 
-    <div class="row">
-        <div class="col-md-1">
-        </div>
-        <div class="col-md-10">
-            <div class="row">
-                <span>Total time spent in this function: {{ (total_time * 100).toFixed(2) }}% self: {{ (self_time * 100).toFixed(2) }}%</span>
-            </div>
-            <div class="row" ng-if="root.cumulative_meta">
-                Meta data (cumulative for this callsite):
-                <span class="green">
-                    Jitted: {{ (root.green() * 100).toFixed(2) }}%
-                </span>
-                <span class="yellow"  data-toggle="tooltip" data-placement="top" title="Blackhole: {{ (root.blackhole() * 100).toFixed(2) }}% tracing: {{ (root.tracing() * 100).toFixed(2) }}%">
-                    Warming up: {{ (root.yellow() * 100).toFixed(2) }}%
-                </span>
-                <span class="red">
-                    Interpreting: {{ (root.red() * 100).toFixed(2) }}%
-                </span>
-                <span class="blue" data-toggle="tooltip" data-placement="top" title="Minor: {{ (root.gc_minor() * 100).toFixed(2) }}% major: {{ (root.gc_major() * 100).toFixed(2) }}%">
-                    GC: {{ (root.gc() * 100).toFixed(2) }}%
-                </span>
-            </div>
-        </div>
-    </div>
     <div ng-if="currentProfiles.length > 0" class="row">
         <div class="col-md-12">
             <table class="table table-hover">
@@ -88,4 +107,4 @@
         <div id="visualization"></div>
     </div>
 </div>
- 
+

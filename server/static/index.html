@@ -1,44 +1,45 @@
 <html lang="en" ng-app="vmprof">
 
-	<head>
-		<meta charset="utf-8"/>
-		<title>vmprof</title>
+    <head>
+        <meta charset="utf-8"/>
+        <title>vmprof</title>
 
-		<link href="/static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-		<link href="/static/libs/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
-		<link href="/static/main.css" rel="stylesheet" />
+        <link href="/static/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/static/libs/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+        <link href="/static/libs/font-awesome-4.3.0/css/font-awesome.min.css" rel="stylesheet" >
+        <link href="/static/main.css" rel="stylesheet" />
 
-		<script src="/static/libs/jquery-2.1.1.min.js"></script>
-		<script src="/static/libs/lodash.min.js"></script>
-		<script src="/static/libs/bootstrap/js/bootstrap.min.js"></script>
-		<script src="/static/libs/angular.min.js"></script>
-		<script src="/static/libs/angular-resource.min.js"></script>
-		<script src="/static/libs/angular-route.min.js"></script>
-		<script src="/static/libs/raphael-min.js"></script>
-		<script src="/static/libs/treemap/treemap-squarify.js"></script>
-		<script src="/static/libs/treemap/treemap-raphael.js"></script>
+        <script src="/static/libs/jquery-2.1.1.min.js"></script>
+        <script src="/static/libs/lodash.min.js"></script>
+        <script src="/static/libs/bootstrap/js/bootstrap.min.js"></script>
+        <script src="/static/libs/angular.min.js"></script>
+        <script src="/static/libs/angular-resource.min.js"></script>
+        <script src="/static/libs/angular-route.min.js"></script>
+        <script src="/static/libs/raphael-min.js"></script>
+        <script src="/static/libs/treemap/treemap-squarify.js"></script>
+        <script src="/static/libs/treemap/treemap-raphael.js"></script>
 
-		<script src="/static/stats.js"></script>
-		<script src="/static/visualizations.js"></script>
-		<script src="/static/main.js"></script>
+        <script src="/static/stats.js"></script>
+        <script src="/static/visualizations.js"></script>
+        <script src="/static/main.js"></script>
 
-	</head>
+    </head>
 
-	<body>
+    <body>
 
-		<nav class="navbar navbar-default" role="navigation">
-			<div class="container">
-				<div class="navbar-header">
-					<a class="navbar-brand" ng-href="#/">VMprof</a>
-				</div>
-			</div>
-		</nav>
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" ng-href="#/">VMprof</a>
+                </div>
+            </div>
+        </nav>
 
-		<div class="container">
+        <div class="container">
 
-			<div ng-view></div>
+            <div ng-view></div>
 
-		</div>
-	</body>
+        </div>
+    </body>
 
 </html>

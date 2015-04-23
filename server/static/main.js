@@ -42,16 +42,19 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
 
 		var addresses = $routeParams.id;
         var path_so_far;
+
         if (addresses) {
             path_so_far = addresses.split(",");
         } else {
             path_so_far = [];
         }
+
 		var stats = new Stats(response.data.data);
         global_stats = stats;
 		var root = stats.nodes;
 		$scope.visualization = $routeParams.view || 'flames';
 		var d = stats.getProfiles($routeParams.id);
+
 		$scope.currentProfiles = d.profiles;
         $scope.root = d.root;
         $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
@@ -59,35 +62,35 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
 		$scope.paths = d.paths;
 
 		$timeout(function () {
-            $('[data-toggle=tooltip]').tooltip();
-			var height = 800; //$('.table').height();
-			var $visualization = $("#visualization");
-			if ($visualization.length < 1)
-		 		return;
-			$scope.visualizationChange = function(visualization) {
-				
-		 		$scope.visualization = visualization;
-                var cutoff = d.root.total / 100;
-		 		if (visualization == 'squares') {
-		 			Visualization.squareChart(
-		 				$("#visualization"),
-		 				height,
-		 				d.root,
-		 				$scope, $location, path_so_far
-		 			);
-		 		}
-		 		if (visualization == 'flames') {
-		 			Visualization.flameChart(
-		 				$("#visualization"),
-		 				height,
-		 				d.root,
-		 				$scope, $location,
-                        cutoff, path_so_far
-		 			);
-		 		}
-		 	};
+			$('[data-toggle=tooltip]').tooltip();
+		// 	var height = 800; //$('.table').height();
+		// 	var $visualization = $("#visualization");
+		// 	if ($visualization.length < 1)
+		//  		return;
+		// 	$scope.visualizationChange = function(visualization) {
 
-		 	$scope.visualizationChange($scope.visualization);
+		//  		$scope.visualization = visualization;
+        //         var cutoff = d.root.total / 100;
+		//  		if (visualization == 'squares') {
+		//  			Visualization.squareChart(
+		//  				$("#visualization"),
+		//  				height,
+		//  				d.root,
+		//  				$scope, $location, path_so_far
+		//  			);
+		//  		}
+		//  		if (visualization == 'flames') {
+		//  			Visualization.flameChart(
+		//  				$("#visualization"),
+		//  				height,
+		//  				d.root,
+		//  				$scope, $location,
+        //                 cutoff, path_so_far
+		//  			);
+		//  		}
+		//  	};
+
+		//  	$scope.visualizationChange($scope.visualization);
 		});
 
 		$scope.loading = false;
