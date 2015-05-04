@@ -24,6 +24,7 @@ Stats.prototype.makeTree = function(t) {
         if (accum[elem.addr]) {
             return 0;
         }
+        accum = clone(accum);
         accum[elem.addr] = "a"; // non-zero length
         if (allStats[elem.addr] === undefined) {
             allStats[elem.addr] = new FunctionData(elem);
