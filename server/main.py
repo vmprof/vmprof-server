@@ -21,9 +21,10 @@ class LogSerializer(serializers.ModelSerializer):
     def get_data(self, obj):
         return json.loads(obj.data)
 
+
 class LogListSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Log
 
@@ -31,6 +32,7 @@ class LogListSerializer(serializers.ModelSerializer):
         j = json.loads(obj.data)
         del j['profiles']
         return j
+
 
 class LogViewSet(viewsets.ModelViewSet):
     queryset = Log.objects.all()

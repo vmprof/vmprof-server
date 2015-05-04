@@ -6,37 +6,31 @@ img.loading {
 	transform: translate(-50%, -50%);
 }
 
+#item header {
+	padding-left: 15px;
+	margin-bottom: 30px;
+}
+
+#item header .times {
+	font-size: 30px;
+	margin-bottom: 10px;
+}
+
+#item header .metadata {
+	font-size: 16px;
+	display: block;
+}
+
+#item header .metadata .label {
+	margin-right: 5px;
+}
+
 .paths {
 	margin-left: 10px;
 }
 
 .table {
 	margin-bottom: 0;
-}
-
-.red {
-    padding: 2px;
-    margin-left: 10px;
-    background-color: #F44;
-}
-
-.green {
-    padding: 2px;
-    margin-left: 10px;
-    background-color: #00AA00;
-}
-
-.yellow {
-    padding: 2px;
-    margin-left: 10px;
-    background-color: yellow;
-}
-
-.blue {
-    padding: 2px;
-    margin-left: 20px;
-    background-color: blue;
-    color: #DDD;
 }
 
 svg rect, svg text {
