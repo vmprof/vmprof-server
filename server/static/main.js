@@ -39,7 +39,19 @@ app.controller('login', function ($scope, $http) {
 
 });
 
-app.controller('register', function ($scope) {
+app.controller('register', function ($scope, $http) {
+
+	$scope.user = {
+		username: "",
+		password: "",
+		email: ""
+	};
+
+	$scope.submit = function() {
+		$http.put('/api/user/', $scope.user).then(function(response) {
+			debugger
+		});
+	}
 
 });
 

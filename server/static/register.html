@@ -1,15 +1,15 @@
 
-<form id="register" class="center-block">
+<form id="register" class="center-block" ng-submit="submit()">
 
     <h1>Create Account</h1>
 
-    <input type="text" class="form-control" placeholder="username" autofocus>
+    <input ng-model="user.username" type="text" class="form-control" placeholder="username" autofocus>
 
-    <input type="email" class="form-control" placeholder="email">
-    <input type="email" class="form-control" placeholder="confirm email">
+    <input ng-model="user.email" type="email" class="form-control" placeholder="email">
+    <input ng-model="confirm.email" type="email" class="form-control" placeholder="confirm email">
 
-    <input type="password" class="form-control" placeholder="password">
-    <input type="password" class="form-control" placeholder="confirm password">
+    <input ng-model="user.password" type="password" class="form-control" placeholder="password">
+    <input ng-model="confirm.password" type="password" class="form-control" placeholder="confirm password">
 
     <button class="btn btn-primary btn-block" type="submit">Sign in</button>
 
