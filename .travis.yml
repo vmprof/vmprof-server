@@ -9,7 +9,7 @@ install:
 
 
 script:
-  - py.test tests/
+  - py.test tests/ -v 
 
 
 notifications:
