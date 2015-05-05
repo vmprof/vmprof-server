@@ -25,7 +25,17 @@ app.config(['$routeProvider', function($routeProvider) {
 }]);
 
 
-app.controller('login', function ($scope) {
+app.controller('login', function ($scope, $http) {
+	$scope.user = {
+		username: "",
+		password: ""
+	};
+
+	$scope.submit = function() {
+		$http.post('/api/user/', $scope.user).then(function(response) {
+			debugger
+		});
+	}
 
 });
 

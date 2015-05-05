@@ -1,10 +1,10 @@
 
-<form id="login" class="center-block">
+<form id="login" class="center-block" ng-submit="submit()">
 
     <h1>Please sign in</h1>
 
-    <input type="email" class="form-control" placeholder="email" autofocus>
-    <input type="password" class="form-control" placeholder="password" >
+    <input class="form-control" type="email" ng-model="user.email" placeholder="email" autofocus>
+    <input class="form-control" type="password" ng-model="user.password" placeholder="password" >
 
     <button class="btn btn-primary btn-block" type="submit">Sign in</button>
 
