@@ -74,40 +74,24 @@ password_max = auth.models.User._meta.get_field('password').max_length
 email_max = auth.models.User._meta.get_field('email').max_length
 
 
-class RegisterSerializer(serializers.Serializer):
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = auth.models.User
+        fields = ['username']
+
+
+class UserRegisterSerializer(serializers.Serializer):
     username = serializers.CharField(min_length=6, max_length=username_max)
     password = serializers.CharField(min_length=6, max_length=password_max)
 
     email = serializers.EmailField(max_length=email_max)
 
 
-class RegisterView(views.APIView):
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request, format=None):
-        serializer = RegisterSerializer(data=request.data)
-
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        auth.models.User.objects.create_user(
-            serializer.data['username'],
-            serializer.data['email'],
-            serializer.data['password']
-        )
-
-        return Response(status=status.HTTP_201_CREATED)
-
-
-class MeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = auth.models.User
-        fields = ['username']
-
-
 class UserPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
+            return True
+        if request.method == "PUT":
             return True
         if request.method == "GET":
             return request.user.is_authenticated()
@@ -119,7 +103,7 @@ class MeView(views.APIView):
     permission_classes = (UserPermission,)
 
     def get(self, request, format=None):
-        data = MeSerializer(self.request.user).data
+        data = UserSerializer(self.request.user).data
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
@@ -134,13 +118,26 @@ class MeView(views.APIView):
 
         return Response(status=status.HTTP_403_FORBIDDEN)
 
+    def put(self, request, format=None):
+        serializer = UserRegisterSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        auth.models.User.objects.create_user(
+            serializer.data['username'],
+            serializer.data['email'],
+            serializer.data['password']
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
+
 
 router = routers.DefaultRouter()
 router.register(r'log', LogViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
-    url(r'^api/register/', RegisterView.as_view()),
     url(r'^api/user/', MeView.as_view()),
     url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
 ]
