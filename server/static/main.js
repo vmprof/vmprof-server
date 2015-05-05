@@ -7,6 +7,14 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: '/static/list.html',
             controller: 'list'
         })
+	    .when('/login', {
+            templateUrl: '/static/login.html',
+            controller: 'login'
+        })
+		.when('/register', {
+            templateUrl: '/static/register.html',
+            controller: 'register'
+        })
         .when('/:log', {
             templateUrl: '/static/details.html',
             controller: 'details'
@@ -15,6 +23,16 @@ app.config(['$routeProvider', function($routeProvider) {
             redirectTo: '/'
         });
 }]);
+
+
+app.controller('login', function ($scope) {
+
+});
+
+app.controller('register', function ($scope) {
+
+});
+
 
 
 app.controller('list', function ($scope, $http) {

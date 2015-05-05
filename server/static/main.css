@@ -1,3 +1,22 @@
+#login, #register {
+	padding: 40px;
+	max-width: 500px;
+}
+
+#login h1, #register, h1 {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+#login input, #register input {
+	margin-bottom: 10px;
+}
+
+#login button, #register button {
+	margin-top: 20px;
+}
+
+
 img.loading {
 	position: fixed;
 	width: 60px;
