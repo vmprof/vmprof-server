@@ -42,6 +42,7 @@ class LogViewSet(viewsets.ModelViewSet):
     queryset = Log.objects.all()
     serializer_class = LogSerializer
     list_serializer_class = LogListSerializer
+    permission_classes = (permissions.AllowAny,)
 
     def create(self, request):
         data = json.dumps(request.data)
