@@ -10,3 +10,17 @@ install:
 
 script:
   - py.test tests/
+
+
+notifications:
+  irc:
+    channels: "irc.freenode.org#baroque-dev"
+    template:
+      - "%{repository}@%{branch}: %{message} (%{build_url})"
+    use_notice: true
+    on_success: always
+    on_failure: always
+
+  email:
+    on_success: change
+    on_failure: change
