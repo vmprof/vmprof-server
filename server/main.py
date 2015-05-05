@@ -13,6 +13,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 
+
 from .models import Log
 
 
@@ -98,11 +99,48 @@ class RegisterView(views.APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
+class MeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = auth.models.User
+        fields = ['username']
+
+
+class UserPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return True
+        if request.method == "GET":
+            return request.user.is_authenticated()
+
+        return False
+
+
+class MeView(views.APIView):
+    permission_classes = (UserPermission,)
+
+    def get(self, request, format=None):
+        data = MeSerializer(self.request.user).data
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        username = request.data['username']
+        password = request.data['password']
+
+        user = auth.authenticate(username=username, password=password)
+
+        if user is not None and user.is_active:
+            auth.login(request, user)
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+
 router = routers.DefaultRouter()
 router.register(r'log', LogViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^api/register/', RegisterView.as_view()),
+    url(r'^api/user/', MeView.as_view()),
     url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
 ]
