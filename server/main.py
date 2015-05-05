@@ -3,9 +3,12 @@ import hashlib
 import json
 
 from django.conf.urls import url, include
-from django.contrib.staticfiles import views
+from django.contrib.staticfiles import views as static
+from django.contrib import auth
 
+from rest_framework import views
 from rest_framework import routers
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 
@@ -63,11 +66,40 @@ class LogViewSet(viewsets.ModelViewSet):
             return Response(status=404)
 
 
+username_max = auth.models.User._meta.get_field('username').max_length
+password_max = auth.models.User._meta.get_field('password').max_length
+email_max = auth.models.User._meta.get_field('email').max_length
+
+
+class RegisterSerializer(serializers.Serializer):
+    username = serializers.CharField(min_length=6, max_length=username_max)
+    password = serializers.CharField(min_length=6, max_length=password_max)
+
+    email = serializers.EmailField(max_length=email_max)
+
+
+class RegisterView(views.APIView):
+
+    def post(self, request, format=None):
+        serializer = RegisterSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        auth.models.User.objects.create_user(
+            serializer.data['username'],
+            serializer.data['email'],
+            serializer.data['password']
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
 router = routers.DefaultRouter()
 router.register(r'log', LogViewSet)
 
-
 urlpatterns = [
     url(r'^api/', include(router.urls)),
-    url(r'^$', views.serve, {'path': 'index.html', 'insecure': True}),
+    url(r'^api/register/', RegisterView.as_view()),
+    url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
 ]
