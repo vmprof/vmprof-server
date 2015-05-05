@@ -9,6 +9,7 @@ from django.contrib import auth
 from rest_framework import views
 from rest_framework import routers
 from rest_framework import status
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 
@@ -79,6 +80,7 @@ class RegisterSerializer(serializers.Serializer):
 
 
 class RegisterView(views.APIView):
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request, format=None):
         serializer = RegisterSerializer(data=request.data)
