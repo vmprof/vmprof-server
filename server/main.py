@@ -5,6 +5,7 @@ import json
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
 from django.contrib import auth
+from django.contrib import admin
 
 from rest_framework import views
 from rest_framework import routers
@@ -77,7 +78,7 @@ email_max = auth.models.User._meta.get_field('email').max_length
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = auth.models.User
-        fields = ['username']
+        fields = ['id', 'username']
 
 
 class UserRegisterSerializer(serializers.Serializer):
