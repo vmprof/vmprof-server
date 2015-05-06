@@ -3,10 +3,21 @@
 
     <h1>Please sign in</h1>
 
-    <input class="form-control" type="email" ng-model="user.email" placeholder="email" autofocus>
-    <input class="form-control" type="password" ng-model="user.password" placeholder="password" >
+    <div ng-show="error" class="alert alert-danger" role="alert">
+        Username and password do not match
+    </div>
 
-    <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+    <div class="form-group" ng-class="{'has-error': error}">
+        <input class="form-control" type="text" ng-model="user.username" placeholder="email" autofocus />
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': error}">
+        <input class="form-control" type="password" ng-model="user.password" placeholder="password" />
+    </div>
+
+    <button class="btn btn-primary btn-block" type="submit" ng-disabled="!user.username || !user.password">
+        Sign in
+    </button>
 
     <hr/>
     <p class="text-center">
