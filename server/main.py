@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import hashlib
 import json
+import urllib
+import hashlib
 
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
@@ -77,9 +78,21 @@ email_max = auth.models.User._meta.get_field('email').max_length
 
 
 class UserSerializer(serializers.ModelSerializer):
+    gravatar = serializers.SerializerMethodField()
+
     class Meta:
         model = auth.models.User
-        fields = ['id', 'username']
+        fields = ['id', 'username', 'gravatar']
+
+    def get_gravatar(self, obj):
+        default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
+        size = 40
+
+        gravatar_hash = hashlib.md5(obj.email.lower()).hexdigest()
+        gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
+        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+
+        return gravatar_url
 
 
 class UserRegisterSerializer(serializers.Serializer):

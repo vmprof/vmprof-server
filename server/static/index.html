@@ -41,7 +41,8 @@
 
                     <li ng-show="user" class="dropdown">
                         <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                            {{ user.username }} <span class="caret"></span>
+                            <img ng-src="{{ user.gravatar }}" alt="{{ user.username }}" />
+                            <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu" role="menu">
                             <li><a href="#/logout">Logout</a></li>
