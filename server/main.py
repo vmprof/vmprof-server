@@ -11,6 +11,7 @@ from rest_framework import views
 from rest_framework import routers
 from rest_framework import status
 from rest_framework import permissions
+from rest_framework import validators
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 
@@ -82,10 +83,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(min_length=6, max_length=username_max)
+    username = serializers.CharField(
+        min_length=6,
+        max_length=username_max,
+        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
+    )
+    email = serializers.EmailField(
+        max_length=email_max,
+        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
+    )
     password = serializers.CharField(min_length=6, max_length=password_max)
-
-    email = serializers.EmailField(max_length=email_max)
 
 
 class UserPermission(permissions.BasePermission):

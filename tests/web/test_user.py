@@ -8,6 +8,7 @@ from django.contrib import auth
 from server.main import UserRegisterSerializer
 
 
+@pytest.mark.django_db
 def test_user_register_serializer():
 
     data = {
@@ -20,6 +21,7 @@ def test_user_register_serializer():
     assert serializer.is_valid()
 
 
+@pytest.mark.django_db
 def test_user_register_serializer_errors():
 
     data = {
@@ -78,7 +80,7 @@ def test_user_login(client):
 
 
 @pytest.mark.django_db
-def test_user_register(client):
+def test_user_register_1(client):
 
     data = {
         'username': 'testuser',
@@ -89,6 +91,32 @@ def test_user_register(client):
     response = client.put('/api/user/', json.dumps(data), content_type='application/json')
     assert response.status_code == status.HTTP_201_CREATED
     assert not response.data
+
+
+@pytest.mark.django_db
+def test_user_register_2(client):
+
+    username = 'username'
+    password = 'thepassword'
+    email = 'username@vmprof.com'
+
+    auth.models.User.objects.create_user(
+        username,
+        email,
+        password
+    )
+
+    data = {
+        'username': username,
+        'password': password,
+        'email': email
+    }
+
+    response = client.put('/api/user/', json.dumps(data), content_type='application/json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert len(response.data['username']) > 0
+    assert len(response.data['email']) > 0
+    assert auth.models.User.objects.count() == 1
 
 
 @pytest.mark.django_db
