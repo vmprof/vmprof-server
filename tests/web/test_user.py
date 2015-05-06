@@ -89,3 +89,27 @@ def test_user_register(client):
     response = client.put('/api/user/', json.dumps(data), content_type='application/json')
     assert response.status_code == status.HTTP_201_CREATED
     assert not response.data
+
+
+@pytest.mark.django_db
+def test_user_logout(client):
+
+    username = 'username'
+    password = 'thepassword'
+
+    auth.models.User.objects.create_user(
+        username,
+        'username@vmprof.com',
+        password
+    )
+
+    data = {
+        'username': username,
+        'password': password
+    }
+
+    client.login(username=username, password=password)
+
+    assert client.post('/api/user/', data).status_code == status.HTTP_202_ACCEPTED
+    assert client.delete('/api/user/')
+    assert client.get('/api/user/').status_code == status.HTTP_403_FORBIDDEN

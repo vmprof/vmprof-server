@@ -93,9 +93,10 @@ class UserPermission(permissions.BasePermission):
             return True
         if request.method == "PUT":
             return True
+        if request.method == "DELETE":
+            return request.user.is_authenticated()
         if request.method == "GET":
             return request.user.is_authenticated()
-
         return False
 
 
@@ -114,7 +115,7 @@ class MeView(views.APIView):
 
         if user is not None and user.is_active:
             auth.login(request, user)
-            return Response(status=status.HTTP_202_ACCEPTED)
+            return Response(UserSerializer(user).data, status=status.HTTP_202_ACCEPTED)
 
         return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -132,11 +133,16 @@ class MeView(views.APIView):
 
         return Response(status=status.HTTP_201_CREATED)
 
+    def delete(self, request, format=None):
+        auth.logout(request)
+        return Response(status=status.HTTP_200_OK)
+
 
 router = routers.DefaultRouter()
 router.register(r'log', LogViewSet)
 
 urlpatterns = [
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(router.urls)),
     url(r'^api/user/', MeView.as_view()),
     url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
