@@ -1,6 +1,8 @@
-var app = angular.module('vmprof', ['ngRoute']);
+var app = angular.module(
+	'vmprof', ['ngRoute', 'ngCookies'], function($routeProvider, $httpProvider) {
 
-app.config(['$routeProvider', function($routeProvider) {
+	$httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 
     $routeProvider
         .when('/', {
@@ -11,6 +13,15 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: '/static/login.html',
             controller: 'login'
         })
+		.when('/logout', {
+			resolve: {
+				redirect: function($location, AuthService){
+					AuthService.logout().then(function() {
+						$location.path('/');
+					});
+				}
+			}
+		})
 		.when('/register', {
             templateUrl: '/static/register.html',
             controller: 'register'
@@ -22,21 +33,63 @@ app.config(['$routeProvider', function($routeProvider) {
         .otherwise({
             redirectTo: '/'
         });
-}]);
 
+}).factory('AuthService', function ($http, $cookies) {
+	var authService = {};
 
-app.controller('login', function ($scope, $http) {
+	authService.login = function (credentials) {
+		var d = $http.post('/api/user/', credentials);
+
+		d.then(function (res) {
+			$cookies.user = JSON.stringify(res.data);
+			return res.data;
+		});
+
+		return d;
+	};
+
+	authService.logout = function() {
+		return $http.delete('/api/user/').then(function () {
+			delete $cookies.user;
+		});
+	};
+
+	authService.isAuthenticated = function () {
+		return !!Session.userId;
+	};
+
+	return authService;
+
+});
+
+app.controller('main', function ($scope, $cookies) {
+	$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
+
+	$scope.$watch(function() { return $cookies.user; }, function(newValue) {
+		$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
+    });
+
+	$scope.setUser = function (user) {
+		$scope.user = user;
+	};
+});
+
+app.controller('login', function ($scope, $http, $location, AuthService) {
+
 	$scope.user = {
 		username: "",
 		password: ""
 	};
 
 	$scope.submit = function() {
-		$http.post('/api/user/', $scope.user).then(function(response) {
-			debugger
-		});
+		aaa = AuthService.login($scope.user)
+			.success(function(data, status, headers, config) {
+				$location.path('/');
+			})
+			.error(function(data, status, headers, config) {
+				$scope.error = true;
+			});
 	}
-
 });
 
 app.controller('register', function ($scope, $http) {

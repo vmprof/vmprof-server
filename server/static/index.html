@@ -14,6 +14,7 @@
         <script src="/static/libs/bootstrap/js/bootstrap.min.js"></script>
         <script src="/static/libs/angular.min.js"></script>
         <script src="/static/libs/angular-resource.min.js"></script>
+        <script src="/static/libs/angular-cookies.min.js"></script>
         <script src="/static/libs/angular-route.min.js"></script>
         <script src="/static/libs/raphael-min.js"></script>
         <script src="/static/libs/treemap/treemap-squarify.js"></script>
@@ -25,7 +26,7 @@
 
     </head>
 
-    <body>
+    <body ng-controller="main">
 
         <nav class="navbar navbar-default" role="navigation">
 
@@ -35,16 +36,15 @@
                 </div>
                 <ul class="nav navbar-nav navbar-right">
 
-                    <li><a href="#/login">Login</a></li>
+                    <li ng-hide="user"><a href="#/login">Login</a></li>
+                    <li ng-hide="user"><a href="#/register">Register</a></li>
 
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <li ng-show="user" class="dropdown">
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                            {{ user.username }} <span class="caret"></span>
+                        </a>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="#">Action</a></li>
-                            <li><a href="#">Another action</a></li>
-                            <li><a href="#">Something else here</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#">Separated link</a></li>
+                            <li><a href="#/logout">Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -53,10 +53,9 @@
         </nav>
 
         <div class="container">
-
             <div ng-view></div>
-
         </div>
+
     </body>
 
 </html>
