@@ -1,17 +1,65 @@
 
-<form id="register" class="center-block" ng-submit="submit()">
+<form id="register" class="center-block form-horizontal" ng-submit="submit()">
 
     <h1>Create Account</h1>
 
-    <input ng-model="user.username" type="text" class="form-control" placeholder="username" autofocus>
+    <div class="form-group" ng-class="{'has-error': error.username}">
 
-    <input ng-model="user.email" type="email" class="form-control" placeholder="email">
-    <input ng-model="confirm.email" type="email" class="form-control" placeholder="confirm email">
+        <label class="col-sm-4 control-label">username</label>
+        <div class="col-sm-4">
+            <input ng-model="user.username" type="text" class="form-control" placeholder="username" autofocus>
+        </div>
+        <p class="col-sm-4 help-block text-left">{{ error.username[0] }}</p>
 
-    <input ng-model="user.password" type="password" class="form-control" placeholder="password">
-    <input ng-model="confirm.password" type="password" class="form-control" placeholder="confirm password">
+    </div>
 
-    <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+    <hr/>
+
+    <div class="form-group" ng-class="{'has-error': error.email}">
+
+        <label class="col-sm-4 control-label">email</label>
+        <div class="col-sm-4">
+            <input ng-model="user.email" type="text" class="form-control">
+        </div>
+        <p class="col-sm-4 help-block text-left">{{ error.email[0] }}</p>
+    </div>
+
+
+    <div class="form-group" ng-class="{'has-error': repeatedError.email}">
+
+        <label class="col-sm-4 control-label">repeat email</label>
+        <div class="col-sm-4">
+            <input ng-model="repeated.email" class="form-control">
+        </div>
+        <p class="col-sm-4 help-block text-left">{{ repeatedError.email }}</p>
+
+    </div>
+
+    <hr/>
+
+    <div class="form-group" ng-class="{'has-error': error.password}">
+        <label class="col-sm-4 control-label">password</label>
+        <div class="col-sm-4">
+            <input ng-model="user.password" type="password" class="form-control">
+        </div>
+        <p class="col-sm-4 help-block text-left">{{ error.password[0] }}</p>
+    </div>
+
+
+    <div class="form-group" ng-class="{'has-error': repeatedError.password}">
+        <label class="col-sm-4 control-label">repeat password</label>
+        <div class="col-sm-4">
+            <input ng-model="repeated.password" type="password" class="form-control">
+        </div>
+        <p class="col-sm-4 help-block text-left">{{ repeatedError.password }}</p>
+    </div>
+
+    <hr/>
+
+    <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-4">
+            <button class="btn btn-primary btn-block" type="submit" ng-disabled="!ready">Sign in</button>
+        </div>
+    </div>
 
 </form>
-

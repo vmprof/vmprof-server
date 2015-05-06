@@ -82,7 +82,7 @@ app.controller('login', function ($scope, $http, $location, AuthService) {
 	};
 
 	$scope.submit = function() {
-		aaa = AuthService.login($scope.user)
+		AuthService.login($scope.user)
 			.success(function(data, status, headers, config) {
 				$location.path('/');
 			})
@@ -92,7 +92,8 @@ app.controller('login', function ($scope, $http, $location, AuthService) {
 	}
 });
 
-app.controller('register', function ($scope, $http) {
+app.controller('register', function ($scope, $http, $location, AuthService) {
+	$scope.ready = false;
 
 	$scope.user = {
 		username: "",
@@ -100,14 +101,60 @@ app.controller('register', function ($scope, $http) {
 		email: ""
 	};
 
+	$scope.repeated = {
+		email: "",
+		password: ""
+	}
+
+	$scope.repeatedError = {
+		email: "",
+		password: ""
+	}
+
+	$scope.$watch(function() {return [$scope.user, $scope.repeated]}, function(items) {
+
+		var user = items[0];
+		var repeated = items[1];
+
+		var emailValid = false;
+		var passwordValid = false;
+
+		if (user.email !== repeated.email) {
+			$scope.repeatedError.email = "Repeated email does not match";
+		} else {
+			$scope.repeatedError.email = "";
+			emailValid = true;
+		}
+
+		if (user.password !== repeated.password) {
+			$scope.repeatedError.password = "Repeated password does not match";
+		} else {
+			$scope.repeatedError.password = "";
+			passwordValid = true;
+		}
+
+		if (user.username.length > 0 && user.password.length > 0 && user.email.length > 0 &&
+			emailValid && passwordValid) {
+			$scope.ready = true;
+		} else {
+			$scope.ready = false;
+		}
+
+	}, true);
+
 	$scope.submit = function() {
-		$http.put('/api/user/', $scope.user).then(function(response) {
-			debugger
-		});
+		$http.put('/api/user/', $scope.user)
+			.success(function(response) {
+				AuthService.login($scope.user).then(function() {
+					$location.path('/');
+				});
+			})
+			.error(function(error) {
+				$scope.error = error;
+			});
 	}
 
 });
-
 
 
 app.controller('list', function ($scope, $http) {

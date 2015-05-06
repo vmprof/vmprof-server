@@ -84,7 +84,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserRegisterSerializer(serializers.Serializer):
     username = serializers.CharField(
-        min_length=6,
+        min_length=5,
         max_length=username_max,
         validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
     )
