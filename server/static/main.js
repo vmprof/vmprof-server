@@ -62,6 +62,12 @@ var app = angular.module(
 
 });
 
+app.filter('ago', function() {
+	return function(input) {
+		return moment(input, 'YYYY-MM-DD HH:mm:ss').fromNow();
+	};
+});
+
 app.controller('main', function ($scope, $cookies) {
 	$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
 

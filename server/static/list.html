@@ -1,21 +1,25 @@
-<img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
+<div id="list">
 
-<div ng-show="!loading" class="list-group">
+    <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
 
-    <div class="media" ng-repeat="log in logs">
-        <div class="media-left">
-            <a href="#">
-                <img class="media-object" ng-if="log.user" ng-src="{{ log.user.gravatar }}" style="width: 42px; height: 42px;">
-            </a>
+    <div ng-show="!loading" class="list-group" ng-init="ago=true">
+
+        <div class="media" ng-repeat="log in logs">
+            <div class="media-left">
+                <img class="media-object" ng-if="log.user" ng-src="{{ log.user.gravatar }}">
+            </div>
+            <div class="media-body">
+                <h4 class="media-heading" id="media-heading">
+                    {{ log.user.username }} / <a ng-href="#{{ log.checksum }}"> {{ log.data.argv }}</a>
+                </h4>
+
+                <div class="times" >
+                    <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
+                    <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
+                </div>
+            </div>
         </div>
-        <div class="media-body">
-            <h4 class="media-heading" id="media-heading">
-                {{ log.user.username }} / <a ng-href="#{{ log.checksum }}"> {{ log.data.argv }}</a>
 
-                </a>
-            </h4>
-            {{ log.created }}
-        </div>
     </div>
 
 </div>
