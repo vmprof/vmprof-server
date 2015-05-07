@@ -2,6 +2,7 @@ import hashlib
 
 from django.db import models
 from django.conf import settings
+from django.contrib import admin
 
 
 class Log(models.Model):
@@ -22,3 +23,8 @@ class Log(models.Model):
             self.checksum = hashlib.md5(data).hexdigest()
 
         return super(Log, self).save(*args, **kwargs)
+
+
+@admin.register(Log)
+class LogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'created', 'secret', 'data')
