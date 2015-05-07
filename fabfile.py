@@ -22,8 +22,9 @@ def deploy():
 
     with cd(PATH):
 
-        if files.exists("uwsgi.pid"):
-            run("%s --stop uwsgi.pid" % ENV_UWSGI)
+        with warn_only():
+            if files.exists("uwsgi.pid"):
+                run("%s --stop uwsgi.pid" % ENV_UWSGI)
 
         run("rm vmprof -rf ")
         run("mkdir vmprof")
