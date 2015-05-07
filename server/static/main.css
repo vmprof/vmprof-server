@@ -8,6 +8,7 @@ nav .navbar-right a.dropdown-toggle {
 }
 
 #list .media {
+	margin-top: 0;
 	border-bottom: 1px solid #eee;
 	padding: 10px 0 10px 10px;
 }
