@@ -31,6 +31,10 @@ nav .navbar-right a.dropdown-toggle {
 	max-width: 500px;
 }
 
+#login .logo, #register .logo {
+	width: 150px
+}
+
 #login h1 {
 	text-align: center;
 	margin-bottom: 20px;
