@@ -15,7 +15,7 @@ from rest_framework import permissions
 from rest_framework import validators
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
-
+from rest_framework.authtoken.models import Token
 
 from .models import Log
 
@@ -161,8 +161,32 @@ class MeView(views.APIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class TokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Token
+
+
+class TokenViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = TokenSerializer
+    model = Token
+
+    def get_queryset(self):
+        return Token.objects.filter(user=self.request.user)
+
+    def create(self, request):
+        Token.objects.filter(user=self.request.user).delete()
+        Token.objects.create(user=self.request.user)
+        return Response(status=status.HTTP_201_CREATED)
+
+    def list(self, request):
+        serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(serializer.data)
+
+
 router = routers.DefaultRouter()
 router.register(r'log', LogViewSet)
+router.register(r'token', TokenViewSet, base_name="token")
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
