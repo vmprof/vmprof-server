@@ -20,6 +20,42 @@ from rest_framework import viewsets, serializers
 from .models import Log
 
 
+username_max = auth.models.User._meta.get_field('username').max_length
+password_max = auth.models.User._meta.get_field('password').max_length
+email_max = auth.models.User._meta.get_field('email').max_length
+
+
+class UserSerializer(serializers.ModelSerializer):
+    gravatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = auth.models.User
+        fields = ['id', 'username', 'gravatar']
+
+    def get_gravatar(self, obj):
+        default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
+        size = 40
+
+        gravatar_hash = hashlib.md5(obj.email.lower()).hexdigest()
+        gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
+        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+
+        return gravatar_url
+
+
+class UserRegisterSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        min_length=5,
+        max_length=username_max,
+        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
+    )
+    email = serializers.EmailField(
+        max_length=email_max,
+        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
+    )
+    password = serializers.CharField(min_length=6, max_length=password_max)
+
+
 class LogSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
 
@@ -32,23 +68,10 @@ class LogSerializer(serializers.ModelSerializer):
 
 class LogListSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
-    user_gravatar = serializers.SerializerMethodField()
+    user = UserSerializer()
 
     class Meta:
         model = Log
-
-    def get_user_gravatar(self, obj):
-        if not obj.user:
-            return ""
-
-        default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
-        size = 40
-
-        gravatar_hash = hashlib.md5(obj.user.email.lower()).hexdigest()
-        gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
-        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
-
-        return gravatar_url
 
     def get_data(self, obj):
         j = json.loads(obj.data)
@@ -85,42 +108,6 @@ class LogViewSet(viewsets.ModelViewSet):
             ).data)
         except Log.DoesNotExist:
             return Response(status=404)
-
-
-username_max = auth.models.User._meta.get_field('username').max_length
-password_max = auth.models.User._meta.get_field('password').max_length
-email_max = auth.models.User._meta.get_field('email').max_length
-
-
-class UserSerializer(serializers.ModelSerializer):
-    gravatar = serializers.SerializerMethodField()
-
-    class Meta:
-        model = auth.models.User
-        fields = ['id', 'username', 'gravatar']
-
-    def get_gravatar(self, obj):
-        default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
-        size = 40
-
-        gravatar_hash = hashlib.md5(obj.email.lower()).hexdigest()
-        gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
-        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
-
-        return gravatar_url
-
-
-class UserRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(
-        min_length=5,
-        max_length=username_max,
-        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
-    )
-    email = serializers.EmailField(
-        max_length=email_max,
-        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
-    )
-    password = serializers.CharField(min_length=6, max_length=password_max)
 
 
 class UserPermission(permissions.BasePermission):

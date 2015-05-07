@@ -5,14 +5,13 @@
     <div class="media" ng-repeat="log in logs">
         <div class="media-left">
             <a href="#">
-                <img class="media-object" ng-if="log.user_gravatar" ng-src="{{ log.user_gravatar }}" style="width: 42px; height: 42px;">
-                <img class="media-object" ng-if="!log.user_gravatar" src="/static/images/logo_150.png" style="width: 42px; height: 42px;">
+                <img class="media-object" ng-if="log.user" ng-src="{{ log.user.gravatar }}" style="width: 42px; height: 42px;">
             </a>
         </div>
         <div class="media-body">
             <h4 class="media-heading" id="media-heading">
-                <a ng-href="#{{ log.checksum }}">
-                    {{ log.data.argv }}
+                {{ log.user.username }} / <a ng-href="#{{ log.checksum }}"> {{ log.data.argv }}</a>
+
                 </a>
             </h4>
             {{ log.created }}
