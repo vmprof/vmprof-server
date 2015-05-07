@@ -167,7 +167,6 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class TokenViewSet(viewsets.ModelViewSet):
-    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TokenSerializer
     model = Token
 
