@@ -47,3 +47,21 @@ def test_token_create(client):
     assert Token.objects.filter(user=user).count() == 1
     assert client.post('/api/token/').status_code == status.HTTP_201_CREATED
     assert Token.objects.filter(user=user).count() == 1
+
+
+@pytest.mark.django_db
+def test_token_use(client):
+
+    username = 'username'
+    password = 'thepassword'
+
+    user = auth.models.User.objects.create_user(
+        username,
+        'username@vmprof.com',
+        password
+    )
+
+    token = Token.objects.create(user=user)
+
+    response = client.get('/api/token/', **{'HTTP_AUTHORIZATION': "Token %s" % token.key})
+    assert response.status_code == status.HTTP_200_OK
