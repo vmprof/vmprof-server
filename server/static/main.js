@@ -64,7 +64,7 @@ var app = angular.module(
 
 app.filter('ago', function() {
 	return function(input) {
-		return moment(input, 'YYYY-MM-DD HH:mm:ss').fromNow();
+		return moment.utc(input, 'YYYY-MM-DD HH:mm:ss').fromNow();
 	};
 });
 
@@ -163,16 +163,33 @@ app.controller('register', function ($scope, $http, $location, AuthService) {
 });
 
 
-app.controller('list', function ($scope, $http) {
+app.controller('list', function ($scope, $http, $interval) {
     angular.element('svg').remove();
 
     $scope.loading = true;
 
     $http.get('/api/log/').then(function(response) {
         $scope.logs = response.data;
-
         $scope.loading = false;
     });
+
+	$interval(function() {
+		$http.get('/api/log/').then(function(response) {
+			$scope.logs = response.data;
+		});
+	}, 11000);
+
+	$scope.background = function(time) {
+		var seconds = moment.utc().diff(moment.utc(time, 'YYYY-MM-DD HH:mm:ss'), 'seconds');
+
+		if (seconds > 500) {
+			return {}
+		}
+		var color = Math.floor(205 + (seconds / 10));
+
+		return {background: "rgb(255,255,"+ color +")"}
+	}
+
 });
 
 app.controller('details', function ($scope, $http, $routeParams, $timeout,

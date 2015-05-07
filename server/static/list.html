@@ -4,7 +4,7 @@
 
     <div ng-show="!loading" class="list-group" ng-init="ago=true">
 
-        <div class="media" ng-repeat="log in logs">
+        <div class="media" ng-repeat="log in logs" ng-style="background(log.created)">
             <div class="media-left">
                 <img class="media-object" ng-if="log.user" ng-src="{{ log.user.gravatar }}">
             </div>
