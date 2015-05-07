@@ -12,10 +12,9 @@ def asssing_default_user(apps, schema_editor):
     if User.objects.count() > 0:
         user = User.objects.all()[0]
     else:
-        user = User.objects.create_user(
-            "anonymous",
-            "anonymous@email.com",
-            "thepassword"
+        user = User.objects.create(
+            username="anonymous",
+            email="anonymous@email.com",
         )
 
     Log.objects.filter(user__isnull=True).update(user=user)
