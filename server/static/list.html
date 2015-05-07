@@ -1,8 +1,22 @@
 <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
 
 <div ng-show="!loading" class="list-group">
-	<a ng-href="#{{ log.checksum }}" class="list-group-item" ng-repeat="log in logs">
-		<div class="pull-right">{{ log.created }}</div>
-		{{ log.data.argv }}
-	</a>
+
+    <div class="media" ng-repeat="log in logs">
+        <div class="media-left">
+            <a href="#">
+                <img class="media-object" ng-if="log.user_gravatar" ng-src="{{ log.user_gravatar }}" style="width: 42px; height: 42px;">
+                <img class="media-object" ng-if="!log.user_gravatar" src="/static/images/logo_150.png" style="width: 42px; height: 42px;">
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading" id="media-heading">
+                <a ng-href="#{{ log.checksum }}">
+                    {{ log.data.argv }}
+                </a>
+            </h4>
+            {{ log.created }}
+        </div>
+    </div>
+
 </div>

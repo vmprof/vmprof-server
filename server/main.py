@@ -32,18 +32,33 @@ class LogSerializer(serializers.ModelSerializer):
 
 class LogListSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
+    user_gravatar = serializers.SerializerMethodField()
 
     class Meta:
         model = Log
 
+    def get_user_gravatar(self, obj):
+        if not obj.user:
+            return ""
+
+        default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
+        size = 40
+
+        gravatar_hash = hashlib.md5(obj.user.email.lower()).hexdigest()
+        gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
+        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+
+        return gravatar_url
+
     def get_data(self, obj):
         j = json.loads(obj.data)
-        del j['profiles']
+        if 'profiles' in j:
+            del j['profiles']
         return j
 
 
 class LogViewSet(viewsets.ModelViewSet):
-    queryset = Log.objects.all()
+    queryset = Log.objects.select_related('user')
     serializer_class = LogSerializer
     list_serializer_class = LogListSerializer
     permission_classes = (permissions.AllowAny,)
