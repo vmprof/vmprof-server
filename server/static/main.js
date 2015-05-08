@@ -26,6 +26,10 @@ var app = angular.module(
             templateUrl: '/static/register.html',
             controller: 'register'
         })
+		.when('/profile', {
+			templateUrl: '/static/profile.html',
+            controller: 'profile'
+		})
         .when('/:log', {
             templateUrl: '/static/details.html',
             controller: 'details'
@@ -79,6 +83,27 @@ app.controller('main', function ($scope, $cookies) {
 		$scope.user = user;
 	};
 });
+
+app.controller('profile', function ($scope, $http) {
+
+	function getToken() {
+		$http.get('/api/token/').then(function(response) {
+			if (response.data.length) {
+				$scope.token = response.data[0];
+			}
+		})
+	}
+
+	getToken();
+
+	$scope.generate = function() {
+		$http.post('/api/token/').then(function(response) {
+			getToken();
+		});
+	};
+
+});
+
 
 app.controller('login', function ($scope, $http, $location, AuthService) {
 
