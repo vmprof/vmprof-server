@@ -89,9 +89,11 @@ class LogViewSet(viewsets.ModelViewSet):
     def create(self, request):
         data = json.dumps(request.data)
         checksum = hashlib.md5(data).hexdigest()
+        user = request.user if request.user.is_authenticated() else None
         log, _ = self.queryset.get_or_create(
             data=data,
-            checksum=checksum
+            checksum=checksum,
+            user=user
         )
 
         return Response(log.checksum)

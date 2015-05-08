@@ -22,6 +22,11 @@ nav .navbar-right a.dropdown-toggle {
 	cursor: pointer;
 }
 
+#list .media .media-body {
+	padding-left: 2px;
+}
+
+
 #register {
 	padding: 40px;
 	max-width: 800px;

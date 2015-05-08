@@ -6,11 +6,17 @@
 
         <div class="media" ng-repeat="log in logs" ng-style="background(log.created)">
             <div class="media-left">
-                <img class="media-object" ng-if="log.user" ng-src="{{ log.user.gravatar }}">
+
+                <img class="media-object" ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
+
             </div>
             <div class="media-body">
                 <h4 class="media-heading" id="media-heading">
-                    {{ log.user.username }} / <a ng-href="#{{ log.checksum }}"> {{ log.data.argv }}</a>
+
+                    <span ng-if="log.user">{{ log.user.username }}</span>
+                    <span ng-if="!log.user"><i style="color: #888">anonymus</i></span>
+
+                    / <a ng-href="#{{ log.checksum }}"> {{ log.data.argv }}</a>
                 </h4>
 
                 <div class="times" >
