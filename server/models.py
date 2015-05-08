@@ -7,7 +7,6 @@ from django.contrib import admin
 
 class Log(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
-    secret = models.BooleanField(default=False)
 
     checksum = models.CharField(max_length=32, primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -27,4 +26,4 @@ class Log(models.Model):
 
 @admin.register(Log)
 class LogAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created', 'secret', 'data')
+    list_display = ('user', 'created', 'data')
