@@ -2,7 +2,7 @@
 
     <div class="row display-control" ng-show="user">
         <div class="col-md-2 col-md-offset-10">
-            <select class="form-control input-sm" ng-model="fetchAll" ng-change="getLogs()" ng-disabled="loading">
+            <select class="form-control input-sm" ng-model="fetchAll" ng-change="getLogs(true)" ng-disabled="loading">
                 <option selected value="">Display: Mine</option>
                 <option value="True">Display: All</option>
             </select>

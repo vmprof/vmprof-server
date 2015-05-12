@@ -205,18 +205,20 @@ app.controller('list', function ($scope, $http, $interval) {
 
 	$scope.fetchAll = "";
 
-	$scope.getLogs = function(all) {
-		$scope.loading = true;
+	$scope.getLogs = function(showLoading) {
+		if(showLoading) {
+			$scope.loading = true;
+		}
 		$http.get('/api/log/', {params: {all:$scope.fetchAll}}).then(function(response) {
 			$scope.logs = response.data;
 			$scope.loading = false;
 		});
 	}
 
-	$scope.getLogs();
+	$scope.getLogs(true);
 
 	$interval(function() {
-		$scope.getLogs();
+		$scope.getLogs(false);
 	}, 11000);
 
 	$scope.background = function(time) {
