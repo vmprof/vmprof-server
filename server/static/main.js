@@ -86,10 +86,12 @@ app.controller('main', function ($scope, $cookies, $interval, $location, $http, 
 	};
 
 	$interval(function() {
-		$http.get('/api/user/').error(function(response) {
-			delete $cookies.user;
-			$location.path('/');
-		});
+		if(!angular.isUndefined($cookies.user)) {
+			$http.get('/api/user/').error(function(response) {
+				delete $cookies.user;
+				$location.path('/');
+			});
+		}
 	}, 11000);
 
 });
