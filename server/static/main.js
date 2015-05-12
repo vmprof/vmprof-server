@@ -77,6 +77,10 @@ app.filter('ago', function() {
 app.controller('main', function ($scope, $cookies, $interval, $location, $http, AuthService) {
 	$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
 
+	if ($scope.user == null) {
+		AuthService.logout();
+	}
+
 	$scope.$watch(function() { return $cookies.user; }, function(newValue) {
 		$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
     });
