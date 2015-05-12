@@ -1,8 +1,5 @@
 var app = angular.module(
-	'vmprof', ['ngRoute', 'ngCookies'], function($routeProvider, $httpProvider) {
-
-	$httpProvider.defaults.xsrfCookieName = 'csrftoken';
-    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+	'vmprof', ['ngRoute', 'ngCookies'], function($routeProvider) {
 
     $routeProvider
         .when('/', {
@@ -65,6 +62,11 @@ var app = angular.module(
 	return authService;
 
 });
+
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+}]);
 
 app.filter('ago', function() {
 	return function(input) {
