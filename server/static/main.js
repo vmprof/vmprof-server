@@ -203,17 +203,20 @@ app.controller('register', function ($scope, $http, $location, AuthService) {
 app.controller('list', function ($scope, $http, $interval) {
     angular.element('svg').remove();
 
-    $scope.loading = true;
+	$scope.fetchAll = "";
 
-    $http.get('/api/log/').then(function(response) {
-        $scope.logs = response.data;
-        $scope.loading = false;
-    });
+	$scope.getLogs = function(all) {
+		$scope.loading = true;
+		$http.get('/api/log/', {params: {all:$scope.fetchAll}}).then(function(response) {
+			$scope.logs = response.data;
+			$scope.loading = false;
+		});
+	}
+
+	$scope.getLogs();
 
 	$interval(function() {
-		$http.get('/api/log/').then(function(response) {
-			$scope.logs = response.data;
-		});
+		$scope.getLogs();
 	}, 11000);
 
 	$scope.background = function(time) {

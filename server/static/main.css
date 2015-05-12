@@ -2,6 +2,10 @@ nav .navbar-right a.dropdown-toggle {
 	padding: 2px 6px 2px 4px;
 }
 
+#list .display-control{
+	margin-bottom: 15px;
+}
+
 #list img.media-object{
 	width: 42px;
 	height: 42px;

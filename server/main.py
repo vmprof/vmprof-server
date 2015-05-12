@@ -98,8 +98,16 @@ class LogViewSet(viewsets.ModelViewSet):
 
         return Response(log.checksum)
 
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return self.queryset
+
+        if not bool(self.request.GET.get('all', False)):
+            return self.queryset.filter(user=self.request.user)
+        return self.queryset
+
     def list(self, request):
-        serializer = self.list_serializer_class(self.queryset, many=True)
+        serializer = self.list_serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
