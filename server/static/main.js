@@ -74,7 +74,7 @@ app.filter('ago', function() {
 	};
 });
 
-app.controller('main', function ($scope, $cookies) {
+app.controller('main', function ($scope, $cookies, $interval, $location, $http, AuthService) {
 	$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
 
 	$scope.$watch(function() { return $cookies.user; }, function(newValue) {
@@ -84,6 +84,14 @@ app.controller('main', function ($scope, $cookies) {
 	$scope.setUser = function (user) {
 		$scope.user = user;
 	};
+
+	$interval(function() {
+		$http.get('/api/user/').error(function(response) {
+			delete $cookies.user;
+			$location.path('/');
+		});
+	}, 11000);
+
 });
 
 app.controller('profile', function ($scope, $http) {
