@@ -1,67 +1,67 @@
 var app = angular.module(
-	'vmprof', ['ngRoute', 'ngCookies'], function($routeProvider) {
+    'vmprof', ['ngRoute', 'ngCookies'], function($routeProvider) {
 
-    $routeProvider
-        .when('/', {
-            templateUrl: '/static/list.html',
-            controller: 'list'
-        })
-	    .when('/login', {
-            templateUrl: '/static/login.html',
-            controller: 'login'
-        })
-		.when('/logout', {
-			resolve: {
-				redirect: function($location, AuthService){
-					AuthService.logout().then(function() {
-						$location.path('/');
-					});
-				}
-			}
-		})
-		.when('/register', {
-            templateUrl: '/static/register.html',
-            controller: 'register'
-        })
-		.when('/profile', {
-			templateUrl: '/static/profile.html',
-            controller: 'profile'
-		})
-        .when('/:log', {
-            templateUrl: '/static/details.html',
-            controller: 'details'
-        })
-        .otherwise({
-            redirectTo: '/'
-        });
+        $routeProvider
+            .when('/', {
+                templateUrl: '/static/list.html',
+                controller: 'list'
+            })
+            .when('/login', {
+                templateUrl: '/static/login.html',
+                controller: 'login'
+            })
+            .when('/logout', {
+                resolve: {
+                    redirect: function($location, AuthService){
+                        AuthService.logout().then(function() {
+                            $location.path('/');
+                        });
+                    }
+                }
+            })
+            .when('/register', {
+                templateUrl: '/static/register.html',
+                controller: 'register'
+            })
+            .when('/profile', {
+                templateUrl: '/static/profile.html',
+                controller: 'profile'
+            })
+            .when('/:log', {
+                templateUrl: '/static/details.html',
+                controller: 'details'
+            })
+            .otherwise({
+                redirectTo: '/'
+            });
 
-}).factory('AuthService', function ($http, $cookies) {
-	var authService = {};
+    }).factory('AuthService', function ($http, $cookies) {
+        var authService = {};
 
-	authService.login = function (credentials) {
-		var d = $http.post('/api/user/', credentials);
+        authService.login = function (credentials) {
+            var d = $http.post('/api/user/', credentials);
 
-		d.then(function (res) {
-			$cookies.user = JSON.stringify(res.data);
-			return res.data;
-		});
+            d.then(function (res) {
+                $cookies.user = JSON.stringify(res.data);
+                return res.data;
+            });
 
-		return d;
-	};
+            return d;
+        };
 
-	authService.logout = function() {
-		return $http.delete('/api/user/').then(function () {
-			delete $cookies.user;
-		});
-	};
+        authService.logout = function() {
+            return $http.delete('/api/user/').then(function () {
+                delete $cookies.user;
+            });
+        };
 
-	authService.isAuthenticated = function () {
-		return !!Session.userId;
-	};
+        authService.isAuthenticated = function () {
+            return !!Session.userId;
+        };
 
-	return authService;
+        return authService;
 
-});
+    });
 
 app.config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';
@@ -69,137 +69,137 @@ app.config(['$httpProvider', function($httpProvider) {
 }]);
 
 app.filter('ago', function() {
-	return function(input) {
-		return moment.utc(input, 'YYYY-MM-DD HH:mm:ss').fromNow();
-	};
+    return function(input) {
+        return moment.utc(input, 'YYYY-MM-DD HH:mm:ss').fromNow();
+    };
 });
 
 app.controller('main', function ($scope, $cookies, $interval, $location, $http, AuthService) {
-	$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
+    $scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
 
-	if ($scope.user == null) {
-		AuthService.logout();
-	}
+    if ($scope.user == null) {
+        AuthService.logout();
+    }
 
-	$scope.$watch(function() { return $cookies.user; }, function(newValue) {
-		$scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
+    $scope.$watch(function() { return $cookies.user; }, function(newValue) {
+        $scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
     });
 
-	$scope.setUser = function (user) {
-		$scope.user = user;
-	};
+    $scope.setUser = function (user) {
+        $scope.user = user;
+    };
 
-	$interval(function() {
-		if(!angular.isUndefined($cookies.user)) {
-			$http.get('/api/user/').error(function(response) {
-				delete $cookies.user;
-				$location.path('/');
-			});
-		}
-	}, 11000);
+    $interval(function() {
+        if(!angular.isUndefined($cookies.user)) {
+            $http.get('/api/user/').error(function(response) {
+                delete $cookies.user;
+                $location.path('/');
+            });
+        }
+    }, 11000);
 
 });
 
 app.controller('profile', function ($scope, $http) {
 
-	function getToken() {
-		$http.get('/api/token/').then(function(response) {
-			if (response.data.length) {
-				$scope.token = response.data[0];
-			}
-		})
-	}
+    function getToken() {
+        $http.get('/api/token/').then(function(response) {
+            if (response.data.length) {
+                $scope.token = response.data[0];
+            }
+        })
+    }
 
-	getToken();
+    getToken();
 
-	$scope.generate = function() {
-		$http.post('/api/token/').then(function(response) {
-			getToken();
-		});
-	};
+    $scope.generate = function() {
+        $http.post('/api/token/').then(function(response) {
+            getToken();
+        });
+    };
 
 });
 
 
 app.controller('login', function ($scope, $http, $location, AuthService) {
 
-	$scope.user = {
-		username: "",
-		password: ""
-	};
+    $scope.user = {
+        username: "",
+        password: ""
+    };
 
-	$scope.submit = function() {
-		AuthService.login($scope.user)
-			.success(function(data, status, headers, config) {
-				$location.path('/');
-			})
-			.error(function(data, status, headers, config) {
-				$scope.error = true;
-			});
-	}
+    $scope.submit = function() {
+        AuthService.login($scope.user)
+            .success(function(data, status, headers, config) {
+                $location.path('/');
+            })
+            .error(function(data, status, headers, config) {
+                $scope.error = true;
+            });
+    }
 });
 
 app.controller('register', function ($scope, $http, $location, AuthService) {
-	$scope.ready = false;
+    $scope.ready = false;
 
-	$scope.user = {
-		username: "",
-		password: "",
-		email: ""
-	};
+    $scope.user = {
+        username: "",
+        password: "",
+        email: ""
+    };
 
-	$scope.repeated = {
-		email: "",
-		password: ""
-	}
+    $scope.repeated = {
+        email: "",
+        password: ""
+    }
 
-	$scope.repeatedError = {
-		email: "",
-		password: ""
-	}
+    $scope.repeatedError = {
+        email: "",
+        password: ""
+    }
 
-	$scope.$watch(function() {return [$scope.user, $scope.repeated]}, function(items) {
+    $scope.$watch(function() {return [$scope.user, $scope.repeated]}, function(items) {
 
-		var user = items[0];
-		var repeated = items[1];
+        var user = items[0];
+        var repeated = items[1];
 
-		var emailValid = false;
-		var passwordValid = false;
+        var emailValid = false;
+        var passwordValid = false;
 
-		if (user.email !== repeated.email) {
-			$scope.repeatedError.email = "Repeated email does not match";
-		} else {
-			$scope.repeatedError.email = "";
-			emailValid = true;
-		}
+        if (user.email !== repeated.email) {
+            $scope.repeatedError.email = "Repeated email does not match";
+        } else {
+            $scope.repeatedError.email = "";
+            emailValid = true;
+        }
 
-		if (user.password !== repeated.password) {
-			$scope.repeatedError.password = "Repeated password does not match";
-		} else {
-			$scope.repeatedError.password = "";
-			passwordValid = true;
-		}
+        if (user.password !== repeated.password) {
+            $scope.repeatedError.password = "Repeated password does not match";
+        } else {
+            $scope.repeatedError.password = "";
+            passwordValid = true;
+        }
 
-		if (user.username.length > 0 && user.password.length > 0 && user.email.length > 0 &&
-			emailValid && passwordValid) {
-			$scope.ready = true;
-		} else {
-			$scope.ready = false;
-		}
+        if (user.username.length > 0 && user.password.length > 0 && user.email.length > 0 &&
+            emailValid && passwordValid) {
+            $scope.ready = true;
+        } else {
+            $scope.ready = false;
+        }
 
-	}, true);
+    }, true);
 
-	$scope.submit = function() {
-		$http.put('/api/user/', $scope.user)
-			.success(function(response) {
-				AuthService.login($scope.user).then(function() {
-					$location.path('/');
-				});
-			})
-			.error(function(error) {
-				$scope.error = error;
-			});
-	}
+    $scope.submit = function() {
+        $http.put('/api/user/', $scope.user)
+            .success(function(response) {
+                AuthService.login($scope.user).then(function() {
+                    $location.path('/');
+                });
+            })
+            .error(function(error) {
+                $scope.error = error;
+            });
+    }
 
 });
 
@@ -207,34 +207,34 @@ app.controller('register', function ($scope, $http, $location, AuthService) {
 app.controller('list', function ($scope, $http, $interval) {
     angular.element('svg').remove();
 
-	$scope.fetchAll = "";
+    $scope.fetchAll = "";
 
-	$scope.getLogs = function(showLoading) {
-		if(showLoading) {
-			$scope.loading = true;
-		}
-		$http.get('/api/log/', {params: {all:$scope.fetchAll}}).then(function(response) {
-			$scope.logs = response.data;
-			$scope.loading = false;
-		});
-	}
+    $scope.getLogs = function(showLoading) {
+        if(showLoading) {
+            $scope.loading = true;
+        }
+        $http.get('/api/log/', {params: {all:$scope.fetchAll}}).then(function(response) {
+            $scope.logs = response.data;
+            $scope.loading = false;
+        });
+    }
 
-	$scope.getLogs(true);
+    $scope.getLogs(true);
 
-	$interval(function() {
-		$scope.getLogs(false);
-	}, 11000);
+    $interval(function() {
+        $scope.getLogs(false);
+    }, 11000);
 
-	$scope.background = function(time) {
-		var seconds = moment.utc().diff(moment.utc(time, 'YYYY-MM-DD HH:mm:ss'), 'seconds');
+    $scope.background = function(time) {
+        var seconds = moment.utc().diff(moment.utc(time, 'YYYY-MM-DD HH:mm:ss'), 'seconds');
 
-		if (seconds > 500) {
-			return {}
-		}
-		var color = Math.floor(205 + (seconds / 10));
+        if (seconds > 500) {
+            return {}
+        }
+        var color = Math.floor(205 + (seconds / 10));
 
-		return {background: "rgb(255,255,"+ color +")"}
-	}
+        return {background: "rgb(255,255,"+ color +")"}
+    }
 
 });
 
