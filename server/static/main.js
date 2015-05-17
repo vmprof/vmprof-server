@@ -68,13 +68,34 @@ app.config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 }]);
 
+app.config(function ($httpProvider) {
+    $httpProvider.interceptors.push([
+        '$injector',
+        function ($injector) {
+            return $injector.get('AuthInterceptor');
+        }
+    ]);
+});
+
+app.factory('AuthInterceptor', function ($rootScope, $q, $location, $cookies) {
+    return {
+        responseError: function (response) {
+            if (response.status == 403) {
+                delete $cookies.user;
+                $location.path('/');
+            }
+            return $q.reject(response);
+        }
+    };
+});
+
 app.filter('ago', function() {
     return function(input) {
         return moment.utc(input, 'YYYY-MM-DD HH:mm:ss').fromNow();
     };
 });
 
-app.controller('main', function ($scope, $cookies, $interval, $location, $http, AuthService) {
+app.controller('main', function ($scope, $cookies, $location, $http, AuthService) {
     $scope.user = $cookies.user ? JSON.parse($cookies.user) : null;
 
     if ($scope.user == null) {
@@ -88,15 +109,6 @@ app.controller('main', function ($scope, $cookies, $interval, $location, $http, 
     $scope.setUser = function (user) {
         $scope.user = user;
     };
-
-    $interval(function() {
-        if(!angular.isUndefined($cookies.user)) {
-            $http.get('/api/user/').error(function(response) {
-                delete $cookies.user;
-                $location.path('/');
-            });
-        }
-    }, 11000);
 
 });
 
