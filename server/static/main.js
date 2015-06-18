@@ -80,7 +80,9 @@ app.config(function ($httpProvider) {
 app.factory('AuthInterceptor', function ($rootScope, $q, $location, $cookies) {
     return {
         responseError: function (response) {
-            if (response.status == 403) {
+            if (response.status == 403 &&
+                response.config.method != "DELETE" &&
+                response.config.url != "/api/user/") {
                 delete $cookies.user;
                 $location.path('/');
             }
@@ -255,7 +257,6 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
     angular.element('svg').remove();
 
     $scope.loading = true;
-
     $http.get('/api/log/' + $routeParams.log + '/', {
         cache: true
     }).then(function(response) {
