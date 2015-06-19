@@ -121,7 +121,7 @@ app.controller('profile', function ($scope, $http) {
             if (response.data.length) {
                 $scope.token = response.data[0];
             }
-        })
+        });
     }
 
     getToken();
@@ -150,7 +150,7 @@ app.controller('login', function ($scope, $http, $location, AuthService) {
             .error(function(data, status, headers, config) {
                 $scope.error = true;
             });
-    }
+    };
 });
 
 app.controller('register', function ($scope, $http, $location, AuthService) {
@@ -165,12 +165,12 @@ app.controller('register', function ($scope, $http, $location, AuthService) {
     $scope.repeated = {
         email: "",
         password: ""
-    }
+    };
 
     $scope.repeatedError = {
         email: "",
         password: ""
-    }
+    };
 
     $scope.$watch(function() {return [$scope.user, $scope.repeated]}, function(items) {
 
@@ -213,7 +213,7 @@ app.controller('register', function ($scope, $http, $location, AuthService) {
             .error(function(error) {
                 $scope.error = error;
             });
-    }
+    };
 
 });
 
@@ -231,7 +231,7 @@ app.controller('list', function ($scope, $http, $interval) {
             $scope.logs = response.data;
             $scope.loading = false;
         });
-    }
+    };
 
     $scope.getLogs(true);
 
@@ -243,12 +243,12 @@ app.controller('list', function ($scope, $http, $interval) {
         var seconds = moment.utc().diff(moment.utc(time, 'YYYY-MM-DD HH:mm:ss'), 'seconds');
 
         if (seconds > 500) {
-            return {}
+            return {};
         }
         var color = Math.floor(205 + (seconds / 10));
 
-        return {background: "rgb(255,255,"+ color +")"}
-    }
+        return {background: "rgb(255,255,"+ color +")"};
+    };
 
 });
 
