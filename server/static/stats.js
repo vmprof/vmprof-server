@@ -12,7 +12,6 @@ var FunctionData = function (elem) {
 
 FunctionData.prototype.update = function(node) {
     if (this.name != node.name) {
-        debugger;
     }
     this.total += node.total;
 };
