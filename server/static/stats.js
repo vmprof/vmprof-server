@@ -183,10 +183,6 @@ function split_name(name) {
 }
 
 Stats.prototype.process = function(functions, parent, total, path_so_far, paths) {
-	if(Object.keys(functions).length == 0) {
-		return []
-	}
-
 	var top = [];
 
 	for (var i in functions) {
