@@ -116,3 +116,7 @@ svg rect, svg text {
 	cursor: pointer;
 	cursor: hand;
 }
+
+.footer {
+	padding: 20px;
+}
