@@ -21,7 +21,46 @@ var Visualization = {};
 				text.remove();
 			}
 
-			var color = colors[(parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length];
+			//var color = colors[(parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length];
+
+			// compute a gradient which represents how much time we spent in
+			// each phase.
+			var phases = [{"value": node.green(),  "color": "#5cb85c"},
+						  {"value": node.yellow(), "color": "#f0ad4e"},
+						  {"value": node.red(),	   "color": "#d9534f"},
+						  {"value": node.gc(),	   "color": "#5bc0de"}
+						  ]
+
+			// At each boundary, we want a phase transition of about P pixels
+			// (just because I found it pleasant to view, but feel free to
+			// experiment :)): however, in the gradient we can only specify
+			// the percentage, not the pixels: thus, we compute which
+			// percentage of the total width corresponds to P pixels
+			var P = 15;
+			var padding = (P/width) * 100;
+
+			// suppose to have the following data:
+			//	 - green: 60%
+			//	 - yellow: 10%
+			//	 - red: 30%
+			//	 - padding: 2%
+			//
+			// we want to compute a gradient like this:
+			//	   green:60-yellow:62-yellow:70-red:72-red:100
+			// this way, the green-yellow and yellow-red transitions are done in 2% of the width
+
+			var offset = 0
+			var gradient = "0"; // this is the angle: 0 means no rotation, i.e. a horizontal gradient
+
+			for (var phase of phases) {
+				if (phase.value == 0)
+					continue;
+				gradient += "-" + phase.color + ":" + (offset*100 + padding);
+				offset += phase.value;
+				gradient += "-" + phase.color + ":" + offset*100;
+			}
+
+			var color = gradient;
 			rect.attr({fill: color});
 			st.data('color', color);
 			st.data('node', node);
@@ -34,7 +73,14 @@ var Visualization = {};
                     var rect = this.data('rect');
 					rect.attr({'fill': '#99CCFF'});
                     var name = split_name(node.name);
-                    $("#visualization-data").text("Function: " + name.funcname + " file: " + name.file + " line: " + name.line);
+                    var visdata = "Function: " + name.funcname + " file: " + name.file + " line: " + name.line;
+                    visdata += " (";
+                    visdata += "Jitted: " + (node.green()*100).toFixed(2) + "%; ";
+                    visdata += "Warmup: " + (node.yellow()*100).toFixed(2) + "%; ";
+                    visdata += "Interp: " + (node.red()*100).toFixed(2) + "%; ";
+                    visdata += "GC: " + (node.gc()*100).toFixed(2) + "%";
+                    visdata += ")";
+                    $("#visualization-data").text(visdata);
 				},
 				function(e) {
                     var rect = this.data('rect');
@@ -74,11 +120,11 @@ var Visualization = {};
 		}
 
 		$element.empty();
-		var colors = ["rgb(228, 137, 9)",
-					  "rgb(231, 227, 3)",
-					  "rgb(214, 73, 15)",
-					  "rgb(236, 164, 11)",
-					  "rgb(231, 173, 15)"];
+		// var colors = ["rgb(228, 137, 9)",
+		// 			  "rgb(231, 227, 3)",
+		// 			  "rgb(214, 73, 15)",
+		// 			  "rgb(236, 164, 11)",
+		// 			  "rgb(231, 173, 15)"];
 
 		var width = $element.width();
 		var paper = Raphael($element[0], width, height);
