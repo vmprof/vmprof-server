@@ -61,13 +61,14 @@ var Visualization = {};
 			}
 
 			var color = gradient;
+
 			rect.attr({fill: color});
 
 			// compute the opacity, so that functions with the highest "self
 			// time" are displayed darker. The fuction with the highest self
 			// time is shown with 100% opacity, the others are proportionally
 			// more transparent, with a minimum of 20% opacity.
-			var opacity = (node.self/max_self)*0.8 + 0.2;
+			var opacity = (node.self/max_self)*0.7 + 0.2;
 			jQuery(rect.node).css('opacity', opacity)
 
 			st.data('color', color);
@@ -89,13 +90,15 @@ var Visualization = {};
 				function(e) {
 					var node = this.data('node');
                     var rect = this.data('rect');
-					rect.attr({'fill': '#99CCFF'});
+					//rect.attr({'fill': '#99CCFF'});
+                    rect.attr({'stroke-width': 2});
+					jQuery(rect.node).css('opacity', 1);
                     $("#visualization-data").text(visdata);
 				},
 				function(e) {
                     var rect = this.data('rect');
 					rect.attr({'fill': this.data('color'),
-                               "title": ""});
+                               "stroke-width": 1});
 					jQuery(rect.node).css('opacity', opacity);
 				}
 			);
