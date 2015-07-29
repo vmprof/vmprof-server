@@ -143,6 +143,19 @@ Node.prototype.count_self = function () {
 	return s;
 };
 
+Node.prototype.max_self = function() {
+    var max = this.count_self();
+    for (var i in this.children) {
+        c = this.children[i];
+        var child_max_self = c.max_self();
+        if (child_max_self > max)
+            max = child_max_self;
+    }
+    return max;
+}
+
+
+
 Stats.prototype.getProfiles = function(path) {
 	var total = this.nodes.total;
 	var nodes = this.nodes;
