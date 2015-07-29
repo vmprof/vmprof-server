@@ -75,19 +75,21 @@ var Visualization = {};
             st.data('rect', rect);
             var cur_path = path.toString();
 
+            var name = split_name(node.name);
+            var visdata = ("Function: " + name.funcname + " " +
+                           "file: " + name.file + " " +
+                           "line: " + name.line);
+            var tooltip = ("Jitted: " + (node.green()*100).toFixed(2)  + "%\n" +
+                           "Warmup: " + (node.yellow()*100).toFixed(2) + "%\n" +
+                           "Interp: " + (node.red()*100).toFixed(2)    + "%\n" +
+                           "GC: " +     (node.gc()*100).toFixed(2)     + "%");
+            rect.attr({title: tooltip});
+
 			st.hover(
 				function(e) {
 					var node = this.data('node');
                     var rect = this.data('rect');
 					rect.attr({'fill': '#99CCFF'});
-                    var name = split_name(node.name);
-                    var visdata = "Function: " + name.funcname + " file: " + name.file + " line: " + name.line;
-                    visdata += " (";
-                    visdata += "Jitted: " + (node.green()*100).toFixed(2) + "%; ";
-                    visdata += "Warmup: " + (node.yellow()*100).toFixed(2) + "%; ";
-                    visdata += "Interp: " + (node.red()*100).toFixed(2) + "%; ";
-                    visdata += "GC: " + (node.gc()*100).toFixed(2) + "%";
-                    visdata += ")";
                     $("#visualization-data").text(visdata);
 				},
 				function(e) {
