@@ -1,5 +1,6 @@
 var Stats = function (data) {
 	this.argv = data.argv;
+	this.VM = data.VM || "cpython";
 	this.nodes = this.makeTree(data.profiles);
 };
 

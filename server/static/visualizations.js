@@ -3,8 +3,83 @@ var Visualization = {};
 (function() {
     "use strict";
 
+	function compute_gradient(phases, width) {
+		// compute a gradient which represents how much time we spent in
+		// each phase.
+
+		// At each boundary, we want a phase transition of about P pixels
+		// (just because I found it pleasant to view, but feel free to
+		// experiment :)): however, in the gradient we can only specify
+		// the percentage, not the pixels: thus, we compute which
+		// percentage of the total width corresponds to P pixels
+		var P = 8;
+		var padding = (P/width);
+
+		// suppose to have the following data:
+		// green:  30% => [ 0,	30]
+		// red:	   30% => [30,	60]
+		// cyan:	1% => [60,	61]
+		// yellow: 39% => [61, 100]
+		// padding: 5%
+		//
+		// var phases = [{"value": 0.30, "color": "green"},
+		//				 {"value": 0.30, "color": "red"},
+		//				 {"value": 0.01, "color": "cyan"},
+		//				 {"value": 0.39, "color": "yellow"}
+		//				]
+		// var padding = 0.05;
+
+		// we want to compute a gradient like this:
+		//	   (green-0)			  # implicit
+		//	   green :05 - green :25
+		//	   red	 :35 - red	 :55
+		//	   cyan	 :60 - cyan	 :61  # this section is not wide enough to apply padding
+		//	   yellow:66 - yellow:95
+		//	   (yellow-100)			  # implicit
+		//
+		var offset = 0
+		var gradient = "0"; // this is the angle: 0 means no rotation, i.e. a horizontal gradient
+
+		for (var i in phases) {
+			var phase = phases[i];
+			if (phase.value == 0)
+				continue;
+			var start = offset;
+			var end = offset+phase.value;
+			if (phase.value > padding) {
+				start += padding;
+				end -= padding;
+			}
+			gradient += "-" + phase.color + ":" + (start*100).toFixed(4);
+			gradient += "-" + phase.color + ":" + (end*100).toFixed(4);
+
+			offset += phase.value;
+		}
+		return gradient;
+	}
+
+	var colors = ["rgb(228, 137, 9)",
+				  "rgb(231, 227, 3)",
+				  "rgb(214, 73, 15)",
+				  "rgb(236, 164, 11)",
+				  "rgb(231, 173, 15)"];
+
+	function pick_color(VM, node, width) {
+		if (VM == "cpython") {
+			var i = (parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length;
+			return colors[i];
+		}
+		var phases = [{value: node.green(),	 color: "#5cb85c"},
+					  {value: node.yellow(), color: "#f0ad4e"},
+					  {value: node.red(),	 color: "#d9534f"},
+					  {value: node.gc(),	 color: "#5bc0de"}
+					  ]
+
+		return compute_gradient(phases, width);
+	}
+
 	Visualization.flameChart = function($element, height, node, $scope,
-                                        $location, cutoff, path_so_far) {
+                                        $location, cutoff, path_so_far, VM) {
 
 		function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
@@ -21,53 +96,15 @@ var Visualization = {};
 				text.remove();
 			}
 
-			//var color = colors[(parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length];
+            var color = pick_color(VM, node, width);
 
-			// compute a gradient which represents how much time we spent in
-			// each phase.
-			var phases = [{"value": node.green(),  "color": "#5cb85c"},
-						  {"value": node.yellow(), "color": "#f0ad4e"},
-						  {"value": node.red(),	   "color": "#d9534f"},
-						  {"value": node.gc(),	   "color": "#5bc0de"}
-						  ]
-
-			// At each boundary, we want a phase transition of about P pixels
-			// (just because I found it pleasant to view, but feel free to
-			// experiment :)): however, in the gradient we can only specify
-			// the percentage, not the pixels: thus, we compute which
-			// percentage of the total width corresponds to P pixels
-			var P = 15;
-			var padding = (P/width) * 100;
-
-			// suppose to have the following data:
-			//	 - green: 60%
-			//	 - yellow: 10%
-			//	 - red: 30%
-			//	 - padding: 2%
-			//
-			// we want to compute a gradient like this:
-			//	   green:60-yellow:62-yellow:70-red:72-red:100
-			// this way, the green-yellow and yellow-red transitions are done in 2% of the width
-
-			var offset = 0
-			var gradient = "0"; // this is the angle: 0 means no rotation, i.e. a horizontal gradient
-
-			for (var phase of phases) {
-				if (phase.value == 0)
-					continue;
-				gradient += "-" + phase.color + ":" + (offset*100 + padding);
-				offset += phase.value;
-				gradient += "-" + phase.color + ":" + offset*100;
-			}
-
-			var color = gradient;
 			rect.attr({fill: color});
 
 			// compute the opacity, so that functions with the highest "self
 			// time" are displayed darker. The fuction with the highest self
 			// time is shown with 100% opacity, the others are proportionally
 			// more transparent, with a minimum of 20% opacity.
-			var opacity = (node.self/max_self)*0.8 + 0.2;
+			var opacity = (node.self/max_self)*0.7 + 0.2;
 			jQuery(rect.node).css('opacity', opacity)
 
 			st.data('color', color);
@@ -89,13 +126,15 @@ var Visualization = {};
 				function(e) {
 					var node = this.data('node');
                     var rect = this.data('rect');
-					rect.attr({'fill': '#99CCFF'});
+					//rect.attr({'fill': '#99CCFF'});
+                    rect.attr({'stroke-width': 2});
+					jQuery(rect.node).css('opacity', 1);
                     $("#visualization-data").text(visdata);
 				},
 				function(e) {
                     var rect = this.data('rect');
 					rect.attr({'fill': this.data('color'),
-                               "title": ""});
+                               "stroke-width": 1});
 					jQuery(rect.node).css('opacity', opacity);
 				}
 			);
@@ -131,11 +170,6 @@ var Visualization = {};
 		}
 
 		$element.empty();
-		// var colors = ["rgb(228, 137, 9)",
-		// 			  "rgb(231, 227, 3)",
-		// 			  "rgb(214, 73, 15)",
-		// 			  "rgb(236, 164, 11)",
-		// 			  "rgb(231, 173, 15)"];
 
 		var width = $element.width();
 		var paper = Raphael($element[0], width, height);

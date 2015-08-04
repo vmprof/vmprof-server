@@ -307,7 +307,8 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                         height,
                         d.root,
                         $scope, $location,
-                        cutoff, path_so_far
+                        cutoff, path_so_far,
+                        stats.VM
                     );
                 }
             };
