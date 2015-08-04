@@ -3,6 +3,61 @@ var Visualization = {};
 (function() {
     "use strict";
 
+	function compute_gradient(phases, width) {
+		// compute a gradient which represents how much time we spent in
+		// each phase.
+
+		// At each boundary, we want a phase transition of about P pixels
+		// (just because I found it pleasant to view, but feel free to
+		// experiment :)): however, in the gradient we can only specify
+		// the percentage, not the pixels: thus, we compute which
+		// percentage of the total width corresponds to P pixels
+		var P = 8;
+		var padding = (P/width);
+
+		// suppose to have the following data:
+		// green:  30% => [ 0,	30]
+		// red:	   30% => [30,	60]
+		// cyan:	1% => [60,	61]
+		// yellow: 39% => [61, 100]
+		// padding: 5%
+		//
+		// var phases = [{"value": 0.30, "color": "green"},
+		//				 {"value": 0.30, "color": "red"},
+		//				 {"value": 0.01, "color": "cyan"},
+		//				 {"value": 0.39, "color": "yellow"}
+		//				]
+		// var padding = 0.05;
+
+		// we want to compute a gradient like this:
+		//	   (green-0)			  # implicit
+		//	   green :05 - green :25
+		//	   red	 :35 - red	 :55
+		//	   cyan	 :60 - cyan	 :61  # this section is not wide enough to apply padding
+		//	   yellow:66 - yellow:95
+		//	   (yellow-100)			  # implicit
+		//
+		var offset = 0
+		var gradient = "0"; // this is the angle: 0 means no rotation, i.e. a horizontal gradient
+
+		for (var i in phases) {
+			var phase = phases[i];
+			if (phase.value == 0)
+				continue;
+			var start = offset;
+			var end = offset+phase.value;
+			if (phase.value > padding) {
+				start += padding;
+				end -= padding;
+			}
+			gradient += "-" + phase.color + ":" + (start*100).toFixed(4);
+			gradient += "-" + phase.color + ":" + (end*100).toFixed(4);
+
+			offset += phase.value;
+		}
+		return gradient;
+	}
+
 	Visualization.flameChart = function($element, height, node, $scope,
                                         $location, cutoff, path_so_far) {
 
@@ -22,45 +77,13 @@ var Visualization = {};
 			}
 
 			//var color = colors[(parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length];
-
-			// compute a gradient which represents how much time we spent in
-			// each phase.
-			var phases = [{"value": node.green(),  "color": "#5cb85c"},
-						  {"value": node.yellow(), "color": "#f0ad4e"},
-						  {"value": node.red(),	   "color": "#d9534f"},
-						  {"value": node.gc(),	   "color": "#5bc0de"}
+			var phases = [{value: node.green(),	 color: "#5cb85c"},
+						  {value: node.yellow(), color: "#f0ad4e"},
+						  {value: node.red(),	 color: "#d9534f"},
+						  {value: node.gc(),	 color: "#5bc0de"}
 						  ]
 
-			// At each boundary, we want a phase transition of about P pixels
-			// (just because I found it pleasant to view, but feel free to
-			// experiment :)): however, in the gradient we can only specify
-			// the percentage, not the pixels: thus, we compute which
-			// percentage of the total width corresponds to P pixels
-			var P = 15;
-			var padding = (P/width) * 100;
-
-			// suppose to have the following data:
-			//	 - green: 60%
-			//	 - yellow: 10%
-			//	 - red: 30%
-			//	 - padding: 2%
-			//
-			// we want to compute a gradient like this:
-			//	   green:60-yellow:62-yellow:70-red:72-red:100
-			// this way, the green-yellow and yellow-red transitions are done in 2% of the width
-
-			var offset = 0
-			var gradient = "0"; // this is the angle: 0 means no rotation, i.e. a horizontal gradient
-
-			for (var phase of phases) {
-				if (phase.value == 0)
-					continue;
-				gradient += "-" + phase.color + ":" + (offset*100 + padding);
-				offset += phase.value;
-				gradient += "-" + phase.color + ":" + offset*100;
-			}
-
-			var color = gradient;
+			var color = compute_gradient(phases, width);
 
 			rect.attr({fill: color});
 
