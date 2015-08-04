@@ -58,8 +58,28 @@ var Visualization = {};
 		return gradient;
 	}
 
+	var colors = ["rgb(228, 137, 9)",
+				  "rgb(231, 227, 3)",
+				  "rgb(214, 73, 15)",
+				  "rgb(236, 164, 11)",
+				  "rgb(231, 173, 15)"];
+
+	function pick_color(VM, node, width) {
+		if (VM == "cpython") {
+			var i = (parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length;
+			return colors[i];
+		}
+		var phases = [{value: node.green(),	 color: "#5cb85c"},
+					  {value: node.yellow(), color: "#f0ad4e"},
+					  {value: node.red(),	 color: "#d9534f"},
+					  {value: node.gc(),	 color: "#5bc0de"}
+					  ]
+
+		return compute_gradient(phases, width);
+	}
+
 	Visualization.flameChart = function($element, height, node, $scope,
-                                        $location, cutoff, path_so_far) {
+                                        $location, cutoff, path_so_far, VM) {
 
 		function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
@@ -76,14 +96,7 @@ var Visualization = {};
 				text.remove();
 			}
 
-			//var color = colors[(parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length];
-			var phases = [{value: node.green(),	 color: "#5cb85c"},
-						  {value: node.yellow(), color: "#f0ad4e"},
-						  {value: node.red(),	 color: "#d9534f"},
-						  {value: node.gc(),	 color: "#5bc0de"}
-						  ]
-
-			var color = compute_gradient(phases, width);
+            var color = pick_color(VM, node, width);
 
 			rect.attr({fill: color});
 
@@ -157,11 +170,6 @@ var Visualization = {};
 		}
 
 		$element.empty();
-		// var colors = ["rgb(228, 137, 9)",
-		// 			  "rgb(231, 227, 3)",
-		// 			  "rgb(214, 73, 15)",
-		// 			  "rgb(236, 164, 11)",
-		// 			  "rgb(231, 173, 15)"];
 
 		var width = $element.width();
 		var paper = Raphael($element[0], width, height);
