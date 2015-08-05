@@ -134,11 +134,12 @@ var Visualization = {};
 			// time is shown with 100% opacity, the others are proportionally
 			// more transparent, with a minimum of 20% opacity.
 			var opacity = (node.self/max_self)*0.7 + 0.2;
-			jQuery(rect.node).css('opacity', opacity)
+			$(rect.node).css('opacity', opacity)
 
 			st.data('color', color);
 			st.data('node', node);
             st.data('rect', rect);
+            st.data('opacity', opacity);
             var cur_path = path.toString();
 
             add_tooltip(node, rect, text)
@@ -148,18 +149,17 @@ var Visualization = {};
 					var node = this.data('node');
                     var rect = this.data('rect');
                     var name = split_name(node.name);
-					//rect.attr({'fill': '#99CCFF'});
                     rect.attr({'stroke-width': 2});
-					jQuery(rect.node).css('opacity', 1);
+					$(rect.node).css('opacity', 1);
                     $("#funcname").text(name.funcname);
                     $("#filename").text(name.file + ":" + name.line);
                     $("#visualization-data").show();
 				},
 				function(e) {
                     var rect = this.data('rect');
-					rect.attr({'fill': this.data('color'),
-                               "stroke-width": 1});
-					jQuery(rect.node).css('opacity', opacity);
+                    var opacity = this.data('opacity');
+					rect.attr({'stroke-width': 1});
+					$(rect.node).css('opacity', opacity);
                     $("#visualization-data").hide();
 				}
 			);
