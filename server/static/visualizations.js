@@ -78,6 +78,36 @@ var Visualization = {};
 		return compute_gradient(phases, width);
 	}
 
+    function add_tooltip(node, rect, text) {
+        var ul = $('<ul class="list-inline">')
+        var phases = [
+            {text: "JIT: ",         cls: "label-success", value: node.green()},
+            {text: "Warmup: ",      cls: "label-warning", value: node.yellow()},
+            {text: "Interpreted: ", cls: "label-danger",  value: node.red()},
+            {text: "GC: ",          cls: "label-info",    value: node.gc()}
+        ];
+        for (var i in phases) {
+            var phase = phases[i];
+            var li = $('<li>').
+                addClass("label").
+                addClass(phase.cls).
+                text(phase.text + (phase.value*100).toFixed(2) + "%");
+            ul.append(li);
+            ul.append("\n");
+        }
+        var tooltip = ul[0].outerHTML;
+        console.log(tooltip);
+		var name = split_name(node.name);
+        $(rect.node).add(text.node).popover({
+            title: _.escape(name.funcname),
+            content: tooltip,
+            container: "#wide-popovers",
+            placement: "bottom",
+            trigger: "hover",
+            html: true
+        })
+    }
+
 	Visualization.flameChart = function($element, height, node, $scope,
                                         $location, cutoff, path_so_far, VM) {
 
@@ -97,7 +127,6 @@ var Visualization = {};
 			}
 
             var color = pick_color(VM, node, width);
-
 			rect.attr({fill: color});
 
 			// compute the opacity, so that functions with the highest "self
@@ -116,11 +145,8 @@ var Visualization = {};
             var visdata = ("Function: " + name.funcname + " " +
                            "file: " + name.file + " " +
                            "line: " + name.line);
-            var tooltip = ("Jitted: " + (node.green()*100).toFixed(2)  + "%\n" +
-                           "Warmup: " + (node.yellow()*100).toFixed(2) + "%\n" +
-                           "Interp: " + (node.red()*100).toFixed(2)    + "%\n" +
-                           "GC: " +     (node.gc()*100).toFixed(2)     + "%");
-            rect.attr({title: tooltip});
+
+            add_tooltip(node, rect, text)
 
 			st.hover(
 				function(e) {

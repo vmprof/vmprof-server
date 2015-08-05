@@ -120,3 +120,7 @@ svg rect, svg text {
 .footer {
 	padding: 20px;
 }
+
+#wide-popovers .popover {
+    max-width: none;
+}
