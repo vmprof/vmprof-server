@@ -141,27 +141,26 @@ var Visualization = {};
             st.data('rect', rect);
             var cur_path = path.toString();
 
-            var name = split_name(node.name);
-            var visdata = ("Function: " + name.funcname + " " +
-                           "file: " + name.file + " " +
-                           "line: " + name.line);
-
             add_tooltip(node, rect, text)
 
 			st.hover(
 				function(e) {
 					var node = this.data('node');
                     var rect = this.data('rect');
+                    var name = split_name(node.name);
 					//rect.attr({'fill': '#99CCFF'});
                     rect.attr({'stroke-width': 2});
 					jQuery(rect.node).css('opacity', 1);
-                    $("#visualization-data").text(visdata);
+                    $("#funcname").text(name.funcname);
+                    $("#filename").text(name.file + ":" + name.line);
+                    $("#visualization-data").show();
 				},
 				function(e) {
                     var rect = this.data('rect');
 					rect.attr({'fill': this.data('color'),
                                "stroke-width": 1});
 					jQuery(rect.node).css('opacity', opacity);
+                    $("#visualization-data").hide();
 				}
 			);
 
@@ -196,6 +195,7 @@ var Visualization = {};
 		}
 
 		$element.empty();
+		$("#visualization-data").hide();
 
 		var width = $element.width();
 		var paper = Raphael($element[0], width, height);
