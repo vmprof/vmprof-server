@@ -121,6 +121,10 @@ svg rect, svg text {
 	padding: 20px;
 }
 
+#visualization {
+    margin-top: 5px;
+}
+
 #wide-popovers .popover {
     max-width: none;
 }

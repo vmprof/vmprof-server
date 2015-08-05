@@ -59,40 +59,6 @@
 
 <div ng-show="!loading" class="panel panel-default">
 
-    <p ng-if="currentProfiles.length == 0" class="lead text-center" style="padding-top: 15px">
-        no profiles
-    </p>
-
-    <div ng-if="currentProfiles.length > 0" class="row">
-        <div class="col-md-12">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>name</th>
-                        <th>file</th>
-                        <th>% of parent</th>
-                        <th>% of total</th>
-                        <th>self</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr ng-repeat="profile in currentProfiles" ng-class="{active: address==profile.address}">
-                        <td>
-                            <a ng-href="/#/{{ log.checksum }}/?id={{ profile.path }}&view={{ visualization }}">
-                                {{ profile.name }}
-                            </a>
-                        </td>
-                        <td>{{ profile.file }}:{{ profile.line }}</td>
-                        <td>{{ profile.times.toFixed(2) }}%</td>
-                        <td>{{ profile.total.toFixed(2) }}%</td>
-                        <td>{{ profile.self.toFixed(2) }}%</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-    </div>
     <div ng-if="currentProfiles.length > 0" class="row">
         <div class="btn-group" role="group" aria-label="...">
             <button type="button" class="btn btn-default"
@@ -106,8 +72,7 @@
                     <span class="glyphicon glyphicon-align-center" aria-hidden="true"></span>
             </button>
         </div>
-
-        <div id="visualization-data"></div>
+        <span id="visualization-data"></span>
         <div id="visualization"></div>
     </div>
 </div>
