@@ -69,9 +69,9 @@ var Visualization = {};
 			var i = (parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length;
 			return colors[i];
 		}
-		var phases = [{value: node.green(),	 color: "#5cb85c"},
+		var phases = [{value: node.red(),	 color: "#d9534f"},
 					  {value: node.yellow(), color: "#f0ad4e"},
-					  {value: node.red(),	 color: "#d9534f"},
+					  {value: node.green(),	 color: "#5cb85c"},
 					  {value: node.gc(),	 color: "#5bc0de"}
 					  ]
 
@@ -81,9 +81,9 @@ var Visualization = {};
     function add_tooltip(node, rect, text) {
         var ul = $('<ul class="list-inline">')
         var phases = [
-            {text: "JIT: ",         cls: "label-success", value: node.green()},
-            {text: "Warmup: ",      cls: "label-warning", value: node.yellow()},
             {text: "Interpreted: ", cls: "label-danger",  value: node.red()},
+            {text: "Warm-up: ",     cls: "label-warning", value: node.yellow()},
+            {text: "JIT: ",         cls: "label-success", value: node.green()},
             {text: "GC: ",          cls: "label-info",    value: node.gc()}
         ];
         for (var i in phases) {
