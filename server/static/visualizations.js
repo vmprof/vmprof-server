@@ -57,25 +57,37 @@ var Visualization = {};
 		}
 		return gradient;
 	}
+ 
+       var colors = ["rgb(228, 137, 9)",
+                     "rgb(231, 227, 3)",
+                     "rgb(214, 73, 15)",
+                     "rgb(236, 164, 11)",
+                     "rgb(231, 173, 15)"];
 
-	var colors = ["rgb(228, 137, 9)",
-				  "rgb(231, 227, 3)",
-				  "rgb(214, 73, 15)",
-				  "rgb(236, 164, 11)",
-				  "rgb(231, 173, 15)"];
+    function pick_color(VM, node, width) {
+        if (VM == "cpython") {
+            var i = (node.name.length % colors.length);
+            return colors[i];
+        }
 
-	function pick_color(VM, node, width) {
-		if (VM == "cpython") {
-			var i = (parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length;
-			return colors[i];
-		}
-		var phases = [{value: node.red(),	 color: "#d9534f"},
-					  {value: node.yellow(), color: "#f0ad4e"},
-					  {value: node.green(),	 color: "#5cb85c"},
-					  {value: node.gc(),	 color: "#5bc0de"}
-					  ]
+        var RED = "#d9534f";
+        var YELLOW = "#f0ad4e";
+        var GREEN = "#5cb85c";
+        var GC = "#5bc0de";
 
-		return compute_gradient(phases, width);
+        if (node.is_virtual) {
+            var phases = [{value: node.red(),	 color: RED},
+                          {value: node.yellow(), color: YELLOW},
+                          {value: node.green(),	 color: GREEN},
+                          {value: node.gc(),	 color: GC}
+                          ]
+
+            return compute_gradient(phases, width);
+        }
+        if (node.tag == "JIT") {
+            return GREEN;
+        }
+        return RED;
 	}
 
     function add_tooltip(node, rect, text) {
@@ -96,7 +108,6 @@ var Visualization = {};
             ul.append("\n");
         }
         var tooltip = ul[0].outerHTML;
-        console.log(tooltip);
 		var name = split_name(node.name);
         $(rect.node).add(text.node).popover({
             title: _.escape(name.funcname),
@@ -118,7 +129,7 @@ var Visualization = {};
 			var rect = paper.rect(x, y, width, height, 5);
 			var text = paper.text(x + width / 2,
 								  y + height / 2,
-								  node.name.split(':')[1]);
+								  split_name(node.name).funcname);
             var st = paper.set();
             st.push(rect, text);
             

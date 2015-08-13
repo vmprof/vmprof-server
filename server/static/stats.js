@@ -188,7 +188,10 @@ Stats.prototype.getProfiles = function(path) {
 function split_name(name) {
 	var nameSegments = name.split(":");
 	var file;
-	if (nameSegments.length > 4) {
+    if (nameSegments.length < 4) {
+        return {file: "", funcname: name, line: ""};
+    }
+	else if (nameSegments.length > 4) {
 		file = nameSegments.slice(4, nameSegments.length).join(":");
 	} else {
 		file = nameSegments[3];

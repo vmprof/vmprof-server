@@ -271,44 +271,56 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
             path_so_far = [];
         }
 
-        var stats = new Stats(response.data.data);
-        global_stats = stats;
-        var root = stats.nodes;
-        $scope.visualization = $routeParams.view || 'flames';
-        var d = stats.getProfiles($routeParams.id);
+        // var stats = new Stats(response.data.data);
+        // global_stats = stats;
+        // var root = stats.nodes;
 
-        $scope.currentProfiles = d.profiles;
-        $scope.root = d.root;
-        $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
-        $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
-        $scope.paths = d.paths;
+        var VM = response.data.data.VM;
+        var root = response.data.data.callgraph; // XXX
+        StackFrameNode.setPrototype(root);
+
+        var node = root;
+        $scope.visualization = $routeParams.view || 'flames';
+        //var d = stats.getProfiles($routeParams.id);
+
+        
+        $scope.currentNode = node;
+        $scope.root = root;
+        ROOT = root; // global, for debugging
+        // $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
+        // $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
+        $scope.total_time = node.total_cumulative_ticks() / root.total_cumulative_ticks();
+        $scope.self_time = node.total_self_or_virtual_ticks() / root.total_cumulative_ticks();
+
+        //$scope.paths = d.paths;
+        $scope.paths = [];
 
         $timeout(function () {
             $('[data-toggle=tooltip]').tooltip();
-            var height = 800; //$('.table').height();
+            var height = 8000; //$('.table').height();
             var $visualization = $("#visualization");
             if ($visualization.length < 1)
                 return;
             $scope.visualizationChange = function(visualization) {
 
                 $scope.visualization = visualization;
-                var cutoff = d.root.total / 100;
+                var cutoff = root.total_cumulative_ticks() / 100;
                 if (visualization == 'squares') {
-                    Visualization.squareChart(
-                        $("#visualization"),
-                        height,
-                        d.root,
-                        $scope, $location, path_so_far
-                    );
+                    // Visualization.squareChart(
+                    //     $("#visualization"),
+                    //     height,
+                    //     d.root,
+                    //     $scope, $location, path_so_far
+                    // );
                 }
                 if (visualization == 'flames') {
                     Visualization.flameChart(
                         $("#visualization"),
                         height,
-                        d.root,
+                        root,
                         $scope, $location,
                         cutoff, path_so_far,
-                        stats.VM
+                        VM
                     );
                 }
             };
