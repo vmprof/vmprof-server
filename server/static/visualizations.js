@@ -95,7 +95,6 @@ var Visualization = {};
             ul.append("\n");
         }
         var tooltip = ul[0].outerHTML;
-        console.log(tooltip);
 		var name = split_name(node.name);
         $(rect.node).add(text.node).popover({
             title: _.escape(name.funcname),
