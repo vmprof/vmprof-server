@@ -115,13 +115,11 @@ var Visualization = {};
         var width = $element.width();
         var paper = Raphael($element[0], width, height);
         var max_self = node.max_self();
-        var depth = 0;
 
         function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
                 return;
             }
-            depth++;
             var rect = paper.rect(x, y, width, height, 5);
             var text = paper.text(x + width / 2,
                                   y + height / 2,
@@ -202,7 +200,12 @@ var Visualization = {};
         }
 
         draw(0, 0, width, 25, node, path_so_far);
-        paper.setSize(paper.width, depth * 20);
+
+        var depth = _.max($element
+                          .find('rect')
+                          .map(function() {return parseInt(this.attributes['y'].value);} ));
+
+        paper.setSize(paper.width, depth + 27);
     };
 
     Visualization.squareChart = function($element, height, node,
