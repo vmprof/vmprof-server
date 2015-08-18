@@ -37,7 +37,7 @@ var Visualization = {};
 		//	   yellow:66 - yellow:95
 		//	   (yellow-100)			  # implicit
 		//
-		var offset = 0
+		var offset = 0;
 		var gradient = "0"; // this is the angle: 0 means no rotation, i.e. a horizontal gradient
 
 		for (var i in phases) {
@@ -72,14 +72,13 @@ var Visualization = {};
 		var phases = [{value: node.red(),	 color: "#d9534f"},
 					  {value: node.yellow(), color: "#f0ad4e"},
 					  {value: node.green(),	 color: "#5cb85c"},
-					  {value: node.gc(),	 color: "#5bc0de"}
-					  ]
+					  {value: node.gc(),	 color: "#5bc0de"}];
 
 		return compute_gradient(phases, width);
 	}
 
     function add_tooltip(node, rect, text) {
-        var ul = $('<ul class="list-inline">')
+        var ul = $('<ul class="list-inline">');
         var phases = [
             {text: "Interpreted: ", cls: "label-danger",  value: node.red()},
             {text: "Warm-up: ",     cls: "label-warning", value: node.yellow()},
@@ -105,7 +104,7 @@ var Visualization = {};
             placement: "bottom",
             trigger: "hover",
             html: true
-        })
+        });
     }
 
 	Visualization.flameChart = function($element, height, node, $scope,
@@ -121,7 +120,7 @@ var Visualization = {};
 								  node.name.split(':')[1]);
             var st = paper.set();
             st.push(rect, text);
-            
+
 			if (text.getBBox().width > rect.getBBox().width) {
 				text.remove();
 			}
@@ -134,7 +133,7 @@ var Visualization = {};
 			// time is shown with 100% opacity, the others are proportionally
 			// more transparent, with a minimum of 20% opacity.
 			var opacity = (node.self/max_self)*0.7 + 0.2;
-			$(rect.node).css('opacity', opacity)
+			$(rect.node).css('opacity', opacity);
 
 			st.data('color', color);
 			st.data('node', node);
@@ -142,7 +141,7 @@ var Visualization = {};
             st.data('opacity', opacity);
             var cur_path = path.toString();
 
-            add_tooltip(node, rect, text)
+            add_tooltip(node, rect, text);
 
 			st.hover(
 				function(e) {
@@ -188,7 +187,7 @@ var Visualization = {};
                     c_path.push(child);
 					var child = node.children[child];
 					var _width = child.total / node.total * width;
-					draw(x,  y, _width, height, child, c_path)
+					draw(x,  y, _width, height, child, c_path);
 					x = x + _width;
 				}
 			}
@@ -203,7 +202,7 @@ var Visualization = {};
 
 		draw(0, 0, width, 25, node, path_so_far);
 
-	}
+	};
 
 	Visualization.squareChart = function($element, height, node,
 										 $scope, $location) {
@@ -295,6 +294,6 @@ var Visualization = {};
 		}
 		draw(0, 0, width, height, node);
 
-	}
+	};
 
 })();
