@@ -9,6 +9,12 @@ What we want from the vmprof:
 
 * cpython JITted makes no sense - improve
 
+* function name in the box
+
+* cleaner information in the main (this function/this call site)
+
+* full function name in the main
+
 * introduce line-based profiles
 
 * link to traces/view traces
