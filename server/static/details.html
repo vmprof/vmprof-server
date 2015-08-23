@@ -21,13 +21,21 @@
     <header>
 
         <div class="times">
-            <span data-toggle="tooltip" title="Total time spent">
+            <span data-toggle="tooltip" title="Cumulative time spent in this function here">
                 <i class="fa fa-clock-o"></i>
+                <strong>{{ (node_total_time * 100).toFixed(2) }}%</strong>
+            </span>
+            <span data-toggle="tooltip" title="Cumulative time spent in this function everywhere">
+                /
                 <strong>{{ (total_time * 100).toFixed(2) }}%</strong>
             </span>
 
-            <span data-toggle="tooltip" title="Time spent in this function">
+            <span data-toggle="tooltip" title="Time spent in this function here">
                 <i class="fa fa-arrow-down"></i>
+                <strong>{{ (node_self_time * 100).toFixed(2) }}%</strong>
+            </span>
+            <span data-toggle="tooltip" title="Time spent in this function everywhere">
+                /
                 <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
             </span>
         </div>
