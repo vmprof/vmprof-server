@@ -281,6 +281,8 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
         $scope.root = d.root;
         $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
         $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
+        $scope.node_total_time = d.root.total / stats.nodes.total;
+        $scope.node_self_time = d.root.self / stats.nodes.total;
         $scope.paths = d.paths;
 
         $timeout(function () {
