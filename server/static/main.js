@@ -276,8 +276,10 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
         // var root = stats.nodes;
 
         var VM = response.data.data.VM;
-        var root = response.data.data.callgraph; // XXX
+        var root = response.data.data.root;
+        var vroot = response.data.data.vroot;
         StackFrameNode.setPrototype(root);
+        StackFrameNode.setPrototype(vroot);
 
         var node = root;
         $scope.visualization = $routeParams.view || 'flames';
@@ -317,12 +319,23 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                     Visualization.flameChart(
                         $("#visualization"),
                         height,
+                        vroot,
+                        $scope, $location,
+                        cutoff, path_so_far,
+                        VM
+                    );
+                }
+                if (visualization == 'flames-all') {
+                    Visualization.flameChart(
+                        $("#visualization"),
+                        height,
                         root,
                         $scope, $location,
                         cutoff, path_so_far,
                         VM
                     );
                 }
+
             };
 
             $scope.visualizationChange($scope.visualization);
