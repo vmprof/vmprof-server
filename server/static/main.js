@@ -322,7 +322,8 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                         vroot,
                         $scope, $location,
                         cutoff, path_so_far,
-                        VM
+                        VM,
+                        false
                     );
                 }
                 if (visualization == 'flames-all') {
@@ -332,7 +333,8 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                         root,
                         $scope, $location,
                         cutoff, path_so_far,
-                        VM
+                        VM,
+                        true
                     );
                 }
 

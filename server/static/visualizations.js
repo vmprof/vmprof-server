@@ -120,7 +120,8 @@ var Visualization = {};
     }
 
 	Visualization.flameChart = function($element, height, node, $scope,
-                                        $location, cutoff, path_so_far, VM) {
+                                        $location, cutoff, path_so_far, VM,
+                                        highlight_virtuals) {
 
 		function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
@@ -151,6 +152,11 @@ var Visualization = {};
 			st.data('node', node);
             st.data('rect', rect);
             st.data('opacity', opacity);
+            st.data('stroke-width', 1);
+            if (highlight_virtuals && node.is_virtual) {
+                st.data('stroke-width', 1.5);
+                rect.attr('stroke-width', 1.5);
+            }
             var cur_path = path.toString();
 
             add_tooltip(node, rect, text)
@@ -169,7 +175,8 @@ var Visualization = {};
 				function(e) {
                     var rect = this.data('rect');
                     var opacity = this.data('opacity');
-					rect.attr({'stroke-width': 1});
+                    var stroke_width = this.data('stroke-width');
+					rect.attr({'stroke-width': stroke_width});
 					$(rect.node).css('opacity', opacity);
                     $("#visualization-data").hide();
 				}
