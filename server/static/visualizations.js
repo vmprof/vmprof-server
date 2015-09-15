@@ -107,6 +107,13 @@ var Visualization = {};
             ul.append(li);
             ul.append("\n");
         }
+
+        /* useful for debugging */
+        // ul.append("self_or_virt: " + node.total_self_or_virtual_ticks());
+        // ul.append("; cumul: " + node.total_cumulative_ticks());
+        // ul.append("; self: " + node.self);
+        // ul.append("; total: " + node.total);
+
         var tooltip = ul[0].outerHTML;
 		var name = split_name(node.name);
         $(rect.node).add(text.node).popover({
@@ -190,26 +197,16 @@ var Visualization = {};
                 $scope.$apply();
 			});
 
-			if (_.keys(node.children).length == 1) {
-				if (node.self == node.total) {
-					var scale = 1;
-				} else {
-					var scale = 1 - (node.self / node.total);
-				}
-				var child = node.children[Object.keys(node.children)[0]];
-                path.push(0);
-				draw(x, y + height + 2, width * scale, height, child, path);
-			} else if (_.keys(node.children).length > 1) {
-				var y = y + height + 2;
-				for (var child in node.children) {
-                    var c_path = path.slice();
-                    c_path.push(child);
-					var child = node.children[child];
-					var _width = child.total / node.total * width;
-					draw(x,  y, _width, height, child, c_path)
-					x = x + _width;
-				}
-			}
+            // draw children
+            var y = y + height + 2;
+            for (var child in node.children) {
+                var c_path = path.slice();
+                c_path.push(child);
+                var child = node.children[child];
+                var _width = child.total / node.total * width;
+                draw(x,  y, _width, height, child, c_path)
+                x = x + _width;
+            }
 		}
 
 		$element.empty();
