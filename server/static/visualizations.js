@@ -74,6 +74,7 @@ var Visualization = {};
         var YELLOW = "#f0ad4e";
         var GREEN = "#5cb85c";
         var GC = "#5bc0de";
+        var GREY = "#777";
 
         if (node.is_virtual) {
             var phases = [{value: node.red(),	 color: RED},
@@ -87,7 +88,7 @@ var Visualization = {};
         if (node.tag == "JIT") {
             return GREEN;
         }
-        return RED;
+        return GREY;
 	}
 
     function add_tooltip(node, rect, text) {
