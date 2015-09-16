@@ -97,7 +97,7 @@ var Visualization = {};
         var tooltip = ul[0].outerHTML;
         var name = split_name(node.name);
         $(rect.node).add(text.node).popover({
-            title: _.escape(name.funcname),
+            title: "<b>function:</b> " + _.escape(name.funcname) + " <b>file:</b> " + _.escape(name.file) + ":" + name.line,
             content: tooltip,
             container: "#wide-popovers",
             placement: "bottom",
@@ -156,8 +156,6 @@ var Visualization = {};
                     var name = split_name(node.name);
                     rect.attr({'stroke-width': 2});
                     $(rect.node).css('opacity', 1);
-                    $("#funcname").text(name.funcname);
-                    $("#filename").text(name.file + ":" + name.line);
                     $("#visualization-data").show();
                 },
                 function(e) {
