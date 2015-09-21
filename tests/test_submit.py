@@ -24,7 +24,9 @@ def test_submit(c):
     from .submit import data
 
     data = {
-        'data': b64encode(json.dumps(data))
+        'data': b64encode(json.dumps(data)),
+        'VM': 'cpython',
+        'argv': 'test.py'
     }
 
     response = c.post('/api/log/', data=data)
