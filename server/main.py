@@ -92,7 +92,9 @@ class LogViewSet(viewsets.ModelViewSet):
         log, _ = self.queryset.get_or_create(
             data=data,
             checksum=checksum,
-            user=user
+            user=user,
+            vm=request.data['VM'],
+            name=request.data['argv']
         )
 
         return Response(log.checksum)
