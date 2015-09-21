@@ -93,7 +93,7 @@ class LogViewSet(viewsets.ModelViewSet):
             data=data,
             checksum=checksum,
             user=user,
-            vm=request.data['VM'],
+            vm=request.data.get('VM', 'cpython'),
             name=request.data['argv']
         )
 
