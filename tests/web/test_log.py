@@ -20,12 +20,13 @@ def test_log_get_user(client):
     Log.objects.create(user=None, checksum="2", data="{}")
 
     response = client.get('/api/log/')
-    assert len(response.data) == 2
+
+    assert len(response.data['results']) == 2
 
     client.login(username=username, password=password)
 
     response = client.get('/api/log/')
-    assert len(response.data) == 1
+    assert len(response.data['results']) == 1
 
     response = client.get('/api/log/?all=True')
-    assert len(response.data) == 2
+    assert len(response.data['results']) == 2
