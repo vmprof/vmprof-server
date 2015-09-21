@@ -227,17 +227,25 @@ app.controller('list', function ($scope, $http, $interval) {
         if(showLoading) {
             $scope.loading = true;
         }
-        $http.get('/api/log/', {params: {all:$scope.fetchAll}}).then(function(response) {
-            $scope.logs = response.data;
-            $scope.loading = false;
-        });
+        $http.get('/api/log/', {params: {all:$scope.fetchAll}})
+            .then(function(response) {
+                $scope.logs = response.data.results;
+                $scope.next = response.data.next;
+                $scope.loading = false;
+            });
     };
 
-    $scope.getLogs(true);
 
-    $interval(function() {
-        $scope.getLogs(false);
-    }, 11000);
+    $scope.more = function(next) {
+        $http.get(next, {params: {all:$scope.fetchAll}})
+            .then(function(response) {
+                $scope.logs.push.apply($scope.logs,
+                                       response.data.results);
+                $scope.next = response.data.next;
+            });
+
+    };
+    $scope.getLogs(true);
 
     $scope.background = function(time) {
         var seconds = moment.utc().diff(moment.utc(time, 'YYYY-MM-DD HH:mm:ss'), 'seconds');

@@ -1,43 +1,51 @@
 <div id="list">
 
-    <div class="row display-control" ng-show="user">
-        <div class="col-md-2 col-md-offset-10">
-            <select class="form-control input-sm" ng-model="fetchAll" ng-change="getLogs(true)" ng-disabled="loading">
-                <option selected value="">Display: Mine</option>
-                <option value="True">Display: All</option>
-            </select>
-        </div>
+  <div class="row display-control" ng-show="user">
+    <div class="col-md-2 col-md-offset-10">
+      <select class="form-control input-sm" ng-model="fetchAll" ng-change="getLogs(true)" ng-disabled="loading">
+        <option selected value="">Display: Mine</option>
+        <option value="True">Display: All</option>
+      </select>
     </div>
+  </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
+  <div class="row">
+    <div class="col-md-12">
+      <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
 
-            <div ng-show="!loading" class="list-group" ng-init="ago=true">
+      <div ng-show="!loading" class="list-group" ng-init="ago=true">
 
-                <div class="media" ng-repeat="log in logs" ng-style="background(log.created)">
-                    <div class="media-left">
+        <div class="media" ng-repeat="log in logs" ng-style="background(log.created)">
+          <div class="media-left">
 
-                        <img class="media-object" ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
+            <img class="media-object" ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
 
-                    </div>
-                    <div class="media-body">
-                        <h4 class="media-heading" id="media-heading">
+          </div>
+          <div class="media-body">
+            <h4 class="media-heading" id="media-heading">
 
-                            <span ng-if="log.user">{{ log.user.username }}</span>
-                            <span ng-if="!log.user"><i style="color: #888">anonymous</i></span>
+              <span ng-if="log.user">{{ log.user.username }}</span>
+              <span ng-if="!log.user"><i style="color: #888">anonymous</i></span>:
+	      <a ng-href="#{{ log.checksum }}"> {{ log.name }}</a>
+            </h4>
 
-                            / <a ng-href="#{{ log.checksum }}"> {{ log.data.argv }}</a>
-                        </h4>
-
-                        <div class="times" >
-                            <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
-                            <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="times" >
+	      {{ log.vm }} / 
+              <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
+              <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
             </div>
+          </div>
         </div>
+	
+	<button ng-if="next" type="button"
+		class="btn btn-success btn-block"
+		ng-click="more(next)">
+	  More
+	</button>
+	
+      </div>
+      
     </div>
+  </div>
 
 </div>

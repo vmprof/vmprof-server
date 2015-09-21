@@ -13,6 +13,7 @@ from rest_framework import routers
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework import validators
+from rest_framework import pagination
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
@@ -67,24 +68,22 @@ class LogSerializer(serializers.ModelSerializer):
 
 
 class LogListSerializer(serializers.ModelSerializer):
-    data = serializers.SerializerMethodField()
     user = UserSerializer()
 
     class Meta:
         model = Log
-
-    def get_data(self, obj):
-        j = json.loads(obj.data)
-        if 'profiles' in j:
-            del j['profiles']
-        return j
+        fields = ('checksum', 'user', 'created', 'vm', 'name')
 
 
 class LogViewSet(viewsets.ModelViewSet):
     queryset = Log.objects.select_related('user')
-    serializer_class = LogSerializer
-    list_serializer_class = LogListSerializer
+    serializer_class = LogListSerializer
     permission_classes = (permissions.AllowAny,)
+
+    def get_serializer_class(self):
+        if 'pk' in self.kwargs:
+            return LogSerializer
+        return LogListSerializer
 
     def create(self, request):
         data = json.dumps(request.data)
@@ -102,22 +101,9 @@ class LogViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated():
             return self.queryset
 
-        if not bool(self.request.GET.get('all', False)):
+        if not bool(self.request.GET.get('all', False)) and 'pk' not in self.kwargs:
             return self.queryset.filter(user=self.request.user)
         return self.queryset
-
-    def list(self, request):
-        serializer = self.list_serializer_class(self.get_queryset(), many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        try:
-            log = self.queryset.get(pk=pk)
-            return Response(self.serializer_class(
-                log, context={'request': request}
-            ).data)
-        except Log.DoesNotExist:
-            return Response(status=404)
 
 
 class UserPermission(permissions.BasePermission):

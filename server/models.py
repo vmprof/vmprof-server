@@ -13,6 +13,9 @@ class Log(models.Model):
 
     data = models.TextField()
 
+    name = models.CharField(max_length=256, blank=True)
+    vm = models.CharField(max_length=32, blank=True)
+
     class Meta:
         ordering = ['-created']
 
