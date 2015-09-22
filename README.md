@@ -6,6 +6,8 @@ Virtual Machine profiler (so far restricted to pypy and cpython)
 
 ## development
 
+	apt-get install gcc python-dev 
+
     pip install -r requirements/development.txt
 
     python manage.py syncdb --noinput
