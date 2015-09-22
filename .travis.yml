@@ -2,6 +2,12 @@ language: python
 
 python: 2.7
 
+addons:
+  postgresql: "9.3"
+
+before_script:
+  - psql -c 'create database vmprof;' -U postgres
+  
 install:
   - pip install -r requirements/development.txt
   - python manage.py syncdb --noinput
