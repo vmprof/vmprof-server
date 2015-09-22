@@ -6,14 +6,22 @@ Virtual Machine profiler (so far restricted to pypy and cpython)
 
 ## development
 
-	apt-get install gcc python-dev 
+	apt-get install gcc python-dev postgresql-9.X postgresql-server-dev-9.X
 
     pip install -r requirements/development.txt
 
     python manage.py syncdb --noinput
     python manage.py migrate
 
-    python manage.py runserver
+	python manage.py runserver
+
+edit /etc/postgresql/9.X/main/pg_hba.conf
+
+	local all postgres trust
+
+
+	createdb -U postgres vmprof
+
 
 ## test
 
@@ -21,7 +29,4 @@ Virtual Machine profiler (so far restricted to pypy and cpython)
 
 ## deployment
 
-    fab deploy -H {HOST} -u {USER}
-    host: baroquesoftware.com, user: www-data
-
-
+    fab deploy -H vmprof.com -u {USER}
