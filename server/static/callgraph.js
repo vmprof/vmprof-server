@@ -60,11 +60,14 @@ StackFrameNode.prototype.green = function() {
 }
 
 StackFrameNode.prototype.yellow = function() {
-    return 0;
+    var WARMUP = this.cumulative_ticks['WARMUP'] || 0;
+    return WARMUP / this.total_cumulative_ticks();
 }
 
 StackFrameNode.prototype.gc = function() {
-    return 0;
+    var GC_minor = this.cumulative_ticks['GC:MINOR'] || 0;
+    var GC_major = this.cumulative_ticks['GC:MAJOR'] || 0;
+    return (GC_minor+GC_major) / this.total_cumulative_ticks();
 }
 
 StackFrameNode.prototype.find = function(pattern) {

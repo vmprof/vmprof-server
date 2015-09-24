@@ -110,6 +110,7 @@ var Visualization = {};
         }
 
         /* useful for debugging */
+        // ul.append("cumulative: " + JSON.stringify(node.cumulative_ticks));
         // ul.append("self_or_virt: " + node.total_self_or_virtual_ticks());
         // ul.append("; cumul: " + node.total_cumulative_ticks());
         // ul.append("; self: " + node.self);
