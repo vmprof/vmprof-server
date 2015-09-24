@@ -318,6 +318,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                 if (visualization == 'flames') {
                     Visualization.flameChart(
                         $("#visualization"),
+                        visualization,
                         height,
                         vroot,
                         $scope, $location,
@@ -329,6 +330,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                 if (visualization == 'flames-all') {
                     Visualization.flameChart(
                         $("#visualization"),
+                        visualization,
                         height,
                         root,
                         $scope, $location,

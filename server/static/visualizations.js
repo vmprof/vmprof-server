@@ -128,7 +128,7 @@ var Visualization = {};
         })
     }
 
-	Visualization.flameChart = function($element, height, node, $scope,
+	Visualization.flameChart = function($element, view, height, node, $scope,
                                         $location, cutoff, path_so_far, VM,
                                         highlight_virtuals) {
 
@@ -194,7 +194,7 @@ var Visualization = {};
 			st.click(function () {
 				$location.search({
 					id: cur_path,
-					view: 'flames'
+					view: view,
 				});
                 $scope.$apply();
 			});
@@ -213,6 +213,12 @@ var Visualization = {};
 
 		$element.empty();
 		$("#visualization-data").hide();
+
+		// find the current node using path_so_far
+		for(var i in path_so_far) {
+			i = path_so_far[i];
+			node = node.children[i];
+		}
 
 		var width = $element.width();
 		var paper = Raphael($element[0], width, height);
