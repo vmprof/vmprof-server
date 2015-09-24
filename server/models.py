@@ -29,4 +29,4 @@ class Log(models.Model):
 
 @admin.register(Log)
 class LogAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created', 'data')
+    list_display = ('name', 'vm', 'checksum', 'user', 'created')
