@@ -303,7 +303,12 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                 return;
             $scope.visualizationChange = function(visualization) {
 
-                $scope.visualization = visualization;
+                if (visualization != $scope.visualization) {
+                    $scope.visualization = visualization;
+                    path_so_far = [];
+                    $location.search({view: visualization});
+                }
+
                 var cutoff = root.total_cumulative_ticks() / 100;
                 if (visualization == 'squares') {
                     // Visualization.squareChart(
