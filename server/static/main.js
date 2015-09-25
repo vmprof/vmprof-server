@@ -299,7 +299,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
 
         $timeout(function () {
             $('[data-toggle=tooltip]').tooltip();
-            var height = 8000; //$('.table').height();
+            var height = 2000; //$('.table').height();
             var $visualization = $("#visualization");
             if ($visualization.length < 1)
                 return;
