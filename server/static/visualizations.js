@@ -134,12 +134,15 @@ var Visualization = {};
         })
     }
 
-	Visualization.flameChart = function($element, view, height, node, $scope,
+	Visualization.flameChart = function($element, view, total_height, node, $scope,
                                         $location, cutoff, path_so_far, VM,
                                         highlight_virtuals) {
 
 		function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
+                return;
+            }
+            if (y > total_height) {
                 return;
             }
 			var rect = paper.rect(x, y, width, height, 5);
@@ -231,7 +234,7 @@ var Visualization = {};
 		$scope.self_time = node.total_self_or_virtual_ticks() / $scope.root.total_cumulative_ticks();
 
 		var width = $element.width();
-		var paper = Raphael($element[0], width, height);
+		var paper = Raphael($element[0], width, total_height);
 		var max_self = node.max_self();
 
 		draw(0, 0, width, 25, node, path_so_far);

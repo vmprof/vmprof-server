@@ -297,7 +297,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
 
         $timeout(function () {
             $('[data-toggle=tooltip]').tooltip();
-            var height = 2000; //$('.table').height();
+            var height = 27*40; // display up to 40 levels of boxes
             var $visualization = $("#visualization");
             if ($visualization.length < 1)
                 return;
