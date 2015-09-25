@@ -88,6 +88,12 @@ var Visualization = {};
         if (node.tag == "JIT") {
             return GREEN;
         }
+        if (node.tag == "WARMUP") {
+            return YELLOW;
+        }
+        if (node.tag == "GC:MAJOR" || node.tag == "GC:MINOR") {
+            return GC;
+        }
         return GREY;
 	}
 
@@ -140,6 +146,11 @@ var Visualization = {};
 			var text = paper.text(x + width / 2,
 								  y + height / 2,
 								  split_name(node.name).funcname);
+
+            if (highlight_virtuals && node.is_virtual) {
+                text.attr({"font-weight": "bold"});
+            }
+
             var st = paper.set();
             st.push(rect, text);
             
@@ -162,10 +173,6 @@ var Visualization = {};
             st.data('rect', rect);
             st.data('opacity', opacity);
             st.data('stroke-width', 1);
-            if (highlight_virtuals && node.is_virtual) {
-                st.data('stroke-width', 1.5);
-                rect.attr('stroke-width', 1.5);
-            }
             var cur_path = path.toString();
 
             add_tooltip(node, rect, text)
