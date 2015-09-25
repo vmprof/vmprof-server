@@ -291,8 +291,6 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
         ROOT = root; // global, for debugging
         // $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
         // $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
-        $scope.total_time = node.total_cumulative_ticks() / root.total_cumulative_ticks();
-        $scope.self_time = node.total_self_or_virtual_ticks() / root.total_cumulative_ticks();
 
         //$scope.paths = d.paths;
         $scope.paths = [];

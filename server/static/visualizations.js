@@ -220,6 +220,9 @@ var Visualization = {};
 			node = node.children[i];
 		}
 
+		$scope.total_time = node.total_cumulative_ticks() / $scope.root.total_cumulative_ticks();
+		$scope.self_time = node.total_self_or_virtual_ticks() / $scope.root.total_cumulative_ticks();
+
 		var width = $element.width();
 		var paper = Raphael($element[0], width, height);
 		var max_self = node.max_self();
