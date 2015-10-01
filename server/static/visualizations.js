@@ -139,9 +139,6 @@ var Visualization = {};
                                         highlight_virtuals) {
 
 		function draw(x, y, width, height, node, path) {
-            if (node.total < cutoff) {
-                return;
-            }
             if (y > total_height) {
                 return;
             }
@@ -208,6 +205,15 @@ var Visualization = {};
 				});
                 $scope.$apply();
 			});
+
+            // don't display children if we are already below the cutoff threshold
+            if (node.total < cutoff) {
+                var dots = paper.text(x + width / 2,
+                                      y + height / 2,
+                                      "+");
+			    rect.attr({fill: "white"});
+                return;
+            }
 
             // draw children
             var y = y + height + 2;
