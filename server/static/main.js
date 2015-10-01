@@ -309,7 +309,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                     $location.search({view: visualization});
                 }
 
-                var cutoff = root.total_cumulative_ticks() / 100;
+                var cutoff_percentage = 0.01;
                 if (visualization == 'squares') {
                     // Visualization.squareChart(
                     //     $("#visualization"),
@@ -325,7 +325,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                         height,
                         vroot,
                         $scope, $location,
-                        cutoff, path_so_far,
+                        cutoff_percentage, path_so_far,
                         VM,
                         false
                     );
@@ -337,7 +337,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
                         height,
                         root,
                         $scope, $location,
-                        cutoff, path_so_far,
+                        cutoff_percentage, path_so_far,
                         VM,
                         true
                     );

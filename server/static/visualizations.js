@@ -135,7 +135,7 @@ var Visualization = {};
     }
 
 	Visualization.flameChart = function($element, view, total_height, node, $scope,
-                                        $location, cutoff, path_so_far, VM,
+                                        $location, cutoff_percentage, path_so_far, VM,
                                         highlight_virtuals) {
 
 		function draw(x, y, width, height, node, path) {
@@ -230,6 +230,7 @@ var Visualization = {};
 			node = node.children[i];
 		}
 
+		var cutoff = cutoff_percentage * node.total;
 		$scope.total_time = node.total_cumulative_ticks() / $scope.root.total_cumulative_ticks();
 		$scope.self_time = node.total_self_or_virtual_ticks() / $scope.root.total_cumulative_ticks();
 
