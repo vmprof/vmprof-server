@@ -229,9 +229,12 @@ var Visualization = {};
 
             // don't display children if we are already below the cutoff threshold
             if (node.total < cutoff) {
-                var dots = paper.text(x + width / 2,
+                var plus = paper.text(x + width / 2,
                                       y + height / 2,
                                       "+");
+                if (plus.getBBox().width > width) {
+                    plus.remove();
+                }
 			    rect.attr({fill: "white"});
                 return;
             }
