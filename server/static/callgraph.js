@@ -49,6 +49,28 @@ StackFrameNode.prototype.max_self = function() {
     return max;
 }
 
+StackFrameNode.prototype.get_ticks_dict = function(kind) {
+    if (kind == "cumulative")
+        return this.cumulative_ticks;
+    else if (this.is_virtual)
+        return this.virtual_ticks;
+    else
+        return this.self_ticks;
+}
+
+StackFrameNode.prototype.get_ticks = function(kind, tag) {
+    var d = this.get_ticks_dict(kind);
+    var ticks = 0;
+    for (var curtag in d) {
+        if (curtag.startsWith(tag)) {
+            ticks += d[curtag];
+        }
+    }
+    if (ticks == 0)
+        return 0;
+    return ticks / _total_ticks(d);
+}
+
 StackFrameNode.prototype.red = function() {
     var C = this.cumulative_ticks['C'] || 0;
     return C / this.total_cumulative_ticks();

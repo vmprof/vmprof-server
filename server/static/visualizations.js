@@ -98,22 +98,32 @@ var Visualization = {};
 	}
 
     function add_tooltip(node, rect, text) {
-        var ul = $('<ul class="list-inline">')
-        var phases = [
-            {text: "Interpreted: ", cls: "label-danger",  value: node.red()},
-            {text: "Warm-up: ",     cls: "label-warning", value: node.yellow()},
-            {text: "JIT: ",         cls: "label-success", value: node.green()},
-            {text: "GC: ",          cls: "label-info",    value: node.gc()}
-        ];
-        for (var i in phases) {
-            var phase = phases[i];
-            var li = $('<li>').
-                addClass("label").
-                addClass(phase.cls).
-                text(phase.text + (phase.value*100).toFixed(2) + "%");
-            ul.append(li);
-            ul.append("\n");
+        var div = $("<div>");
+        
+        for (var kind of ["cumulative", "self"]) {
+            var ul = $('<ul class="list-inline">');
+            var phases = [
+                {text: "Interpreted: ", cls: "label-danger",  value: node.get_ticks(kind, "C")},
+                {text: "Warm-up: ",     cls: "label-warning", value: node.get_ticks(kind, "WARMUP")},
+                {text: "JIT: ",         cls: "label-success", value: node.get_ticks(kind, "JIT")},
+                {text: "GC: ",          cls: "label-info",    value: node.get_ticks(kind, "GC:")},
+                {text: kind,            cls: "label-default", value: null}
+            ];
+            for (var i in phases) {
+                var phase = phases[i];
+                var text = phase.text;
+                if (phase.value != null)
+                    text += (phase.value*100).toFixed(2) + "%";
+                var li = $('<li>').
+                    addClass("label").
+                    addClass(phase.cls).
+                    text(text);
+                ul.append(li);
+                ul.append("\n");
+            }
+            div.append(ul);
         }
+
 
         /* useful for debugging */
         // ul.append("cumulative: " + JSON.stringify(node.cumulative_ticks));
@@ -122,7 +132,7 @@ var Visualization = {};
         // ul.append("; self: " + node.self);
         // ul.append("; total: " + node.total);
 
-        var tooltip = ul[0].outerHTML;
+        var tooltip = div[0].outerHTML;
 		var name = split_name(node.name);
         $(rect.node).add(text.node).popover({
             title: _.escape(name.funcname),
