@@ -97,8 +97,20 @@ var Visualization = {};
         return GREY;
 	}
 
-    function add_tooltip(node, rect, text) {
+    function _fmt_percent(value) {
+        return (value*100).toFixed(2) + "%";
+    }
+
+    function add_tooltip(node, rect, text, all_total, total) {
         var div = $("<div>");
+        
+        var ul = $('<ul class="list-inline">');
+        ul.append($('<li class="label label-default">').
+                  text("Relative to <all>: " + _fmt_percent(node.total/all_total)));
+        ul.append("\n");
+        ul.append($('<li class="label label-default">').
+                  text("Relative to current: " + _fmt_percent(node.total/total)));
+        div.append(ul);
         
         for (var kind of ["cumulative", "self"]) {
             var ul = $('<ul class="list-inline">');
@@ -113,7 +125,7 @@ var Visualization = {};
                 var phase = phases[i];
                 var text = phase.text;
                 if (phase.value != null)
-                    text += (phase.value*100).toFixed(2) + "%";
+                    text += _fmt_percent(phase.value);
                 var li = $('<li>').
                     addClass("label").
                     addClass(phase.cls).
@@ -123,7 +135,6 @@ var Visualization = {};
             }
             div.append(ul);
         }
-
 
         /* useful for debugging */
         // ul.append("cumulative: " + JSON.stringify(node.cumulative_ticks));
@@ -148,7 +159,7 @@ var Visualization = {};
                                         $location, cutoff_percentage, path_so_far, VM,
                                         highlight_virtuals) {
 
-		function draw(x, y, width, height, node, path) {
+		function draw(x, y, width, height, node, path, width_of_parent) {
             if (y > total_height) {
                 return;
             }
@@ -185,7 +196,7 @@ var Visualization = {};
             st.data('stroke-width', 1);
             var cur_path = path.toString();
 
-            add_tooltip(node, rect, text)
+            add_tooltip(node, rect, text, global_root.total, root.total);
 
 			st.hover(
 				function(e) {
@@ -232,13 +243,14 @@ var Visualization = {};
                 c_path.push(child);
                 var child = node.children[child];
                 var _width = child.total / node.total * width;
-                draw(x,  y, _width, height, child, c_path)
+                draw(x,  y, _width, height, child, c_path, width)
                 x = x + _width;
             }
 		}
 
 		$element.empty();
 		$("#visualization-data").hide();
+		var global_root = node;
 
 		// find the current node using path_so_far
 		for(var i in path_so_far) {
@@ -246,6 +258,7 @@ var Visualization = {};
 			node = node.children[i];
 		}
 
+		var root = node;
 		var cutoff = cutoff_percentage * node.total;
 		$scope.total_time = node.total_cumulative_ticks() / $scope.root.total_cumulative_ticks();
 		$scope.self_time = node.total_self_or_virtual_ticks() / $scope.root.total_cumulative_ticks();
