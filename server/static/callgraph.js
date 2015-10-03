@@ -9,7 +9,6 @@ StackFrameNode.setPrototype = function(node) {
     // XXX?
     node.total = node.total_cumulative_ticks();
     node.self = node.total_self_or_virtual_ticks(); 
-    node.name = node.frame;
     // XXX?
 
     for (var i in node.children) {

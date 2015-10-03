@@ -144,9 +144,8 @@ var Visualization = {};
         // ul.append("; total: " + node.total);
 
         var tooltip = div[0].outerHTML;
-		var name = split_name(node.name);
         $(rect.node).add(text.node).popover({
-            title: _.escape(name.funcname),
+            title: _.escape(node.name),
             content: tooltip,
             container: "#wide-popovers",
             placement: "bottom",
@@ -163,10 +162,11 @@ var Visualization = {};
             if (y > total_height) {
                 return;
             }
+
 			var rect = paper.rect(x, y, width, height, 5);
 			var text = paper.text(x + width / 2,
 								  y + height / 2,
-								  split_name(node.name).funcname);
+                                  node.name);
 
             if (highlight_virtuals && node.is_virtual) {
                 text.attr({"font-weight": "bold"});
@@ -202,11 +202,13 @@ var Visualization = {};
 				function(e) {
 					var node = this.data('node');
                     var rect = this.data('rect');
-                    var name = split_name(node.name);
+                    var filename = node.filename;
+                    if (node.line != null)
+                        filename += ":" + node.line;
                     rect.attr({'stroke-width': 2});
 					$(rect.node).css('opacity', 1);
-                    $("#funcname").text(name.funcname);
-                    $("#filename").text(name.file + ":" + name.line);
+                    $("#funcname").text(node.name);
+                    $("#filename").text(filename);
                     $("#visualization-data").show();
 				},
 				function(e) {
