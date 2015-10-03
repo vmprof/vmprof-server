@@ -17,6 +17,14 @@ StackFrameNode.setPrototype = function(node) {
     }
 }
 
+StackFrameNode.prototype.fmt_filename = function() {
+    var filename = this.filename;
+    if (this.line != null)
+        filename += ":" + this.line;
+    return filename;
+}
+
+
 function _total_ticks(d) {
     var total = 0;
     for (var tag in d) {

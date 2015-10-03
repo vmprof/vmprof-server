@@ -136,6 +136,17 @@ var Visualization = {};
             div.append(ul);
         }
 
+        div.append(
+            $('<ul class="list-inline">').append(
+                $('<li>').append(
+                    $('<small>').text(
+                        node.fmt_filename()
+                    )
+                )
+            )
+        );
+
+
         /* useful for debugging */
         // ul.append("cumulative: " + JSON.stringify(node.cumulative_ticks));
         // ul.append("self_or_virt: " + node.total_self_or_virtual_ticks());
@@ -202,13 +213,10 @@ var Visualization = {};
 				function(e) {
 					var node = this.data('node');
                     var rect = this.data('rect');
-                    var filename = node.filename;
-                    if (node.line != null)
-                        filename += ":" + node.line;
                     rect.attr({'stroke-width': 2});
 					$(rect.node).css('opacity', 1);
                     $("#funcname").text(node.name);
-                    $("#filename").text(filename);
+                    $("#filename").text(node.fmt_filename());
                     $("#visualization-data").show();
 				},
 				function(e) {
