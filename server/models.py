@@ -17,8 +17,6 @@ class Log(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     uid = models.CharField(max_length=128, default=default_hash)
 
-    data = models.TextField()
-
     name = models.CharField(max_length=256, blank=True)
     vm = models.CharField(max_length=32, blank=True)
 
@@ -38,6 +36,9 @@ class Entry(models.Model):
     data = models.TextField(default="{}")
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 @admin.register(Log)

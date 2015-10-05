@@ -7,6 +7,8 @@ from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
 from django.contrib import auth
 from django.contrib import admin
+from django.conf import settings
+from django.utils import dateformat
 
 from rest_framework import views
 from rest_framework import routers
@@ -18,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
 
-from .models import Log
+from .models import Log, Entry
 
 
 username_max = auth.models.User._meta.get_field('username').max_length
@@ -57,15 +59,30 @@ class UserRegisterSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=6, max_length=password_max)
 
 
+class EntriesField(serializers.RelatedField):
+    def to_representation(self, value):
+        return {
+            "id": value.id,
+            "created_at": dateformat.format(value.created_at, settings.DATETIME_FORMAT)
+        }
+
+
 class LogSerializer(serializers.ModelSerializer):
-    data = serializers.SerializerMethodField()
+    entries = EntriesField(many=True, read_only=True)
 
     class Meta:
         model = Log
+        fields = ('entries', )
+
+
+class EntrySerializer(serializers.ModelSerializer):
+    data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Entry
 
     def get_data(self, obj):
         return json.loads(obj.data)
-
 
 class LogListSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -73,6 +90,12 @@ class LogListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Log
         fields = ('checksum', 'user', 'created_at', 'vm', 'name')
+
+
+class EntryViewSet(viewsets.ModelViewSet):
+    queryset = Entry.objects.all()
+    serializer_class = EntrySerializer
+    permission_classes = (permissions.AllowAny,)
 
 
 class LogViewSet(viewsets.ModelViewSet):
@@ -182,6 +205,7 @@ class TokenViewSet(viewsets.ModelViewSet):
 
 
 router = routers.DefaultRouter()
+router.register(r'entry', EntryViewSet)
 router.register(r'log', LogViewSet)
 router.register(r'token', TokenViewSet, base_name="token")
 
