@@ -99,6 +99,11 @@ StackFrameNode.prototype.gc = function() {
     return (GC_minor+GC_major) / this.total_cumulative_ticks();
 }
 
+StackFrameNode.prototype.external = function() {
+    var EXTERNAL = this.cumulative_ticks['EXT'] || 0;
+    return EXTERNAL / this.total_cumulative_ticks();
+}
+
 StackFrameNode.prototype.find = function(pattern) {
     if (this.name.match(pattern))
         return this;

@@ -75,12 +75,14 @@ var Visualization = {};
         var GREEN = "#5cb85c";
         var GC = "#5bc0de";
         var GREY = "#777";
+        var EXTERNAL = "#9b59b6";
 
         if (node.is_virtual) {
-            var phases = [{value: node.red(),	 color: RED},
-                          {value: node.yellow(), color: YELLOW},
-                          {value: node.green(),	 color: GREEN},
-                          {value: node.gc(),	 color: GC}
+            var phases = [{value: node.red(),	   color: RED},
+                          {value: node.yellow(),   color: YELLOW},
+                          {value: node.green(),	   color: GREEN},
+                          {value: node.gc(),	   color: GC},
+                          {value: node.external(), color: EXTERNAL}
                           ]
 
             return compute_gradient(phases, width);
@@ -93,6 +95,9 @@ var Visualization = {};
         }
         if (node.tag == "GC:MAJOR" || node.tag == "GC:MINOR") {
             return GC;
+        }
+        if (node.tag == "EXT") {
+            return EXTERNAL;
         }
         return GREY;
 	}
@@ -119,6 +124,7 @@ var Visualization = {};
                 {text: "Warm-up: ",     cls: "label-warning", value: node.get_ticks(kind, "WARMUP")},
                 {text: "JIT: ",         cls: "label-success", value: node.get_ticks(kind, "JIT")},
                 {text: "GC: ",          cls: "label-info",    value: node.get_ticks(kind, "GC:")},
+                {text: "Ext: ",         cls: "label-external",value: node.get_ticks(kind, "EXT")},
                 {text: kind,            cls: "label-default", value: null}
             ];
             for (var i in phases) {
@@ -148,6 +154,7 @@ var Visualization = {};
 
 
         /* useful for debugging */
+        // div.append("tag: " + node.tag);
         // ul.append("cumulative: " + JSON.stringify(node.cumulative_ticks));
         // ul.append("self_or_virt: " + node.total_self_or_virtual_ticks());
         // ul.append("; cumul: " + node.total_cumulative_ticks());

@@ -128,3 +128,8 @@ svg rect, svg text {
 #wide-popovers .popover {
     max-width: none;
 }
+
+/* additional bootstrap label class */
+.label-external {
+  background-color: #9b59b6;
+}
