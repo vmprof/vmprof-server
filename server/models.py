@@ -33,6 +33,10 @@ class Log(models.Model):
         return super(Log, self).save(*args, **kwargs)
 
 
+class Entry(models.Model):
+    log = models.ForeignKey('Log', related_name="entries")
+
+
 @admin.register(Log)
 class LogAdmin(admin.ModelAdmin):
     list_display = ('name', 'vm', 'checksum', 'user', 'created')
