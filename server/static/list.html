@@ -15,7 +15,7 @@
 
       <div ng-show="!loading" class="list-group" ng-init="ago=true">
 
-        <div class="media" ng-repeat="log in logs" ng-style="background(log.created)">
+        <div class="media" ng-repeat="log in logs" ng-style="background(log.created_at)">
           <div class="media-left">
 
             <img class="media-object" ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
@@ -30,8 +30,8 @@
 
             <div class="times" >
 	      {{ log.vm }} / 
-              <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
-              <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
+              <span ng-show="ago" ng-click="ago=false">{{ log.created_at | ago }}</span>
+              <span ng-hide="ago" ng-click="ago=true">{{ log.created_at }}</span>
             </div>
           </div>
         </div>

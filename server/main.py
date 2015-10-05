@@ -72,7 +72,7 @@ class LogListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Log
-        fields = ('checksum', 'user', 'created', 'vm', 'name')
+        fields = ('checksum', 'user', 'created_at', 'vm', 'name')
 
 
 class LogViewSet(viewsets.ModelViewSet):
