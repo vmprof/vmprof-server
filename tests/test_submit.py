@@ -36,6 +36,23 @@ def test_submit(c):
 
 
 @pytest.mark.django_db
+def test_submit_uid(c):
+    from .submit import data
+
+    data = {
+        'data': b64encode(json.dumps(data)),
+        'VM': 'cpython',
+        'argv': 'test.py',
+        'uid': 'test'
+    }
+
+    response = c.post('/api/log/', data=data)
+
+    assert Log.objects.get(checksum=response.data)
+    assert Log.objects.count() == 1
+
+
+@pytest.mark.django_db
 def test_log(c):
     from .submit import data
 
