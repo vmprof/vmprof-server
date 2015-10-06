@@ -224,7 +224,7 @@ var Visualization = {};
 					$(rect.node).css('opacity', 1);
                     $("#funcname").text(node.name);
                     $("#filename").text(node.fmt_filename());
-                    $("#visualization-data").show();
+                    //$("#visualization-data").show();
 				},
 				function(e) {
                     var rect = this.data('rect');
@@ -232,7 +232,7 @@ var Visualization = {};
                     var stroke_width = this.data('stroke-width');
 					rect.attr({'stroke-width': stroke_width});
 					$(rect.node).css('opacity', opacity);
-                    $("#visualization-data").hide();
+                    //$("#visualization-data").hide();
 				}
 			);
 
