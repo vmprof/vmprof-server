@@ -8,7 +8,6 @@ from django.contrib.staticfiles import views as static
 from django.contrib import auth
 from django.contrib import admin
 from django.conf import settings
-from django.utils import dateformat
 
 from rest_framework import views
 from rest_framework import routers
@@ -20,105 +19,36 @@ from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
 
-from .models import Log, Entry
-
-
-username_max = auth.models.User._meta.get_field('username').max_length
-password_max = auth.models.User._meta.get_field('password').max_length
-email_max = auth.models.User._meta.get_field('email').max_length
-
-
-class UserSerializer(serializers.ModelSerializer):
-    gravatar = serializers.SerializerMethodField()
-
-    class Meta:
-        model = auth.models.User
-        fields = ['id', 'username', 'gravatar']
-
-    def get_gravatar(self, obj):
-        default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
-        size = 40
-
-        gravatar_hash = hashlib.md5(obj.email.lower()).hexdigest()
-        gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
-        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
-
-        return gravatar_url
-
-
-class UserRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(
-        min_length=5,
-        max_length=username_max,
-        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
-    )
-    email = serializers.EmailField(
-        max_length=email_max,
-        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
-    )
-    password = serializers.CharField(min_length=6, max_length=password_max)
-
-
-class EntriesField(serializers.RelatedField):
-    def to_representation(self, value):
-        return {
-            "id": value.id,
-            "created_at": dateformat.format(value.created_at, settings.DATETIME_FORMAT)
-        }
-
-
-class LogSerializer(serializers.ModelSerializer):
-    entries = EntriesField(many=True, read_only=True)
-
-    class Meta:
-        model = Log
-        fields = ('entries', )
-
-
-class EntrySerializer(serializers.ModelSerializer):
-    data = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Entry
-
-    def get_data(self, obj):
-        return json.loads(obj.data)
-
-class LogListSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = Log
-        fields = ('checksum', 'user', 'created_at', 'vm', 'name')
+from . import models
+from . import serializers
 
 
 class EntryViewSet(viewsets.ModelViewSet):
-    queryset = Entry.objects.all()
-    serializer_class = EntrySerializer
+    queryset = models.Entry.objects.all()
+    serializer_class = serializers.EntrySerializer
     permission_classes = (permissions.AllowAny,)
 
 
 class LogViewSet(viewsets.ModelViewSet):
-    queryset = Log.objects.select_related('user')
-    serializer_class = LogListSerializer
-    permission_classes = (permissions.AllowAny,)
-
-    def get_serializer_class(self):
-        if 'pk' in self.kwargs:
-            return LogSerializer
-        return LogListSerializer
+    queryset = models.Log.objects.select_related('user')
+    serializer_class = serializers.LogSerializer
 
     def create(self, request):
         data = json.dumps(request.data)
-        checksum = hashlib.md5(data).hexdigest()
+        checksum = request.data.get('uid', hashlib.md5(data).hexdigest())
         user = request.user if request.user.is_authenticated() else None
-        log, _ = self.queryset.get_or_create(
-            data=data,
-            checksum=checksum,
-            user=user,
-            vm=request.data['VM'],
-            name=request.data['argv']
-        )
+
+        try:
+            log = self.queryset.get(checksum=checksum)
+        except self.queryset.model.DoesNotExist:
+            log = self.queryset.create(
+                checksum=checksum,
+                user=user,
+                vm=request.data['VM'],
+                name=request.data['argv']
+            )
+
+        log.entries.create(data=data)
 
         return Response(log.checksum)
 
@@ -126,7 +56,9 @@ class LogViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated():
             return self.queryset
 
-        if not bool(self.request.GET.get('all', False)) and 'pk' not in self.kwargs:
+        if not bool(self.request.GET.get('all', False)) \
+           and 'pk' not in self.kwargs:
+
             return self.queryset.filter(user=self.request.user)
         return self.queryset
 
@@ -148,7 +80,7 @@ class MeView(views.APIView):
     permission_classes = (UserPermission,)
 
     def get(self, request, format=None):
-        data = UserSerializer(self.request.user).data
+        data = serializers.UserSerializer(self.request.user).data
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
@@ -159,15 +91,19 @@ class MeView(views.APIView):
 
         if user is not None and user.is_active:
             auth.login(request, user)
-            return Response(UserSerializer(user).data, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                serializers.UserSerializer(user).data,
+                status=status.HTTP_202_ACCEPTED)
 
         return Response(status=status.HTTP_403_FORBIDDEN)
 
     def put(self, request, format=None):
-        serializer = UserRegisterSerializer(data=request.data)
+        serializer = serializers.UserRegisterSerializer(
+            data=request.data)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         auth.models.User.objects.create_user(
             serializer.data['username'],
@@ -182,21 +118,16 @@ class MeView(views.APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Token
-
-
 class TokenViewSet(viewsets.ModelViewSet):
-    serializer_class = TokenSerializer
+    serializer_class = serializers.TokenSerializer
     model = Token
 
     def get_queryset(self):
-        return Token.objects.filter(user=self.request.user)
+        return models.Token.objects.filter(user=self.request.user)
 
     def create(self, request):
-        Token.objects.filter(user=self.request.user).delete()
-        Token.objects.create(user=self.request.user)
+        models.Token.objects.filter(user=self.request.user).delete()
+        models.Token.objects.create(user=self.request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     def list(self, request):
@@ -215,3 +146,4 @@ urlpatterns = [
     url(r'^api/user/', MeView.as_view()),
     url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
 ]
+

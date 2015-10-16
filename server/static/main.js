@@ -260,73 +260,80 @@ app.controller('list', function ($scope, $http, $interval) {
 
 });
 
-app.controller('details', function ($scope, $http, $routeParams, $timeout,
-                                    $location) {
-    angular.element('svg').remove();
+app.controller('details', function ($scope, $http, $routeParams, $timeout, $location) {
 
-    $scope.loading = true;
-    $http.get('/api/log/' + $routeParams.log + '/', {
-        cache: true
-    }).then(function(response) {
+    $scope.$on('$destroy', function() {
+        angular.element('svg').remove();
+    });
+
+    $scope.loadEntry = function(entry) {
+        $scope.loading = true;
+        return $http.get(entry.url).then(function(response) {
+            $scope.loading = false;
+            var stats = new Stats(response.data);
+            global_stats = stats;
+            var root = stats.nodes;
+            $scope.visualization = $routeParams.view || 'flames';
+            var d = stats.getProfiles($routeParams.id);
+
+            $scope.currentProfiles = d.profiles;
+            $scope.root = d.root;
+            $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
+            $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
+            $scope.node_total_time = d.root.total / stats.nodes.total;
+            $scope.node_self_time = d.root.self / stats.nodes.total;
+            $scope.paths = d.paths;
+
+            $timeout(function () {
+                $('[data-toggle=tooltip]').tooltip();
+                var height = 800; //$('.table').height();
+                var $visualization = $("#visualization");
+                if ($visualization.length < 1)
+                    return;
+                $scope.visualizationChange = function(visualization) {
+
+                    $scope.visualization = visualization;
+                    var cutoff = d.root.total / 100;
+                    if (visualization == 'squares') {
+                        Visualization.squareChart(
+                            $("#visualization"),
+                            height,
+                            d.root,
+                            $scope, $location,
+                            $scope.pathSoFar
+                        );
+                    }
+                    if (visualization == 'flames') {
+                        Visualization.flameChart(
+                            $("#visualization"),
+                            height, d.root,
+                            $scope, $location, cutoff,
+                            $scope.pathSoFar,
+                            stats.VM
+                        );
+                    }
+                };
+
+                $scope.visualizationChange($scope.visualization);
+            });
+
+        });
+    };
+
+    $http.get('/api/log/' + $routeParams.log + '/').then(function(response) {
         $scope.log = response.data;
 
         var addresses = $routeParams.id;
-        var path_so_far;
+        var pathSoFar;
 
         if (addresses) {
-            path_so_far = addresses.split(",");
+            $scope.pathSoFar = addresses.split(",");
         } else {
-            path_so_far = [];
+            $scope.pathSoFar = [];
         }
 
-        var stats = new Stats(response.data.data);
-        global_stats = stats;
-        var root = stats.nodes;
-        $scope.visualization = $routeParams.view || 'flames';
-        var d = stats.getProfiles($routeParams.id);
-
-        $scope.currentProfiles = d.profiles;
-        $scope.root = d.root;
-        $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
-        $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
-        $scope.node_total_time = d.root.total / stats.nodes.total;
-        $scope.node_self_time = d.root.self / stats.nodes.total;
-        $scope.paths = d.paths;
-
-        $timeout(function () {
-            $('[data-toggle=tooltip]').tooltip();
-            var height = 800; //$('.table').height();
-            var $visualization = $("#visualization");
-            if ($visualization.length < 1)
-                return;
-            $scope.visualizationChange = function(visualization) {
-
-                $scope.visualization = visualization;
-                var cutoff = d.root.total / 100;
-                if (visualization == 'squares') {
-                    Visualization.squareChart(
-                        $("#visualization"),
-                        height,
-                        d.root,
-                        $scope, $location, path_so_far
-                    );
-                }
-                if (visualization == 'flames') {
-                    Visualization.flameChart(
-                        $("#visualization"),
-                        height,
-                        d.root,
-                        $scope, $location,
-                        cutoff, path_so_far,
-                        stats.VM
-                    );
-                }
-            };
-
-            $scope.visualizationChange($scope.visualization);
-        });
-
-        $scope.loading = false;
+        $scope.entry = $scope.log.entries[0];
+        $scope.loadEntry($scope.entry);
     });
 });
 

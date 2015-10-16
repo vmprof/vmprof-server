@@ -1,88 +1,94 @@
 <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
 
- <!-- this is used just as the the container of tooltips, so that I can style
-      them selectively in main.css -->
+<!-- this is used just as the the container of tooltips, so that I can style
+     them selectively in main.css -->
 <div id="wide-popovers"></div>
 
 <div id="item" ng-show="!loading">
 
-    <ol class="breadcrumb">
-        <li>
-            <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}">{{ log.data.argv }}</a>
-            <span ng-if="name">: {{ name }}</span>
-        </li>
-        <li ng-repeat="path in paths">
-            <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}&id={{ path.path }}">
-                {{ path.name }} {{ "(" + (path.percentage * 100).toFixed(2) + "%)" }}
-            </a>
-        </li>
-    </ol>
+  <ol class="breadcrumb">
 
-    <header>
+    <li>
+      <a ng-href="/#/"> $HOME </a> //
+      <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}">{{ log.name }}</a>
+    </li>
 
-        <div class="times">
-            <span data-toggle="tooltip" title="Cumulative time spent in this function here">
-                <i class="fa fa-clock-o"></i>
-                <strong>{{ (node_total_time * 100).toFixed(2) }}%</strong>
-            </span>
-            <span data-toggle="tooltip" title="Cumulative time spent in this function everywhere">
-                /
-                <strong>{{ (total_time * 100).toFixed(2) }}%</strong>
-            </span>
+    <li ng-repeat="path in paths">
+      <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}&id={{ path.path }}">
+        {{ path.name }} {{ "(" + (path.percentage * 100).toFixed(2) + "%)" }}
+      </a>
+    </li>
 
-            <span data-toggle="tooltip" title="Time spent in this function here">
-                <i class="fa fa-arrow-down"></i>
-                <strong>{{ (node_self_time * 100).toFixed(2) }}%</strong>
-            </span>
-            <span data-toggle="tooltip" title="Time spent in this function everywhere">
-                /
-                <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
-            </span>
-        </div>
+    <select class="pull-right"
+	    ng-change="loadEntry(entry)"
+	    ng-options="entry.created_at for entry in log.entries track by entry.id"
+	    ng-model="entry"></select>
+  </ol>
 
-        <div class="metadata" ng-if="root.cumulative_meta">
-            <span class="label label-danger">
-                Interpreted: {{ (root.red() * 100).toFixed(2) }}%
-            </span>
+  <header>
+    <div class="times">
+      <span data-toggle="tooltip" title="Cumulative time spent in this function here">
+        <i class="fa fa-clock-o"></i>
+        <strong>{{ (node_total_time * 100).toFixed(2) }}%</strong>
+      </span>
+      <span data-toggle="tooltip" title="Cumulative time spent in this function everywhere">
+        /
+        <strong>{{ (total_time * 100).toFixed(2) }}%</strong>
+      </span>
 
-            <span class="label label-warning" data-toggle="tooltip"
-                  title="Blackhole: {{ (root.blackhole() * 100).toFixed(2) }}% tracing: {{ (root.tracing() * 100).toFixed(2) }}%">
-                Warm-up: {{ (root.yellow() * 100).toFixed(2) }}%
-            </span>
+      <span data-toggle="tooltip" title="Time spent in this function here">
+        <i class="fa fa-arrow-down"></i>
+        <strong>{{ (node_self_time * 100).toFixed(2) }}%</strong>
+      </span>
+      <span data-toggle="tooltip" title="Time spent in this function everywhere">
+        /
+        <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
+      </span>
+    </div>
 
-            <span class="label label-success">
-                JIT: {{ (root.green() * 100).toFixed(2) }}%
-            </span>
+    <div class="metadata" ng-if="root.cumulative_meta">
+      <span class="label label-danger">
+        Interpreted: {{ (root.red() * 100).toFixed(2) }}%
+      </span>
 
-            <span class="label label-info" data-toggle="tooltip"
-                  title="Minor: {{ (root.gc_minor() * 100).toFixed(2) }}% major: {{ (root.gc_major() * 100).toFixed(2) }}%">
-                GC: {{ (root.gc() * 100).toFixed(2) }}%
-            </span>
-            <i class="fa fa-question-circle" data-toggle="tooltip" title="Meta data (cumulative for this callsite)"></i>
-        </div>
-    </header>
+      <span class="label label-warning" data-toggle="tooltip"
+            title="Blackhole: {{ (root.blackhole() * 100).toFixed(2) }}% tracing: {{ (root.tracing() * 100).toFixed(2) }}%">
+        Warm-up: {{ (root.yellow() * 100).toFixed(2) }}%
+      </span>
+
+      <span class="label label-success">
+        JIT: {{ (root.green() * 100).toFixed(2) }}%
+      </span>
+
+      <span class="label label-info" data-toggle="tooltip"
+            title="Minor: {{ (root.gc_minor() * 100).toFixed(2) }}% major: {{ (root.gc_major() * 100).toFixed(2) }}%">
+        GC: {{ (root.gc() * 100).toFixed(2) }}%
+      </span>
+      <i class="fa fa-question-circle" data-toggle="tooltip" title="Meta data (cumulative for this callsite)"></i>
+    </div>
+  </header>
 
 </div>
 
 
 <div ng-show="!loading" class="panel panel-default">
 
-    <div ng-if="currentProfiles.length > 0" class="row">
-        <div class="btn-group" role="group" aria-label="...">
-            <button type="button" class="btn btn-default"
-                    ng-click="visualizationChange('squares')"
-                    ng-class="{active: visualization=='squares'}"}>
-                    <span class="glyphicon glyphicon-th" aria-hidden="true"></span>
-            </button>
-            <button type="button" class="btn btn-default"
-                    ng-click="visualizationChange('flames')"
-                    ng-class="{active: visualization=='flames'}"}>
-                    <span class="glyphicon glyphicon-align-center" aria-hidden="true"></span>
-            </button>
-        </div>
-        <span id="visualization-data">
-        </span>
-        <div id="visualization"></div>
+  <div ng-if="currentProfiles.length > 0" class="row">
+    <div class="btn-group" role="group" aria-label="...">
+      <button type="button" class="btn btn-default"
+              ng-click="visualizationChange('squares')"
+              ng-class="{active: visualization=='squares'}"}>
+        <span class="glyphicon glyphicon-th" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="btn btn-default"
+              ng-click="visualizationChange('flames')"
+              ng-class="{active: visualization=='flames'}"}>
+        <span class="glyphicon glyphicon-align-center" aria-hidden="true"></span>
+      </button>
     </div>
+    <span id="visualization-data">
+    </span>
+    <div id="visualization"></div>
+  </div>
 </div>
 
