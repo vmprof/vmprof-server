@@ -14,6 +14,9 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 from . import models
 from . import serializers
@@ -116,6 +119,8 @@ class MeView(views.APIView):
 
 class TokenViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.TokenSerializer
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated,)
     model = Token
 
     def get_queryset(self):
@@ -127,7 +132,8 @@ class TokenViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_201_CREATED)
 
     def list(self, request):
-        serializer = self.serializer_class(self.get_queryset(), many=True)
+        serializer = self.serializer_class(
+            self.get_queryset(), many=True)
         return Response(serializer.data)
 
 

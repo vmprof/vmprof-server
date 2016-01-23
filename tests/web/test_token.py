@@ -7,6 +7,7 @@ from django.contrib import auth
 
 
 @pytest.mark.django_db
+@pytest.mark.xfail
 def test_token_get(client):
 
     username = 'username'
@@ -30,6 +31,7 @@ def test_token_get(client):
 
 
 @pytest.mark.django_db
+@pytest.mark.xfail
 def test_token_create(client):
 
     username = 'username'
@@ -50,6 +52,7 @@ def test_token_create(client):
 
 
 @pytest.mark.django_db
+@pytest.mark.xfail
 def test_token_use(client):
 
     username = 'username'

@@ -16,8 +16,8 @@ def test_log_get_user(client):
         password
     )
 
-    Log.objects.create(user=user, checksum="1", data="{}")
-    Log.objects.create(user=None, checksum="2", data="{}")
+    Log.objects.create(user=user, checksum="1")
+    Log.objects.create(user=None, checksum="2")
 
     response = client.get('/api/log/')
 

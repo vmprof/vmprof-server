@@ -1,5 +1,6 @@
 import json
 import hashlib
+import urllib
 
 from django.contrib import auth
 from django.conf import settings
