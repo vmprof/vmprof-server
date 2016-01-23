@@ -77,7 +77,7 @@ class EntrySerializer(serializers.ModelSerializer):
         model = Entry
 
     def get_data(self, obj):
-        return json.loads(obj.data)['profiles']
+        return json.loads(obj.data)['data']
 
 
 class TokenSerializer(serializers.ModelSerializer):
