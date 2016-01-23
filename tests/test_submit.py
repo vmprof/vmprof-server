@@ -56,7 +56,10 @@ def test_submit_uid(c):
 def test_log(c):
     from .submit import data
 
-    log = Log.objects.create(data=json.dumps(data))
+    checksum = "test"
+
+    log = Log.objects.create(checksum=checksum)
+    log.entries.create(data=json.dumps(data))
 
     response = c.get('/api/log/%s/' % log.checksum)
 

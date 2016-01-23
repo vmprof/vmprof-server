@@ -11,7 +11,8 @@ def default_hash():
 
 
 class Log(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True, blank=False)
 
     checksum = models.CharField(max_length=32, primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -22,13 +23,6 @@ class Log(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-
-    def save(self, *args, **kwargs):
-        if not self.checksum:
-            data = self.data
-            self.checksum = hashlib.md5(data).hexdigest()
-
-        return super(Log, self).save(*args, **kwargs)
 
 
 class Entry(models.Model):

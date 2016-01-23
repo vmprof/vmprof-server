@@ -5,7 +5,7 @@ from rest_framework import status
 
 from django.contrib import auth
 
-from server.main import UserRegisterSerializer
+from server.serializers import UserRegisterSerializer
 
 
 @pytest.mark.django_db

@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 import json
-import urllib
 import hashlib
 
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
 from django.contrib import auth
 from django.contrib import admin
-from django.conf import settings
 
 from rest_framework import views
 from rest_framework import routers
 from rest_framework import status
 from rest_framework import permissions
-from rest_framework import validators
-from rest_framework import pagination
 from rest_framework.response import Response
-from rest_framework import viewsets, serializers
+from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 
 from . import models
@@ -123,11 +119,11 @@ class TokenViewSet(viewsets.ModelViewSet):
     model = Token
 
     def get_queryset(self):
-        return models.Token.objects.filter(user=self.request.user)
+        return Token.objects.filter(user=self.request.user)
 
     def create(self, request):
-        models.Token.objects.filter(user=self.request.user).delete()
-        models.Token.objects.create(user=self.request.user)
+        Token.objects.filter(user=self.request.user).delete()
+        Token.objects.create(user=self.request.user)
         return Response(status=status.HTTP_201_CREATED)
 
     def list(self, request):
@@ -146,4 +142,3 @@ urlpatterns = [
     url(r'^api/user/', MeView.as_view()),
     url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
 ]
-
