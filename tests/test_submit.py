@@ -75,7 +75,10 @@ def test_submit_uid_2(c):
     }
 
     response = c.post('/api/log/', data=data)
+
+    assert response.data == uid
     assert Log.objects.count() == 1
+
     log = Log.objects.get(checksum=response.data)
 
     assert log.entries.count() == 2
