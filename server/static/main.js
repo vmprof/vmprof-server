@@ -282,11 +282,12 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
         var stats = new Stats(response.data.data);
         global_stats = stats;
         var root = stats.nodes;
-        $scope.visualization = $routeParams.view || 'flames';
+        $scope.visualization = $routeParams.view || 'list';
         var d = stats.getProfiles($routeParams.id);
 
         $scope.currentProfiles = d.profiles;
         $scope.root = d.root;
+        $scope.stats = stats;
         $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
         $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
         $scope.node_total_time = d.root.total / stats.nodes.total;
@@ -303,13 +304,28 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
 
                 $scope.visualization = visualization;
                 var cutoff = d.root.total / 100;
-                if (visualization == 'squares') {
+                /*if (visualization == 'squares') {
                     Visualization.squareChart(
                         $("#visualization"),
                         height,
                         d.root,
                         $scope, $location, path_so_far
                     );
+                    }*/
+                console.log(visualization);
+                if (visualization == 'list') {
+                    Visualization.listOfFunctions(
+                        $("#visualization"),
+                        height, d.root, $scope, $location,
+                        stats.VM, true
+                    );
+                }
+                if (visualization == 'list-2') {
+                    Visualization.listOfFunctions(
+                        $("#visualization"),
+                        height, d.root, $scope, $location,
+                        stats.VM, false
+                    );                    
                 }
                 if (visualization == 'flames') {
                     Visualization.flameChart(

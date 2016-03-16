@@ -8,34 +8,37 @@ var FunctionData = function (elem) {
     this.total = 0;
     this.self = 0;
     this.name = elem.name;
-    this.update(elem);
 };
 
 FunctionData.prototype.update = function(node) {
-    if (this.name != node.name) {
-    }
     this.total += node.total;
 };
+
+function walk_recursive(allStats, n, accum)
+{
+    if (accum[n.addr]) {
+        return;
+    }
+
+    accum = clone(accum);
+    accum[n.addr] = "a";
+    allStats[n.addr].update(n);
+    for (var i in n.children) {
+        walk_recursive(allStats, n.children[i], accum);
+    }
+}
 
 Stats.prototype.makeTree = function(t) {
 	var n = new Node(t[0], t[1], t[2], t[3], t[4]);
     allStats = [];
-    n.walk(function (elem, accum) {
-        if (accum[elem.addr]) {
-            return 0;
-        }
-        accum = clone(accum);
-        accum[elem.addr] = "a"; // non-zero length
+    n.walk(function (elem) {
         if (allStats[elem.addr] === undefined) {
             allStats[elem.addr] = new FunctionData(elem);
-        } else {
-            allStats[elem.addr].update(elem);
         }
-        return 1;
-    }, []);
-    n.walk(function (elem, ignored) {
+    });
+    walk_recursive(allStats, n, []);
+    n.walk(function (elem) {
         allStats[elem.addr].self += elem.self;
-        return 1;
     });
     this.allStats = allStats;
 	return n;
@@ -125,13 +128,11 @@ function clone(a) {
     return new_a;
 }
 
-Node.prototype.walk = function(cb, accum) {
-    if (!cb(this, accum)) {
-        return;
-    }
+Node.prototype.walk = function(cb) {
+    cb(this);
     for (var i in this.children) {
         c = this.children[i];
-        c.walk(cb, clone(accum));
+        c.walk(cb);
     }
 };
 
@@ -196,18 +197,25 @@ function split_name(name) {
     return {file: file, funcname:nameSegments[1], line: nameSegments[2]};
 }
 
+function parse_func_name(name)
+{
+    var nameSegments = name.split(":");
+    var file;
+    if (nameSegments.length > 4) {
+        file = nameSegments.slice(4, nameSegments.length).join(":");
+    } else {
+        file = nameSegments[3];
+    }
+    return [nameSegments[1], nameSegments[2], file];
+}
+
 Stats.prototype.process = function(functions, parent, total, path_so_far, paths) {
 	var top = [];
 
 	for (var i in functions) {
 		var func = functions[i];
-		var nameSegments = func.name.split(":");
-		var file;
-		if (nameSegments.length > 4) {
-			file = nameSegments.slice(4, nameSegments.length).join(":");
-		} else {
-			file = nameSegments[3];
-		}
+		var name = parse_func_name(functions[i].name);
+        var file = name[2];
 		var path;
 		if (path_so_far.length == 0) {
 			path = i.toString();
@@ -216,8 +224,8 @@ Stats.prototype.process = function(functions, parent, total, path_so_far, paths)
 		}
 		top.push({
 			path: path,
-			name: nameSegments[1],
-			line: nameSegments[2],
+			name: name[0],
+			line: name[1],
 			file: file,
 			times: func.total,
 			self: func.self / total * 100,

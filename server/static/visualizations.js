@@ -206,6 +206,55 @@ var Visualization = {};
         paper.setSize(paper.width, depth + 27);
     };
 
+    Visualization.listOfFunctions = function($element, height, node, $scope,
+                                             $location, VM, cumulative) {
+        $element.empty();
+        var stats = $scope.stats.allStats;
+        var width = $element.width();
+        var paper = Raphael($element[0], width, height);
+        var attr;
+        if (cumulative) {
+            attr = "total";
+        } else {
+            attr = "self";
+        }
+        $scope.stats.allStats.sort(function (a, b) {
+            return b[attr] - a[attr];
+        });
+        var y = 5;
+
+        for (var i in stats) {
+            var stat = stats[i];
+            var name = parse_func_name(stat.name);
+            var percentage = (stat[attr] / $scope.stats.nodes.total);
+            var rect = paper.rect(3, y, (width-6) * percentage, 20, 5);
+            var text = paper.text(30, y + 10, name[0] + " " + (percentage * 100).toFixed(1) + "%");
+            y += 25;
+            text.attr({"text-anchor": "start"})
+            rect.attr({fill: '#5cb85c', stroke: '#888', 'stroke-width': 2});
+            /*$("<div/>").text(name[0] + " " + 
+                (stat.total / $scope.stats.nodes.total * 100).toFixed(1) + "%").addClass(
+                "function-list-item").appendTo($element);*/
+            var st = paper.set();
+            st.click(function () {
+                $location.search({
+                    id: stat.addr,
+                    view: 'function-details'
+                });
+                $scope.$apply();
+            });
+            st.hover(
+                function(e) {
+                    $("#visualization-data").show();
+                },
+                function(e) {
+                    $("#visualization-data").hide();
+                }
+            );
+            st.push(rect, text);
+        }
+    };
+
     Visualization.squareChart = function($element, height, node,
                                          $scope, $location) {
 
@@ -217,7 +266,7 @@ var Visualization = {};
             var scale = scale || scale;
 
             var rect = paper.rect(x, y, width, height);
-            rect.attr({fill: '#9cf', stroke: '#888', 'stroke-width': 2});
+            rect.attr({fill: '#5cb85c', stroke: '#888', 'stroke-width': 2});
             rect.data('name', node.name);
 
             rect.hover(
