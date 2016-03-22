@@ -115,13 +115,15 @@ var Visualization = {};
         var width = $element.width();
         var paper = Raphael($element[0], width, height);
         var max_self = node.max_self();
-        var counter = 0;
 
         function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
+                console.log(node.total, cutoff);
                 return;
             }
-            counter += 1;
+            if (y > $element.height())
+                return
+
             var rect = paper.rect(x, y, width, height, 5);
             var text = paper.text(x + width / 2,
                                   y + height / 2,
@@ -149,7 +151,7 @@ var Visualization = {};
             st.data('opacity', opacity);
             var cur_path = path.toString();
 
-            //add_tooltip(node, rect, text);
+            add_tooltip(node, rect, text);
 
             st.hover(
                 function(e) {
@@ -235,6 +237,8 @@ var Visualization = {};
             var percentage = (stat[attr] / $scope.stats.nodes.total);
             var rect = paper.rect(3, y, (width-6) * percentage, 20, 5);
             var text = paper.text(30, y + 10, name[0] + " " + (percentage * 100).toFixed(1) + "%");
+            if (y > $element.height())
+                break
             y += 25;
             text.attr({"text-anchor": "start"})
             rect.attr({fill: '#5cb85c', stroke: '#888', 'stroke-width': 2});
