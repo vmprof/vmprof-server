@@ -8,6 +8,7 @@ var FunctionData = function (elem) {
     this.total = 0;
     this.self = 0;
     this.name = elem.name;
+    this.addr = elem.addr;
 };
 
 FunctionData.prototype.update = function(node) {
@@ -19,20 +20,38 @@ function walk_recursive(allStats, n, accum)
     if (accum[n.addr]) {
         return;
     }
-
     accum = clone(accum);
     accum[n.addr] = "a";
+    if (allStats[n.addr] == undefined) {
+        allStats[n.addr] = new FunctionData(n);
+    }
     allStats[n.addr].update(n);
     for (var i in n.children) {
         walk_recursive(allStats, n.children[i], accum);
     }
 }
 
+function walk_tree(n)
+{
+    for (var i in n.children) {
+        walk_tree(n.children[i]);
+    }
+}
+
+function run_walk()
+{
+    d0 = new Date();
+    walk_recursive([], global_stats.nodes, []);
+    d1 = new Date();
+    console.log(d1.getTime() - d0.getTime());
+}
+
 Stats.prototype.makeTree = function(t) {
 	var n = new Node(t[0], t[1], t[2], t[3], t[4]);
-    allStats = [];
+    allStats = {};
     n.walk(function (elem) {
         if (allStats[elem.addr] === undefined) {
+            console.log(elem.addr);
             allStats[elem.addr] = new FunctionData(elem);
         }
     });
@@ -41,6 +60,7 @@ Stats.prototype.makeTree = function(t) {
         allStats[elem.addr].self += elem.self;
     });
     this.allStats = allStats;
+    n.countCumulativeMeta();
 	return n;
 };
 
@@ -55,23 +75,17 @@ function Node(name, addr, total, meta, children) {
 		this.children[i] = new Node(c[0], c[1], c[2], c[3], c[4]);
 	}
     var c = {};
-    this.cumulative_meta = this.countCumulativeMeta(c);
 	this.self = this.count_self();
 };
 
-Node.prototype.countCumulativeMeta = function (c) {
-    for (var key in this.meta) {
-        var value = this.meta[key];
-        if (c[key]) {
-            c[key] += value;
-        } else {
-            c[key] = value;
-        }
-    }
+Node.prototype.countCumulativeMeta = function () {
     for (var i in this.children) {
-        this.children[i].countCumulativeMeta(c);
+        this.children[i].countCumulativeMeta();
     }
-    return c;
+    this.cumulative_meta = dict_copy(this.meta);
+    for (var i in this.children) {
+        dict_update(this.cumulative_meta, this.children[i].cumulative_meta);
+    }
 };
 
 function dict_get(d, v, _default)
@@ -81,6 +95,22 @@ function dict_get(d, v, _default)
         return _default;
     }
     return item;
+}
+
+function dict_update(d, d1)
+{
+    for (var i in d1) {
+        d[i] = dict_get(d, i, 0) + d1[i];
+    }    
+}
+
+function dict_copy(a)
+{
+    var new_a = [];
+    for (var i in a) {
+        new_a[i] = a[i];
+    }
+    return new_a;
 }
 
 Node.prototype.green = function() {
