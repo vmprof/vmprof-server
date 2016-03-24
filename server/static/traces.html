@@ -1,0 +1,39 @@
+
+<svg id="traces" width="" height="">
+</svg>
+
+<ul ng-if="jitlog">
+    <li ng-repeat="trace in jitlog.all_traces()">
+        <a ng-href="/#/{{ log.checksum }}/traces?trace={{trace.get_unique_id()}}">
+            {{trace.get_type()}}: {{trace.get_name()}}
+        </a>
+    </li>
+</ul>
+
+<button class="btn btn-default" ng-click="show_asm=!show_asm">Toggle Assembler</button>
+
+<div class="trace" ng-if="trace">
+
+    <div class="trace-type-ctrl btn-group" role="group">
+      <button type="button" class="btn btn-default btn-sm"
+              ng-class="{'active': trace_type == 'noopt'}"
+              ng-click="switch_trace('noopt')">noopt</button>
+      <button type="button" class="btn btn-default btn-sm"
+              ng-class="{'active': trace_type == 'opt'}"
+              ng-click="switch_trace('opt')">opt</button>
+      <button type="button" class="btn btn-default btn-sm"
+              ng-class="{'active': trace_type == 'asm'}"
+              ng-click="switch_trace('asm')">asm</button>
+    </div>
+
+    <div class="no-trace" ng-if="ops.length == 0">empty</div>
+    <div class="trace-line" ng-repeat="op in ops">
+        <div ng-bind-html="op.to_s(format_op)"></div>
+        <div class="trace-asm" ng-if="show_asm">
+            <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
+                <div ng-bind-html="format_asm(asm)"></div>
+            </div>
+        </div>
+    </div>
+</div>
+

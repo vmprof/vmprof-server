@@ -19,7 +19,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
 
-    'server'
+    'server',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -32,7 +32,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'server.main'
+ROOT_URLCONF = 'server.urls'
 WSGI_APPLICATION = 'server.wsgi.app'
 
 DATABASES = {

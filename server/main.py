@@ -4,12 +4,9 @@ import urllib
 import hashlib
 
 from django.conf.urls import url, include
-from django.contrib.staticfiles import views as static
 from django.contrib import auth
-from django.contrib import admin
 
 from rest_framework import views
-from rest_framework import routers
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework import validators
@@ -181,13 +178,3 @@ class TokenViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-router = routers.DefaultRouter()
-router.register(r'log', LogViewSet)
-router.register(r'token', TokenViewSet, base_name="token")
-
-urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include(router.urls)),
-    url(r'^api/user/', MeView.as_view()),
-    url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
-]

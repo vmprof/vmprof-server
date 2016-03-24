@@ -38,6 +38,9 @@
                 /
                 <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
             </span>
+            <span class="pull-right">
+                <a ng-href="#/{{ log.checksum }}/traces">JIT Log</a>
+            </span>
         </div>
 
         <div class="metadata" ng-if="root.cumulative_meta">

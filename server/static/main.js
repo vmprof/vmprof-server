@@ -1,5 +1,5 @@
 var app = angular.module(
-    'vmprof', ['ngRoute', 'ngCookies'], function($routeProvider) {
+    'vmprof', ['ngRoute', 'ngCookies', 'ngSanitize'], function($routeProvider) {
 
         $routeProvider
             .when('/', {
@@ -30,6 +30,10 @@ var app = angular.module(
             .when('/:log', {
                 templateUrl: '/static/details.html',
                 controller: 'details'
+            })
+            .when('/:log/traces', {
+                templateUrl: '/static/traces.html',
+                controller: 'jit-trace-forest'
             })
             .otherwise({
                 redirectTo: '/'
@@ -330,3 +334,37 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
     });
 });
 
+app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
+                                    $location, $sce) {
+    $scope.loading = true;
+    $scope.show_asm = true;
+    $http.get('/api/log/' + $routeParams.log + '/', {
+        cache: true
+    }).then(function(response) {
+        $scope.log = response.data;
+        var jitlog = new JitLog(response.data.data.jitlog);
+        $scope.jitlog = jitlog;
+        if ($routeParams.trace !== undefined) {
+          var trace = jitlog.get_trace_by_id($routeParams.trace);
+          $scope.ops = trace.get_operations('asm').list()
+          $scope.trace_type = 'asm'
+          $scope.trace = trace
+        }
+
+        $scope.loading = false;
+    });
+
+    $scope.switch_trace = function(type) {
+      if ($scope.loading) { return; }
+      $scope.trace_type = type;
+      $scope.trace = undefined
+      var trace = $scope.jitlog.get_trace_by_id($routeParams.trace);
+      var ops = trace.get_operations(type)
+      $scope.ops = ops.list()
+      $scope.trace = trace
+    }
+
+    $scope.format_asm = function(asm) {
+      return asm;
+    }
+});

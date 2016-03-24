@@ -128,3 +128,28 @@ svg rect, svg text {
 #wide-popovers .popover {
     max-width: none;
 }
+
+.trace {
+    font: Courier, monospace;
+    font-size: 14px;
+    background: #f8f8f8;
+    padding: 15px;
+    border: 1px solid #e8e8e8;
+}
+
+.trace-type-ctrl {
+    float: right;
+    padding: 5px;
+}
+
+.trace-line {
+}
+
+span.resop-name {
+    color: #a71d5d;
+}
+
+.trace-asm {
+    margin-left: 15px;
+    color: #969896;
+}
