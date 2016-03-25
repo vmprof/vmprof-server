@@ -263,29 +263,6 @@ app.controller('list', function ($scope, $http, $interval) {
 function display_log($scope, $routeParams, $timeout, $location)
 {
     var stats = $scope.stats;
-
-/*    var addresses = $routeParams.id;
-    var path_so_far;
-
-    if (addresses) {
-        path_so_far = addresses.split(",");
-    } else {
-        path_so_far = [];
-    }
-
-    var stats = new Stats(response.data.data);
-    global_stats = stats;
-    var root = stats.nodes;
-    $scope.visualization = $routeParams.view || 'list';
-    var d = stats.getProfiles($routeParams.id);
-
-    $scope.currentProfiles = d.profiles;
-    $scope.root = d.root;
-    $scope.total_time = stats.allStats[d.root.addr].total / stats.nodes.total;
-    $scope.self_time = stats.allStats[d.root.addr].self / stats.nodes.total;
-    $scope.node_total_time = d.root.total / stats.nodes.total;
-    $scope.node_self_time = d.root.self / stats.nodes.total;
-    $scope.paths = d.paths;*/
     $scope.visualization = $routeParams.view || 'flames';
 
     $timeout(function () {
@@ -297,7 +274,6 @@ function display_log($scope, $routeParams, $timeout, $location)
         $scope.visualizationChange = function(visualization) {
             $scope.visualization = visualization;
             var stats = $scope.stats;
-            console.log(stats);
             if (visualization == 'list') {
                 Visualization.listOfFunctions(
                     $("#visualization"),
@@ -314,7 +290,7 @@ function display_log($scope, $routeParams, $timeout, $location)
                     $("#visualization"),
                     height, $scope, $location,
                     stats.VM, false
-                );                    
+                );
             }
             if (visualization == 'flames') {
                 var d = stats.getProfiles($routeParams.id);

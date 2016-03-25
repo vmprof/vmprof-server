@@ -122,7 +122,7 @@ var Visualization = {};
                 return;
             }
             if (y > $element.height())
-                return
+                return;
 
             var rect = paper.rect(x, y, width, height, 5);
             var text = paper.text(x + width / 2,
@@ -278,7 +278,7 @@ var Visualization = {};
                 accum = clone(accum);
                 accum[n.addr] = 'a';
                 if (found[n.addr] === undefined) {
-                    found[n.addr] = {total: 0, name:n.name}
+                    found[n.addr] = {total: 0, name:n.name};
                 }
                 found[n.addr].total += n.total;
             } else if (n.addr == addr) {

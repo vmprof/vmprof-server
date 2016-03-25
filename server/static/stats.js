@@ -43,7 +43,6 @@ function run_walk()
     d0 = new Date();
     walk_recursive([], global_stats.nodes, []);
     d1 = new Date();
-    console.log(d1.getTime() - d0.getTime());
 }
 
 Stats.prototype.makeTree = function(t) {
@@ -51,7 +50,6 @@ Stats.prototype.makeTree = function(t) {
     allStats = {};
     n.walk(function (elem) {
         if (allStats[elem.addr] === undefined) {
-            console.log(elem.addr);
             allStats[elem.addr] = new FunctionData(elem);
         }
     });
@@ -101,7 +99,7 @@ function dict_update(d, d1)
 {
     for (var i in d1) {
         d[i] = dict_get(d, i, 0) + d1[i];
-    }    
+    }
 }
 
 function dict_copy(a)
@@ -258,13 +256,13 @@ Stats.prototype.process = function(functions, parent, total, path_so_far, paths)
 			line: name[1],
 			file: file,
 			times: func.total,
-			self: func.self / total * 100,
+			self: func.self / total * 100
 		});
 	}
 
 	top.sort(function(a, b) {
 		return b.times - a.times;
-	})
+	});
 	var max = parent || top[0].times;
 
 	return {'profiles': top.map(function(a) {
