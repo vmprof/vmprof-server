@@ -67,22 +67,36 @@ var ResOp = function(jitlog, data) {
   this._data = data
 }
 
-ResOp.prototype.to_s = function(format) {
-  var prefix = ''
+ResOp.prototype.to_s = function(index) {
+  var prefix = '<span class="live-range live-range-'+index+'"></span>' +
+               '<span class="trace-line-number">'+index+':</span> '
+  var fvar = function(variable) {
+    var type = 'const';
+    if (variable.startsWith("i") ||
+        variable.startsWith("r") ||
+        variable.startsWith("p") ||
+        variable.startsWith("f")) {
+      var type = 'var';
+    }
+    return '<span class="'+type+' varid-' + variable + '">' + variable + '</span>'
+  }
   if ('res' in this._data && this._data.res !== '?') {
-    prefix = this._data.res + ' = '
+    prefix += fvar(this._data.res) + ' = '
   }
   var opnum = this._data.num
   var opname = this._jitlog._resops[opnum]
   var args = this._data.args
   var descr = undefined
   var format = function(prefix, opname, args, descr) {
-    var a = args.join(', ')
+    var arg_str = ''
+    for (var i = 0; i < args.length; i++) {
+      arg_str += fvar(args[i]);
+      if (i+1 < args.length) {
+        arg_str += ', ';
+      }
+    }
     return prefix + '<span class="resop-name">' +
-           opname + '</span>(' + a + ')'
-  }
-  var format_variable = function(variable) {
-    return '<span class="var ' +  + '">' + variable + '</span>'
+           opname + '</span>(' + arg_str + ')'
   }
   return format(prefix, opname, args, descr);
 }
@@ -104,10 +118,16 @@ ResOp.prototype.get_disassembly = function() {
     buffer.push((m << 4) | n)
   }
 
+  var rfmt = function(text){
+    var regex = /r(ax|cx|dx|si|di|bp|sp|\d+)/g
+    return text.replace(regex, '<span class="reg" data-varid="r$1">r$1</span>')
+  }
+
   var cs = new capstone.Cs(capstone.ARCH_X86, capstone.MODE_64);
   var instructions = cs.disasm(buffer, offset);
   instructions.forEach(function (instr) {
-    array.push(instr.mnemonic + " " + instr.op_str);
+    array.push('<span class="asm-mnemoic">' + 
+               instr.mnemonic + "</span> " + rfmt(instr.op_str));
   });
   cs.delete();
   return array;

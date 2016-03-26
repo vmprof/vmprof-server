@@ -131,7 +131,7 @@ svg rect, svg text {
 
 .trace {
     font: Courier, monospace;
-    font-size: 14px;
+    font-size: 15px;
     background: #f8f8f8;
     padding: 15px;
     border: 1px solid #e8e8e8;
@@ -147,9 +147,35 @@ svg rect, svg text {
 
 span.resop-name {
     color: #a71d5d;
+    font-weight: bold;
 }
 
 .trace-asm {
     margin-left: 15px;
     color: #969896;
+    font-size: 14px;
+}
+
+span.selected.var {
+    background: black;
+    color: white;
+    padding: 5px;
+}
+
+.live-range.selected {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background-color: blue;
+}
+
+.trace-line-number {
+    display: inline-block;
+    min-width: 1.5em;
+    text-align: right;
+    margin-right: 5px;
+}
+
+.asm-mnemoic {
+    color: #088A29;
 }
