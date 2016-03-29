@@ -341,40 +341,15 @@ app.directive('hoverVars', function($timeout){
         // need the timeout, otherwise the wrong variables
         // will be selected
         $timeout(function(){
-          var enable = function(){
-            jQuery('.var').removeClass('selected');
-            jQuery('.live-range').removeClass('selected');
-            var varid = jQuery(this).attr('class');
-            var varid = varid.substr(varid.indexOf('varid-'))
-            if (varid.indexOf(' ') != -1) {
-              var varid = varid.substr(0, varid.indexOf(' '))
-            }
-            var min_index = Number.MAX_VALUE;
-            var max_index = -1;
-            jQuery("."+varid).each(function(){
-              jQuery(this).addClass('selected')
-              var integer = parseInt(jQuery(this).parent().data('index'))
-              if (integer < min_index) { min_index = integer; }
-              if (integer > max_index) { max_index = integer; }
-            })
-            console.log("found min,max index: %d,%d", min_index, max_index);
-            for (var i = min_index; i <= max_index; i++) {
-              jQuery('.live-range-' + (i+1)).addClass('selected')
-            }
-          }
-          var disable = function(){
-            jQuery('.var').removeClass('selected');
-            jQuery('.live-range').removeClass('selected');
-          }
-          jQuery('.var').hover(enable, disable);
-        })
+          JitLog.hoverVars.call(this)
+        });
       });
     }
   }
 });
 
 app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
-                                    $location, $sce) {
+                                    $location, $timeout) {
     $scope.loading = true;
     $scope.show_asm = false;
     $http.get('/api/log/' + $routeParams.log + '/', {
@@ -391,7 +366,9 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         }
 
         $scope.loading = false;
-        $scope.$broadcast('trace-update')
+        $timeout(function(){
+          $scope.$broadcast('trace-update')
+        })
     });
 
     $scope.switch_trace = function(type) {

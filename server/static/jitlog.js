@@ -11,6 +11,63 @@ var JitLog = function (data) {
   }
 };
 
+var extract_class = function(str, prefix){
+  // returns the first occurance!
+  var str = str.substr(str.indexOf(prefix))
+  if (str.indexOf(' ') != -1) {
+    return str.substr(0, str.indexOf(' '))
+  }
+  return str
+}
+
+// static call
+JitLog.hoverVars = function(){
+  var enable = function(e, clicked){
+    jQuery('.live-range').removeClass('selected');
+    var varid = extract_class(jQuery(this).attr('class'), 'varid-');
+    var min_index = Number.MAX_VALUE;
+    var max_index = -1;
+    jQuery("."+varid).each(function(){
+      jQuery(this).addClass('selected');
+      if (clicked) {
+        jQuery(this).data('_stay_selected', clicked)
+      }
+      var integer = parseInt(jQuery(this).parent().data('index'))
+      if (integer < min_index) { min_index = integer; }
+      if (integer > max_index) { max_index = integer; }
+    })
+    console.log("found min,max index: %d,%d", min_index, max_index);
+    for (var i = min_index; i <= max_index; i++) {
+      jQuery('.live-range-' + (i+1)).addClass('selected')
+    }
+  }
+  var disable = function(e, varid){
+    jQuery('.var').each(function(){
+      var _this = jQuery(this)
+      if (_this.hasClass('selected')) {
+        // varid is undefined: deselect only if _stay_selected is undefined
+        var staysel = _this.data('_stay_selected')
+        if (!staysel || // remove if should not stay selected
+            (staysel && varid && _this.hasClass(varid))) {
+          _this.removeClass('selected');
+          _this.removeAttr('_stay_selected');
+        }
+      }
+    })
+    jQuery('.live-range').removeClass('selected');
+  }
+  var enable_or_disable = function(){
+    if (jQuery(this).data('_stay_selected')) {
+      var varid = extract_class(jQuery(this).attr('class'), 'varid-');
+      disable.call(this, undefined, varid);
+    } else {
+      enable.call(this, undefined, 1);
+    }
+  }
+  jQuery('.var').hover(enable, disable);
+  jQuery('.var').click(enable_or_disable);
+}
+
 JitLog.prototype.all_traces = function() {
   return this._trace_list;
 }
