@@ -50,7 +50,7 @@ JitLog.hoverVars = function(){
         if (!staysel || // remove if should not stay selected
             (staysel && varid && _this.hasClass(varid))) {
           _this.removeClass('selected');
-          _this.removeAttr('_stay_selected');
+          _this.removeData('_stay_selected');
         }
       }
     })
