@@ -138,11 +138,11 @@ svg rect, svg text {
 }
 
 .trace-type-ctrl {
-    float: right;
     padding: 5px;
 }
 
 .trace-line {
+    position: relative;
 }
 
 span.resop-name {
@@ -176,9 +176,8 @@ span.selected.var {
 
 .live-range {
     display: inline-block;
+    position: absolute;
     width: 3px;
-    line-height: 1.6em;
-    height: 1.6em;
 }
 
 .live-range.selected {
@@ -198,6 +197,29 @@ span.selected.var {
 
 .trace-asm-line {
     margin-left: 20px;
-    margin-top: 5px;
-    margin-bottom: -5px;
+}
+
+#forest {
+    background: #f8f8f8;
+    border: 1px solid #e8e8e8;
+    height: 120px;
+}
+
+.trunk {
+    fill: red;
+}
+
+.guard {
+    fill: green;
+}
+
+.guard-not-stitched {
+    stroke: blue;
+    stroke-width: 2px;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1px;
 }

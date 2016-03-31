@@ -1,6 +1,6 @@
 
-<svg id="traces" width="" height="">
-</svg>
+<div id="forest" trace-forest>
+</div>
 
 <ul ng-if="jitlog">
     <li ng-repeat="trace in jitlog.all_traces()">
@@ -11,26 +11,40 @@
 </ul>
 
 
+<div class="trace-type-ctrl">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+              data-toggle="dropdown">
+             Stage <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+          <li><a ng-class="{'active': trace_type == 'noopt'}"
+                 ng-click="switch_trace('noopt')">Plain Trace
+                 <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
+             </a>
+          </li>
+          <li><a ng-class="{'active': trace_type == 'opt'}"
+                 ng-click="switch_trace('opt')">Optimized Trace
+                 <span class="fa fa-check" ng-if="trace_type == 'opt'"></span>
+             </a>
+          </li>
+          <li><a ng-class="{'active': trace_type == 'asm'}"
+                 ng-click="switch_trace('asm')">Assembled Trace
+                 <span class="fa fa-check" ng-if="trace_type == 'asm'"></span>
+             </a>
+          </li>
+      </li>
+    </div>
+    <button class="btn btn-default btn-sm" ng-click="show_asm=!show_asm">
+        <i class="fa fa-code"></i>
+        <span ng-if="!show_asm">Show Assembler</span>
+        <span ng-if="show_asm">Hide Assembler</span>
+    </button>
+</div>
+
 <div class="trace" ng-if="trace" hover-vars>
 
-    <div class="trace-type-ctrl">
-        <div class="btn-group" role="group">
-          <button type="button" class="btn btn-default btn-sm"
-                  ng-class="{'active': trace_type == 'noopt'}"
-                  ng-click="switch_trace('noopt')">noopt</button>
-          <button type="button" class="btn btn-default btn-sm"
-                  ng-class="{'active': trace_type == 'opt'}"
-                  ng-click="switch_trace('opt')">opt</button>
-          <button type="button" class="btn btn-default btn-sm"
-                  ng-class="{'active': trace_type == 'asm'}"
-                  ng-click="switch_trace('asm')">asm</button>
-        </div>
-        <button class="btn btn-default btn-sm" ng-click="show_asm=!show_asm">
-            <i class="fa fa-code"></i> Asm
-        </button>
-    </div>
-
-    <div class="no-trace" ng-if="ops.length == 0">This was not recorded in JIT log</div>
+    <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
     <div class="trace-line" ng-repeat="op in ops">
         <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
         <div class="trace-asm" ng-if="show_asm">

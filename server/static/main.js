@@ -348,6 +348,17 @@ app.directive('hoverVars', function($timeout){
   }
 });
 
+app.directive('traceForest', function($timeout){
+  return {
+    'link': function(scope, element, attrs) {
+      scope.$on('trace-init', function() {
+        trace_forest = new TraceForest(jitlog)
+        trace_forest.grow_forest('#forest');
+      })
+    }
+  }
+});
+
 app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
                                     $location, $timeout) {
     $scope.loading = true;
@@ -356,7 +367,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         cache: true
     }).then(function(response) {
         $scope.log = response.data;
-        var jitlog = new JitLog(response.data.data.jitlog);
+        jitlog = new JitLog(response.data.data.jitlog);
         $scope.jitlog = jitlog;
         if ($routeParams.trace !== undefined) {
           var trace = jitlog.get_trace_by_id($routeParams.trace);
@@ -367,6 +378,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
 
         $scope.loading = false;
         $timeout(function(){
+          $scope.$broadcast('trace-init')
           $scope.$broadcast('trace-update')
         })
     });

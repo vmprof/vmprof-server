@@ -3,12 +3,17 @@ var JitLog = function (data) {
   this._traces = {};
   this._resops = data.resops
   this._trace_list = [];
-  for (var key in data.traces) {
-    var trace = data.traces[key]
-    var objtrace = new Trace(this, trace);
-    this._traces[trace.addr[0]] = objtrace
-    this._trace_list.push(objtrace)
+  var _this = this
+  data.traces.forEach(function(trace){
+    var objtrace = new Trace(_this, trace);
+    _this._traces[trace.addr[0]] = objtrace
+    _this._trace_list.push(objtrace)
+  })
+  for (var key in this._traces) {
+    var trace = this._traces[key]
+    trace.link();
   }
+  console.log("traces:", this._traces)
 };
 
 var extract_class = function(str, prefix){
@@ -19,6 +24,7 @@ var extract_class = function(str, prefix){
   }
   return str
 }
+
 
 // static call
 JitLog.hoverVars = function(){
@@ -38,7 +44,9 @@ JitLog.hoverVars = function(){
     })
     console.log("found min,max index: %d,%d", min_index, max_index);
     for (var i = min_index; i <= max_index; i++) {
-      jQuery('.live-range-' + (i+1)).addClass('selected')
+      var lr = jQuery('.live-range-' + (i+1))
+      lr.addClass('selected')
+      lr.height(lr.parents('.trace-line').height())
     }
   }
   var disable = function(e, varid){
@@ -54,7 +62,7 @@ JitLog.hoverVars = function(){
         }
       }
     })
-    jQuery('.live-range').removeClass('selected');
+    jQuery('.live-range').removeClass('selected').height(0);
   }
   var enable_or_disable = function(){
     if (jQuery(this).data('_stay_selected')) {
@@ -78,6 +86,62 @@ JitLog.prototype.get_trace_by_id = function(id) {
 var Trace = function(jitlog, data) {
   this._jitlog = jitlog
   this._data = data
+  this._bridges = data.bridges
+  this._parent = undefined
+  var _this = this;
+}
+
+Trace.prototype.link = function() {
+  var _this = this;
+  this._bridges.forEach(function(bridge){
+    var trace = _this._jitlog._traces[bridge.target]
+    trace._parent = _this;
+  })
+}
+
+Trace.prototype.parent = function() {
+  return this._parent
+}
+
+Trace.prototype.bridges = function() {
+  return this._bridges
+}
+
+Trace.prototype.is_trunk = function() {
+  return this.get_type() === 'loop'
+}
+
+Trace.prototype.calc_width = function() {
+  if (this._width !== undefined) {
+    return this._width;
+  }
+  var width = 10;
+  var _this = this;
+  this._bridges.forEach(function(bridge){
+    var trace = _this._jitlog._traces[bridge.target]
+    width += 20 + trace.calc_width()
+    if (trace.ends_with_jump()) {
+      width += 10;
+    }
+  })
+
+  this._width = width;
+
+  return width;
+}
+
+Trace.prototype.ends_with_jump = function() {
+  var ops = this.get_operations('asm')
+  var oplist = ops.list()
+  if (oplist.length == 0) {
+    return false
+  }
+  var lastop = oplist[oplist.length-1]
+  return lastop.opname() == "jump"
+}
+
+Trace.prototype.is_stitched = function() {
+  return this.parent() !== undefined
 }
 
 Trace.prototype.get_type = function() {
@@ -92,6 +156,14 @@ Trace.prototype.get_unique_id = function() {
     return this._data.addr[0]
   }
   return this._data.unique_id
+}
+
+Trace.prototype.forEachOp = function(fn) {
+  var ops = this.get_operations('asm').list()
+  for (var i = 0; i < ops.length; i++) {
+    var op = ops[i]
+    fn.call(op, op)
+  }
 }
 
 Trace.prototype.get_operations = function(name) {
@@ -122,6 +194,29 @@ Operations.prototype.list = function() {
 var ResOp = function(jitlog, data) {
   this._jitlog = jitlog
   this._data = data
+}
+
+ResOp.prototype.opname = function() {
+  var opnum = this._data.num
+  var opname = this._jitlog._resops[opnum]
+  return opname
+}
+
+ResOp.prototype.is_guard = function() {
+  return this.opname().indexOf('guard') !== -1
+}
+
+ResOp.prototype.has_stitched_trace = function() {
+  return this._data.descr_number !== undefined &&
+         this._jitlog._traces[this._data.descr_number] !== undefined
+}
+
+ResOp.prototype.get_stitched_trace = function() {
+  return this._jitlog._traces[this._data.descr_number]
+}
+
+ResOp.prototype.get_stitch_id = function() {
+  return this._data.descr_number
 }
 
 ResOp.prototype.to_s = function(index) {
