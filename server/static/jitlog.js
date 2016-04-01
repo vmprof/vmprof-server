@@ -1,17 +1,30 @@
 
 var JitLog = function (data) {
   this._traces = {};
+  this._unique_ids = {};
+  this._descrs = {}
   this._resops = data.resops
   this._trace_list = [];
   var _this = this
   data.traces.forEach(function(trace){
     var objtrace = new Trace(_this, trace);
+    // a lookup to find the assembly addr (first byte) -> trace
     _this._traces[trace.addr[0]] = objtrace
+    // a lookup to find the mapping from descr_number -> trace
+    _this._unique_ids[trace.unique_id] = objtrace
     _this._trace_list.push(objtrace)
   })
   for (var key in this._traces) {
     var trace = this._traces[key]
     trace.link();
+    var i = 0;
+    trace.forEachOp(function(op){
+      if (op.is_guard() && op.has_stitched_trace()){
+        op._stitch_index = i;
+        i++;
+      }
+      return true
+    })
   }
   console.log("traces:", this._traces)
 };
@@ -89,6 +102,17 @@ var Trace = function(jitlog, data) {
   this._bridges = data.bridges
   this._parent = undefined
   var _this = this;
+  this._stages = {}
+  var stages = data.stages;
+  if (stages.noopt){
+    this._stages.noopt = new Operations(this._jitlog, stages.noopt)
+  }
+  if (stages.opt){
+    this._stages.opt = new Operations(this._jitlog, stages.opt)
+  }
+  if (stages.asm){
+    this._stages.asm = new Operations(this._jitlog, stages.asm)
+  }
 }
 
 Trace.prototype.link = function() {
@@ -162,14 +186,16 @@ Trace.prototype.forEachOp = function(fn) {
   var ops = this.get_operations('asm').list()
   for (var i = 0; i < ops.length; i++) {
     var op = ops[i]
-    fn.call(op, op)
+    if (!fn.call(op, op)) {
+      return true
+    }
   }
+  return false
 }
 
 Trace.prototype.get_operations = function(name) {
-  var stages = this._data.stages;
-  if (name in stages) {
-    return new Operations(this._jitlog, stages[name]);
+  if (this._stages[name] !== undefined) {
+    return this._stages[name]
   }
   return new Operations(this._jitlog, {'ops': [], 'tick': -1});
 }
@@ -207,12 +233,13 @@ ResOp.prototype.is_guard = function() {
 }
 
 ResOp.prototype.has_stitched_trace = function() {
-  return this._data.descr_number !== undefined &&
-         this._jitlog._traces[this._data.descr_number] !== undefined
+  var stitched = this._jitlog._unique_ids[this._data.descr_number]
+  return stitched !== undefined
 }
 
 ResOp.prototype.get_stitched_trace = function() {
-  return this._jitlog._traces[this._data.descr_number]
+  var stitched = this._jitlog._unique_ids[this._data.descr_number]
+  return stitched
 }
 
 ResOp.prototype.get_stitch_id = function() {

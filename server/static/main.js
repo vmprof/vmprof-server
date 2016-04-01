@@ -273,6 +273,15 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
         cache: true
     }).then(function(response) {
         $scope.log = response.data;
+        $scope.has_jitlog = response.data.data.jitlog !== undefined
+
+        var profiles = response.data.data.profiles || []
+        if (profiles.length == 0) {
+          $scope.loading = false;
+          $scope.noprofile = true;
+          // there is no profile (there might be jitlog though)
+          return;
+        }
 
         var addresses = $routeParams.id;
         var path_so_far;

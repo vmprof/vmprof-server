@@ -4,6 +4,8 @@ TraceForest = function(jitlog){
   this._forest = []
 }
 
+TraceForest.BRIDGE_YOFF = 10
+
 TraceForest.prototype.grow_forest = function(id){
   var _this = this;
   this._jitlog.all_traces().forEach(function(trace) {
@@ -61,12 +63,12 @@ TraceForest.prototype.grow_forest = function(id){
 
     // stitched guards
     node.filter(function(d){
-      return d.guard !== undefined && d.guard.has_stitched_trace()
+      return d.guard !== undefined && d.stitched !== undefined
     }).append("svg:circle").attr("r", 3)
 
     // not stitched guards
     var not_stitched = node.filter(function(d){
-      return d.guard !== undefined && !d.guard.has_stitched_trace()
+      return d.guard !== undefined && d.stitched === undefined
     }).append("svg:g")
     var cw = 3 // cross half width
     not_stitched.append("svg:line")
@@ -83,13 +85,19 @@ TraceForest.prototype.grow_forest = function(id){
 
 TraceForest.prototype.trace_position = function(d) {
   var trace = d.trace;
-  var x = 0;
-  var y = 0;
+  var x = -d.xoffset || 0;
+  var y = -d.yoffset || 0;
 
+  var depth = 0;
   var prev = d._vis_prev
+  var root = prev
   while (prev !== undefined){
-    y -= 20;
+    y -= (20 + (prev.yoffset || 0));
     prev = prev._vis_prev
+    depth += 1;
+    if (prev !== undefined) {
+      root = prev
+    }
   }
 
   if (trace !== undefined) {
@@ -102,7 +110,6 @@ TraceForest.prototype.trace_position = function(d) {
 
   d.x = x
   d.y = y
-  console.log("node", d.x, d.y)
 
   return d
 }
@@ -122,24 +129,26 @@ TraceForest.prototype.walk_trace_tree = function(trace, nodes, links) {
     if (op.is_guard()) {
       // add a new node, give it a connection to the previous
       var bridge = op.get_stitched_trace()
-      console.log("found guard op", op.opname())
-      var node = {'guard': op, class: 'guard', 'trace': bridge}
+      var node = {'guard': op, class: 'guard', 'trace': trace, 'stitched': bridge }
       op._node = node;
       node._vis_prev = last
       nodes.push(node)
       if (bridge !== undefined) {
-        node.class += ' .stitched'
+        node.class += ' stitched'
         stitches.push(op)
       }
       links.push({'source': last, 'target': node})
       last = node
     }
+    return true;
   })
 
   stitches.forEach(function(op){
     var trace = op.get_stitched_trace()
+    console.log(trace)
     if (trace !== undefined){
       var trunk = _this.walk_trace_tree(trace, nodes, links)
+      trunk.yoffset = TraceForest.BRIDGE_YOFF
       links.push({'source': op._node, 'target': trunk, class: 'stitch-edge'})
     }
   })
@@ -150,10 +159,11 @@ TraceForest.prototype.walk_trace_tree = function(trace, nodes, links) {
     trace._node = trunk
     node._vis_prev = last
     nodes.push(node)
+    last = node
 
-    links.push({'source': node, 'target': trunk, class: 'jump-edge'})
+    //links.push({'source': node, 'target': trunk, class: 'jump-edge'})
   }
-  var last = trunk
+  links.push({'source': trunk, 'target': last})
 
   return trunk
 }
