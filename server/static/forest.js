@@ -21,11 +21,39 @@ TraceForest.prototype.grow_forest = function(id){
 
   var bot_margin = 5
   var div = jQuery(id)
-  var svg = d3.select(id).append("svg:svg")
+  var root = d3.select(id).append("svg:svg")
+  var init_xoff = div.width()/2
+  var init_yoff = div.height() - bot_margin
+  var svg = root
               .attr("width", div.width())
               .attr("height", div.height())
             .append("svg:g")
-              .attr("transform", this._tr(div.width()/2, div.height() - bot_margin))
+              .attr("transform", this._tr(init_xoff, init_yoff))
+
+  svg._slide = false
+  svg._slide_offset = {x0:0,y0:0,x:0,y:0}
+  root.on("mousedown", function(){
+    svg._slide_offset.x = d3.event.x
+    svg._slide_offset.y = d3.event.y
+    svg._slide = true;
+  })
+  root.on("mouseup", function(){
+    svg._slide = false;
+    svg._slide_offset.x0 -= (svg._slide_offset.x - d3.event.x)
+    svg._slide_offset.y0 -= (svg._slide_offset.y - d3.event.y)
+  })
+  root.on("mousemove", function(){
+    if (svg._slide) {
+      var dx = svg._slide_offset.x - d3.event.x
+      var dy = svg._slide_offset.y - d3.event.y
+      var ox = svg._slide_offset.x0
+      var oy = svg._slide_offset.y0
+      var x = ox - dx
+      var y = oy - dy
+      svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
+    }
+  })
+
   var diagonal = d3.svg.diagonal()
     .projection(function(d) {
       return [d.x, d.y];
