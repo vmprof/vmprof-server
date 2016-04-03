@@ -217,6 +217,10 @@ span.selected.var {
     stroke: blue;
     stroke-width: 2px;
 }
+.guard-not-stitched-text {
+    stroke: blue;
+    font-size: 8px;
+}
 
 .link {
   fill: none;

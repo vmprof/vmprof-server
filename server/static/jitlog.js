@@ -18,11 +18,14 @@ var JitLog = function (data) {
     var trace = this._traces[key]
     trace.link();
     var i = 0;
+    var index = 0;
     trace.forEachOp(function(op){
+      op._index = index
       if (op.is_guard() && op.has_stitched_trace()){
         op._stitch_index = i;
         i++;
       }
+      index += 1;
       return true
     })
   }
@@ -127,31 +130,54 @@ Trace.prototype.parent = function() {
   return this._parent
 }
 
-Trace.prototype.bridges = function() {
-  return this._bridges
+Trace.prototype.forEachBridge = function(func, sort) {
+  var bridges_json = this._bridges
+  var bridges = [];
+  for (var i = 0; i < bridges_json.length; i++) {
+    var b = bridges_json[i]
+    bridges.push(b)
+  }
+  if (sort) {
+    bridges.sort(sort)
+  }
+  for (var i = 0; i < bridges.length; i++) {
+    var b = bridges[i]
+    if (!func.call(b, b)) {
+      return true
+    }
+  }
+  return false
+}
+
+Trace.prototype.forEachParent = function(func) {
+  var par = this._parent
+  while (par !== undefined) {
+    if (!func.call(par, par)) {
+      return true
+    }
+    par = par._parent
+  }
+  return false
 }
 
 Trace.prototype.is_trunk = function() {
   return this.get_type() === 'loop'
 }
 
-Trace.prototype.calc_width = function() {
-  if (this._width !== undefined) {
-    return this._width;
+Trace.prototype.trace_strips = function() {
+  if (this._trace_strips !== undefined) {
+    return this._trace_strips;
   }
-  var width = 10;
+  var count = 1;
   var _this = this;
   this._bridges.forEach(function(bridge){
     var trace = _this._jitlog._traces[bridge.target]
-    width += 20 + trace.calc_width()
-    if (trace.ends_with_jump()) {
-      width += 10;
-    }
+    count += trace.trace_strips()
   })
 
-  this._width = width;
+  this._trace_strips = count;
 
-  return width;
+  return count;
 }
 
 Trace.prototype.ends_with_jump = function() {
@@ -220,6 +246,11 @@ Operations.prototype.list = function() {
 var ResOp = function(jitlog, data) {
   this._jitlog = jitlog
   this._data = data
+  this._index = -1
+}
+
+ResOp.prototype.getindex = function() {
+  return this._index
 }
 
 ResOp.prototype.opname = function() {
