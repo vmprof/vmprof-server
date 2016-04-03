@@ -32,6 +32,36 @@ TraceForest.prototype.grow_forest = function(id){
 
   svg._slide = false
   svg._slide_offset = {x0:0,y0:0,x:0,y:0}
+  var update_slide = function(mx,my) {
+    var dx = svg._slide_offset.x - mx
+    var dy = svg._slide_offset.y - my
+    var ox = svg._slide_offset.x0
+    var oy = svg._slide_offset.y0
+    var x = ox - dx
+    var y = oy - dy
+    svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
+  }
+  root.on("mouseenter", function(){
+    var h2 = div.height()*2
+    init_yoff += div.height();
+    div.height(h2)
+    root.attr("height", div.height())
+    update_slide(svg._slide_offset.x,
+                 svg._slide_offset.y)
+  })
+  root.on("mouseleave", function(){
+    var h2 = div.height()/2
+    init_yoff -= h2
+    div.height(h2)
+    root.attr("height", div.height())
+    update_slide(svg._slide_offset.x,
+                 svg._slide_offset.y)
+    if (svg._slide) {
+      svg._slide = false;
+      svg._slide_offset.x0 -= (svg._slide_offset.x - d3.event.x)
+      svg._slide_offset.y0 -= (svg._slide_offset.y - d3.event.y)
+    }
+  })
   root.on("mousedown", function(){
     svg._slide_offset.x = d3.event.x
     svg._slide_offset.y = d3.event.y
@@ -44,13 +74,7 @@ TraceForest.prototype.grow_forest = function(id){
   })
   root.on("mousemove", function(){
     if (svg._slide) {
-      var dx = svg._slide_offset.x - d3.event.x
-      var dy = svg._slide_offset.y - d3.event.y
-      var ox = svg._slide_offset.x0
-      var oy = svg._slide_offset.y0
-      var x = ox - dx
-      var y = oy - dy
-      svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
+      update_slide(d3.event.x, d3.event.y);
     }
   })
 
