@@ -3,7 +3,7 @@
 </div>
 
 <ul ng-if="jitlog">
-    <li ng-repeat="trace in jitlog.all_traces()">
+    <li ng-repeat="trace in jitlog.all_traces()" ng-show="$index < 10">
         <a ng-href="/#/{{ log.checksum }}/traces?trace={{trace.get_unique_id()}}">
             {{trace.get_type()}}: {{trace.get_name()}}
         </a>
@@ -19,7 +19,7 @@
       </button>
       <ul class="dropdown-menu">
           <li><a ng-class="{'active': trace_type == 'noopt'}"
-                 ng-click="switch_trace('noopt')">Plain Trace
+                 ng-click="switch_trace('noopt')">Unoptimized Trace
                  <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
              </a>
           </li>

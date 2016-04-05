@@ -118,6 +118,16 @@ var Trace = function(jitlog, data) {
   }
 }
 
+Trace.prototype.walk_trace_tree = function(fn) {
+  fn.call(this, this);
+  var _this = this
+  this._bridges.forEach(function(bridge){
+    var trace = _this._jitlog._traces[bridge.target]
+    fn.call(trace, trace);
+    trace.walk_trace_tree(fn)
+  })
+}
+
 Trace.prototype.link = function() {
   var _this = this;
   this._bridges.forEach(function(bridge){

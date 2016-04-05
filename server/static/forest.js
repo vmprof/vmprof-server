@@ -100,7 +100,7 @@ TraceForest.prototype.grow_forest = function(id){
   var pos = {l:0,r:0,i:0};
   var x = 0
   this._forest.forEach(function(trace){
-    if (x > 1) {
+    if (x > 0) {
       return // TEMPORARY
     }
     _this.walk_trace_tree(trace, nodes, links)
@@ -164,10 +164,20 @@ TraceForest.prototype.position_trace_tree = function(trace, pos) {
   var off = trace._offset || offset(0,0)
   if (pos.i % 2 == 0) {
     off.x += pos.r;
+    //trace.walk_trace_tree(function(t){
+    //  var _off = t._offset || offset(0,0)
+    //  _off = off_plus(_off, off)
+    //  t._offset = _off
+    //})
     pos.r += trace.trace_strips() * 20;
   } else {
     pos.l -= trace.trace_strips() * 20;
     off.x += pos.l;
+    //trace.walk_trace_tree(function(t){
+    //  var _off = t._offset || offset(0,0)
+    //  _off = off_plus(_off, off)
+    //  t._offset = _off
+    //})
   }
   pos.i += 1;
   trace._offset = off
