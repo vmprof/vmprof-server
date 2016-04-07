@@ -37,9 +37,8 @@ WSGI_APPLICATION = 'server.wsgi.app'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'vmprof',
-        'USER': 'postgres',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'sqlite3.db',
     }
 }
 
