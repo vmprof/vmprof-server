@@ -159,6 +159,13 @@ Trace.prototype.forEachBridge = function(func, sort) {
   return false
 }
 
+Trace.prototype.get_trunk = function() {
+  if (!this._parent) {
+    return this;
+  }
+  return this._parent.get_trunk();
+}
+
 Trace.prototype.forEachParent = function(func) {
   var par = this._parent
   while (par !== undefined) {

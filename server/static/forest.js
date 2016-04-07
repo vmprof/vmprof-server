@@ -95,32 +95,34 @@ TraceForest.prototype.grow_forest = function(id){
   var node_layer = svg.append("svg:g")
 
   var _this = this;
-  var nodes = [];
-  var links = [];
   var pos = {l:0,r:0,i:0};
   var x = 0
   this._forest.forEach(function(trace){
     if (x > 0) {
-      return // TEMPORARY
+      return // XXX
     }
+    var nodes = [];
+    var links = [];
     _this.walk_trace_tree(trace, nodes, links)
     _this.position_trace_tree(trace, pos)
     x += 1
-  })
-  var node = node_layer.selectAll(".node").data(nodes)
-              .enter().append("svg:g")
-                .attr("class", function(d){ return 'node ' + d.class })
-                .attr("transform", function(d){
-                  var pos = _this.node_position(d)
-                  return _this._tr(pos.x, pos.y)
-                })
 
-  var link = link_layer.selectAll("path.link")
-         .data(links)
-       .enter()
-         .insert("svg:path")
-         .attr("class", function(d){ return 'link ' + d.class })
-         .attr("d", diagonal)
+    var trace_grp = node_layer.append("svg:g")
+
+    var node = trace_grp.selectAll(".node").data(nodes)
+                .enter().append("svg:g")
+                  .attr("class", function(d){ return 'node ' + d.class })
+                  .attr("transform", function(d){
+                    var pos = _this.node_position(d)
+                    return _this._tr(pos.x, pos.y)
+                  })
+
+    var link = link_layer.selectAll("path.link")
+           .data(links)
+         .enter()
+           .insert("svg:path")
+           .attr("class", function(d){ return 'link ' + d.class })
+           .attr("d", diagonal)
 
     // first and last instruction
     node.filter(function(d){
@@ -157,28 +159,17 @@ TraceForest.prototype.grow_forest = function(id){
                       return d.shrunk_guards.length
                     }
                   })
+  })
+
   console.log(data)
 }
 
 TraceForest.prototype.position_trace_tree = function(trace, pos) {
   var off = trace._offset || offset(0,0)
-  if (pos.i % 2 == 0) {
-    off.x += pos.r;
-    //trace.walk_trace_tree(function(t){
-    //  var _off = t._offset || offset(0,0)
-    //  _off = off_plus(_off, off)
-    //  t._offset = _off
-    //})
-    pos.r += trace.trace_strips() * 20;
-  } else {
-    pos.l -= trace.trace_strips() * 20;
-    off.x += pos.l;
-    //trace.walk_trace_tree(function(t){
-    //  var _off = t._offset || offset(0,0)
-    //  _off = off_plus(_off, off)
-    //  t._offset = _off
-    //})
+  if (pos.i > 0) {
+    pos.r += trace.trace_strips() * 7;
   }
+  var off = off_plus(off, offset(pos.r, 0))
   pos.i += 1;
   trace._offset = off
 }
@@ -197,11 +188,11 @@ TraceForest.prototype.node_position = function(d) {
   //  prev = prev._vis_prev
   //}
 
-  //trace.forEachParent(function(parent) {
-  //  y -= 20;
-  //  return true;
-  //})
-  
+  var trunk = trace.get_trunk()
+  if (trunk !== trace) {
+    off = off_plus(off, trunk._offset)
+  }
+
   d.x = off.x
   d.y = off.y
 
