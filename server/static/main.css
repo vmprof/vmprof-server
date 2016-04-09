@@ -131,7 +131,6 @@ svg rect, svg text {
 
 .trace {
     font: Courier, monospace;
-    font-size: 15px;
     background: #f8f8f8;
     padding: 15px;
     border: 1px solid #e8e8e8;
@@ -156,16 +155,19 @@ span.resop-name {
 }
 
 .instr {
-    line-height: 24px;
     height: 20px;
+    font-size: 15px;
+    vertical-align: middle;
 }
 
 span.var {
-    padding: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 span.const {
-    padding: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 span.selected.var {
@@ -176,6 +178,7 @@ span.selected.var {
     display: inline-block;
     width: 2px;
     margin-right: 1px;
+    height: 100%;
 }
 
 .trace-line-number {

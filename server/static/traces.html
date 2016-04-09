@@ -1,4 +1,17 @@
 
+<div class="trace" ng-if="trace" hover-vars>
+
+    <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
+    <div class="trace-line" ng-repeat="op in ops">
+        <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
+        <div class="trace-asm" ng-if="show_asm">
+            <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
+                <div ng-bind-html="asm"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="forest" trace-forest>
 </div>
 
@@ -40,18 +53,5 @@
         <span ng-if="!show_asm">Show Assembler</span>
         <span ng-if="show_asm">Hide Assembler</span>
     </button>
-</div>
-
-<div class="trace" ng-if="trace" hover-vars>
-
-    <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
-    <div class="trace-line" ng-repeat="op in ops">
-        <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
-        <div class="trace-asm" ng-if="show_asm">
-            <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
-                <div ng-bind-html="asm"></div>
-            </div>
-        </div>
-    </div>
 </div>
 

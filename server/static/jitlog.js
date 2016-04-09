@@ -98,20 +98,23 @@ JitLog.hoverVars = function(){
       }
       lr.addClass('selected')
       lr.css('background-color', color)
-      lr.height(lr.parents('.trace-line').height())
     }
   }
   //
   // disable a hovered variable
   //
-  var disable = function(e, varid){
-    var lr = jQuery(this).data('live-range')
+  var disable = function(e, varid, click){
+    var $this = jQuery(this)
+    var lr = $this.data('live-range')
 
-    if (!jQuery(this).data('_stay_selected')) {
-      var color = jQuery(this).data('hover-color')
-      JitLog.freeColors.push(color)
-      var lr = jQuery(this).data('live-range')
-      JitLog.liverange_indices.push(lr)
+    if (!$this.data('_stay_selected') || click) {
+      var color = $this.data('hover-color')
+      if (color) {
+        JitLog.freeColors.push(color)
+      }
+      if (lr) {
+        JitLog.liverange_indices.push(lr)
+      }
     }
     jQuery('.var').each(function(){
       var _this = jQuery(this)
@@ -133,17 +136,21 @@ JitLog.hoverVars = function(){
       var staysel = elem.data('_stay_selected')
       var lrclass = 'live-range-col-'+ lr;
       if (!staysel ||
-          (staysel && lr && _this.hasClass(lrclass))) {
-        elem.removeClass('selected')
-        elem.removeData('_stay_selected');
-        elem.css('background-color', '');
+          (staysel && varid && lr && elem.hasClass(lrclass))) {
+        if (click){ 
+          elem.removeData('_stay_selected');
+          elem.removeData('live-range');
+        } else {
+          elem.removeClass('selected')
+          elem.css('background-color', '');
+        }
       }
     })
   }
   var enable_or_disable = function(){
     if (jQuery(this).data('_stay_selected')) {
       var varid = extract_class(jQuery(this).attr('class'), 'varid-');
-      disable.call(this, undefined, varid);
+      disable.call(this, undefined, varid, 1);
     } else {
       enable.call(this, undefined, 1);
     }
