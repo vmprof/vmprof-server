@@ -170,7 +170,6 @@ span.const {
 }
 
 span.selected.var {
-    background-color: #fc6605;
     color: white;
 }
 
@@ -178,10 +177,6 @@ span.selected.var {
     display: inline-block;
     position: absolute;
     width: 3px;
-}
-
-.live-range.selected {
-    background-color: #fc6605;
 }
 
 .trace-line-number {

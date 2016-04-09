@@ -1,4 +1,5 @@
 
+
 var JitLog = function (data) {
   this._traces = {};
   this._unique_ids = {};
@@ -32,6 +33,9 @@ var JitLog = function (data) {
   console.log("traces:", this._traces)
 };
 
+JitLog.colorPalette = ['#fc6605','#66fc05','#05fc66'];
+JitLog.freeColors = clone(JitLog.colorPalette);
+
 var extract_class = function(str, prefix){
   // returns the first occurance!
   var str = str.substr(str.indexOf(prefix))
@@ -45,15 +49,34 @@ var extract_class = function(str, prefix){
 // static call
 JitLog.hoverVars = function(){
   var enable = function(e, clicked){
+    // is this variable already hovered?
+    var hovered = clicked || jQuery(this).data('_stay_selected')
     jQuery('.live-range').removeClass('selected');
     var varid = extract_class(jQuery(this).attr('class'), 'varid-');
     var min_index = Number.MAX_VALUE;
     var max_index = -1;
-    jQuery("."+varid).each(function(){
-      jQuery(this).addClass('selected');
+    var color = undefined
+    if (hovered) {
+      // if it is already hovered we know which color to take
+      color = jQuery(this).data('hover-color')
+    }
+    jQuery("." + varid).each(function(){
+      var span = jQuery(this)
       if (clicked) {
-        jQuery(this).data('_stay_selected', clicked)
+        // mark this var as clicked
+        span.data('_stay_selected', clicked)
+      } else {
+        if (!color) {
+          // we do not yet have a color? request a new one
+          color = JitLog.freeColors.pop()
+        }
+        span.addClass('selected')
+        span.css('background-color', color)
+        span.css('color', 'white')
+        // save away the hover color
+        span.data('hover-color', color)
       }
+      // get the min. max positions for this live range
       var integer = parseInt(jQuery(this).parent().data('index'))
       if (integer < min_index) { min_index = integer; }
       if (integer > max_index) { max_index = integer; }
@@ -62,10 +85,15 @@ JitLog.hoverVars = function(){
     for (var i = min_index; i <= max_index; i++) {
       var lr = jQuery('.live-range-' + (i+1))
       lr.addClass('selected')
+      lr.css('background-color', color)
       lr.height(lr.parents('.trace-line').height())
     }
   }
   var disable = function(e, varid){
+    if (!jQuery(this).data('_stay_selected')) {
+      var color = jQuery(this).data('hover-color')
+      JitLog.freeColors.push(color)
+    }
     jQuery('.var').each(function(){
       var _this = jQuery(this)
       if (_this.hasClass('selected')) {
@@ -74,6 +102,8 @@ JitLog.hoverVars = function(){
         if (!staysel || // remove if should not stay selected
             (staysel && varid && _this.hasClass(varid))) {
           _this.removeClass('selected');
+          _this.css('background-color', '');
+          _this.css('color', '');
           _this.removeData('_stay_selected');
         }
       }
@@ -102,7 +132,7 @@ JitLog.prototype.get_trace_by_id = function(id) {
 var Trace = function(jitlog, data) {
   this._jitlog = jitlog
   this._data = data
-  this._bridges = data.bridges
+  this._bridges = data.bridges || []
   this._parent = undefined
   var _this = this;
   this._stages = {}
@@ -164,6 +194,15 @@ Trace.prototype.get_trunk = function() {
     return this;
   }
   return this._parent.get_trunk();
+}
+
+Trace.prototype.reduce_to_trunk = function(func, value) {
+  var par = this._parent
+  while (par !== undefined) {
+    value = func.call(this, par, value)
+    par = par._parent
+  }
+  return value
 }
 
 Trace.prototype.forEachParent = function(func) {
