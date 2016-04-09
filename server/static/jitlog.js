@@ -35,6 +35,7 @@ var JitLog = function (data) {
 
 JitLog.colorPalette = ['#fc6605','#66fc05','#05fc66'];
 JitLog.freeColors = clone(JitLog.colorPalette);
+JitLog.liverange_indices = [0,1,2,3,4,5,6,7,8]
 
 var extract_class = function(str, prefix){
   // returns the first occurance!
@@ -48,20 +49,28 @@ var extract_class = function(str, prefix){
 
 // static call
 JitLog.hoverVars = function(){
+  //
+  // enable a variable (by coloring it and all it's occurances)
+  //
   var enable = function(e, clicked){
     // is this variable already hovered?
     var hovered = clicked || jQuery(this).data('_stay_selected')
-    jQuery('.live-range').removeClass('selected');
     var varid = extract_class(jQuery(this).attr('class'), 'varid-');
     var min_index = Number.MAX_VALUE;
     var max_index = -1;
     var color = undefined
+    var curlr = undefined
     if (hovered) {
       // if it is already hovered we know which color to take
       color = jQuery(this).data('hover-color')
+      curlr = jQuery(this).data('live-range')
+    }
+    if (!curlr) {
+      curlr = JitLog.liverange_indices.pop()
     }
     jQuery("." + varid).each(function(){
       var span = jQuery(this)
+      span.data('live-range', curlr)
       if (clicked) {
         // mark this var as clicked
         span.data('_stay_selected', clicked)
@@ -83,16 +92,26 @@ JitLog.hoverVars = function(){
     })
     console.log("found min,max index: %d,%d", min_index, max_index);
     for (var i = min_index; i <= max_index; i++) {
-      var lr = jQuery('.live-range-' + (i+1))
+      var lr = jQuery('.live-range-' + curlr + '-' + (i+1))
+      if (clicked) {
+        lr.data('_stay_selected', curlr)
+      }
       lr.addClass('selected')
       lr.css('background-color', color)
       lr.height(lr.parents('.trace-line').height())
     }
   }
+  //
+  // disable a hovered variable
+  //
   var disable = function(e, varid){
+    var lr = jQuery(this).data('live-range')
+
     if (!jQuery(this).data('_stay_selected')) {
       var color = jQuery(this).data('hover-color')
       JitLog.freeColors.push(color)
+      var lr = jQuery(this).data('live-range')
+      JitLog.liverange_indices.push(lr)
     }
     jQuery('.var').each(function(){
       var _this = jQuery(this)
@@ -105,10 +124,21 @@ JitLog.hoverVars = function(){
           _this.css('background-color', '');
           _this.css('color', '');
           _this.removeData('_stay_selected');
+          _this.removeData('live-range');
         }
       }
     })
-    jQuery('.live-range').removeClass('selected').height(0);
+    jQuery('.live-range').each(function(){
+      var elem = jQuery(this)
+      var staysel = elem.data('_stay_selected')
+      var lrclass = 'live-range-col-'+ lr;
+      if (!staysel ||
+          (staysel && lr && _this.hasClass(lrclass))) {
+        elem.removeClass('selected')
+        elem.removeData('_stay_selected');
+        elem.css('background-color', '');
+      }
+    })
   }
   var enable_or_disable = function(){
     if (jQuery(this).data('_stay_selected')) {
@@ -334,8 +364,13 @@ ResOp.prototype.get_stitch_id = function() {
 }
 
 ResOp.prototype.to_s = function(index) {
-  var prefix = '<span class="live-range live-range-'+index+'"></span>' +
-               '<span class="trace-line-number">'+index+':</span> '
+  var prefix = ''
+  for (var i = 0; i < JitLog.liverange_indices.length; i++) {
+    var j = JitLog.liverange_indices[i]
+    prefix += '<span class="live-range live-range-'+j+'-'+index+' ' +
+              'live-range-col-'+i+'"></span>'
+  }
+  prefix += '<span class="trace-line-number">'+index+':</span> '
   var fvar = function(variable) {
     var type = 'const';
     if (variable.startsWith("i") ||

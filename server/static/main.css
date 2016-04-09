@@ -142,7 +142,6 @@ svg rect, svg text {
 }
 
 .trace-line {
-    position: relative;
 }
 
 span.resop-name {
@@ -157,8 +156,8 @@ span.resop-name {
 }
 
 .instr {
-    line-height: 1.6em;
-    height: 1.6em;
+    line-height: 24px;
+    height: 20px;
 }
 
 span.var {
@@ -175,8 +174,8 @@ span.selected.var {
 
 .live-range {
     display: inline-block;
-    position: absolute;
-    width: 3px;
+    width: 2px;
+    margin-right: 1px;
 }
 
 .trace-line-number {
