@@ -28,55 +28,62 @@
     </svg>
 </div>
 
-<ul ng-if="jitlog">
-    <li ng-repeat="trace in jitlog.all_traces()" ng-show="$index < 10">
-        <a ng-href="/#/{{ log.checksum }}/traces?trace={{trace.get_unique_id()}}">
-            {{trace.get_type()}}: {{trace.get_name()}}
-        </a>
-    </li>
-</ul>
-
-
-<div class="trace-type-ctrl">
-    <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle"
-              data-toggle="dropdown">
-             Stage <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu">
-          <li><a ng-class="{'active': trace_type == 'noopt'}"
-                 ng-click="switch_trace('noopt')">Unoptimized Trace
-                 <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
-             </a>
+<div class="row trace-type-ctrl" ng-if="traces">
+    <div class="col-sm-12 col-lg-12">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+                  data-toggle="dropdown">
+                 Stage <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+              <li><a ng-class="{'active': trace_type == 'noopt'}"
+                     ng-click="switch_trace('noopt')">Unoptimized Trace
+                     <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
+                 </a>
+              </li>
+              <li><a ng-class="{'active': trace_type == 'opt'}"
+                     ng-click="switch_trace('opt')">Optimized Trace
+                     <span class="fa fa-check" ng-if="trace_type == 'opt'"></span>
+                 </a>
+              </li>
+              <li><a ng-class="{'active': trace_type == 'asm'}"
+                     ng-click="switch_trace('asm')">Assembled Trace
+                     <span class="fa fa-check" ng-if="trace_type == 'asm'"></span>
+                 </a>
+              </li>
           </li>
-          <li><a ng-class="{'active': trace_type == 'opt'}"
-                 ng-click="switch_trace('opt')">Optimized Trace
-                 <span class="fa fa-check" ng-if="trace_type == 'opt'"></span>
-             </a>
-          </li>
-          <li><a ng-class="{'active': trace_type == 'asm'}"
-                 ng-click="switch_trace('asm')">Assembled Trace
-                 <span class="fa fa-check" ng-if="trace_type == 'asm'"></span>
-             </a>
-          </li>
-      </li>
+        </div>
+        <button class="btn btn-default btn-sm" ng-click="show_asm=!show_asm">
+            <i class="fa fa-code"></i>
+            <span ng-if="!show_asm">Show Assembler</span>
+            <span ng-if="show_asm">Hide Assembler</span>
+        </button>
+        </div>
     </div>
-    <button class="btn btn-default btn-sm" ng-click="show_asm=!show_asm">
-        <i class="fa fa-code"></i>
-        <span ng-if="!show_asm">Show Assembler</span>
-        <span ng-if="show_asm">Hide Assembler</span>
-    </button>
-</div>
 
-<div class="trace" ng-if="trace" hover-vars>
+    <div class="col-sm-6 col-lg-6">
+        <input class="form-control input-group-sm" type="text"
+               ng-model="filter" value=""
+               placeholder="Hello" />
+        <ul>
+            <li ng-repeat="trace in traces" ng-show="$index">
+                <a ng-click="display_trace(trace)">
+                    {{trace.get_type()}}: {{trace.get_name()}}
+                </a>
+            </li>
+        </ul>
+    </div>
 
-    <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
-    <div class="trace-line" ng-repeat="op in ops">
-        <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
-        <div class="trace-asm" ng-if="show_asm">
-            <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
-                <div ng-bind-html="asm"></div>
+    <div class="col-md-6" ng-if="selected_trace" hover-vars>
+        <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
+        <div class="trace-line" ng-repeat="op in ops">
+            <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
+            <div class="trace-asm" ng-if="show_asm">
+                <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
+                    <div ng-bind-html="asm"></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+

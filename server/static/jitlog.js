@@ -227,7 +227,6 @@ Trace.prototype.align_tree = function(xoff) {
   this.visual_trace.xoff = 1 + xoff + part.leftcount
 
   var d = 1 + xoff + part.leftcount
-  console.log('l/r', part.leftcount, '/', part.rightcount, d)
 
   // walk the right side of the trace
   var t = 1 + xoff + part.leftcount

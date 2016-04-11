@@ -362,27 +362,33 @@ app.directive('traceForest', function($timeout){
     'link': function(scope, element, attrs) {
       scope.$on('trace-init', function() {
         trace_forest = new TraceForest(jitlog)
-        trace_forest.grow_forest('#forest');
+        trace_forest.setup_once('#forest');
       })
     }
   }
 });
 
 app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
-                                    $location, $timeout) {
+                                    $location) {
+    $scope.display_trace = function(trace){
+        trace_forest.display_tree(trace)
+        $scope.$broadcast('trace-update')
+    }
     $scope.loading = true;
     $scope.show_asm = false;
+    $scope.selected_trace = null;
     $http.get('/api/log/' + $routeParams.log + '/', {
         cache: true
     }).then(function(response) {
         $scope.log = response.data;
         jitlog = new JitLog(response.data.data.jitlog);
+        $scope.traces = jitlog.all_traces();
         $scope.jitlog = jitlog;
         if ($routeParams.trace !== undefined) {
           var trace = jitlog.get_trace_by_id($routeParams.trace);
           $scope.ops = trace.get_operations('asm').list()
           $scope.trace_type = 'asm'
-          $scope.trace = trace
+          $scope.selected_trace = trace
         }
 
         $scope.loading = false;

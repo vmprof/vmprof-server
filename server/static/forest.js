@@ -69,7 +69,7 @@ TraceForest.prototype.draw_guard = function(svg){
       //              })
 }
 
-TraceForest.prototype.grow_forest = function(id){
+TraceForest.prototype.setup_once = function(id){
   var _this = this;
   this._jitlog.all_traces().forEach(function(trace) {
     if (trace.is_trunk()) {
@@ -79,7 +79,7 @@ TraceForest.prototype.grow_forest = function(id){
     }
   })
 
-  this._forest.sort(function(a,b){return a._width-b._width})
+  //this._forest.sort(function(a,b){return a._width-b._width})
 
   var bot_margin = 5
   var div = jQuery(id)
@@ -93,7 +93,6 @@ TraceForest.prototype.grow_forest = function(id){
             .append("svg:g")
               .attr("transform", this._tr(init_xoff, init_yoff))
 
-
   svg._slide = false
   svg._slide_offset = {x0:0,y0:0,x:0,y:0}
   var update_slide = function(mx,my) {
@@ -103,24 +102,23 @@ TraceForest.prototype.grow_forest = function(id){
     var oy = svg._slide_offset.y0
     var x = ox - dx
     var y = oy - dy
-    // currently not necessary, tree grows from top to bottom
-    //svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
+    svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
   }
-  root.on("mouseenter", function(){
-    var h2 = div.height()*2
-    init_yoff += div.height();
-    div.height(h2)
-    root.attr("height", div.height())
-    update_slide(svg._slide_offset.x,
-                 svg._slide_offset.y)
-  })
+  //root.on("mouseenter", function(){
+  //  var h2 = div.height()*2
+  //  init_yoff += div.height();
+  //  div.height(h2)
+  //  root.attr("height", div.height())
+  //  update_slide(svg._slide_offset.x,
+  //               svg._slide_offset.y)
+  //})
   root.on("mouseleave", function(){
-    var h2 = div.height()/2
-    init_yoff -= h2
-    div.height(h2)
-    root.attr("height", div.height())
-    update_slide(svg._slide_offset.x,
-                 svg._slide_offset.y)
+    //var h2 = div.height()/2
+    //init_yoff -= h2
+    //div.height(h2)
+    //root.attr("height", div.height())
+    //update_slide(svg._slide_offset.x,
+    //             svg._slide_offset.y)
     if (svg._slide) {
       svg._slide = false;
       svg._slide_offset.x0 -= (svg._slide_offset.x - d3.event.x)
@@ -143,81 +141,81 @@ TraceForest.prototype.grow_forest = function(id){
     }
   })
 
-  var link_layer = svg.append("svg:g")
-  var node_layer = svg.append("svg:g")
+  this.svg = svg
+  this.link_layer = svg.append("svg:g")
+  this.node_layer = svg.append("svg:g")
+}
 
+TraceForest.prototype.display_tree = function(trunk){
   var _this = this;
   //
   // for each tree root in the known traces
   //
-  var xxx = 0
   var links = [];
-  this._forest.forEach(function(trunk){
-    if (xxx >= 1) {
-      return
-    }
-    xxx += 1;
-    var traces = [];
-    _this.walk_trace_tree(trunk, 0, traces, links)
-    //var off = _this.position_trace_tree(trunk, pos)
+  var traces = [];
+  _this.walk_trace_tree(trunk, 0, traces, links)
 
-    var tree_grp = node_layer.append("svg:g")
+  this.node_layer.remove()
+  this.link_layer.remove()
+  this.link_layer = this.svg.append("svg:g")
+  this.node_layer = this.svg.append("svg:g")
 
-    trunk.align_tree(0)
+  var tree_grp = this.node_layer.append("svg:g")
 
-    for (var i = 0; i < traces.length; i++) {
-      var trace = traces[i]
-      var trace_grp = tree_grp.append("svg:g")
-                        .attr("class", "trace")
-                        .attr("transform", function(d){
-                          var x = trace.xoff*10
-                          var y = trace.yoff*7
-                          return _this._tr(x, y)
-                        })
+  trunk.align_tree(0)
 
-      var node = trace_grp.selectAll(".node").data(trace.nodes)
-                  .enter().append("svg:g")
-                    .attr("class", function(d){ return 'node ' + d.class })
-                    .attr("transform", function(d) {
-                      d.ix = 0
-                      d.iy = d.index
-                      d.x = 0
-                      d.y = d.iy * 7
-                      return _this._tr(d.x, d.y)
-                    })
+  for (var i = 0; i < traces.length; i++) {
+    var trace = traces[i]
+    var trace_grp = tree_grp.append("svg:g")
+                      .attr("class", "trace")
+                      .attr("transform", function(d){
+                        var x = trace.xoff*10
+                        var y = trace.yoff*7
+                        return _this._tr(x, y)
+                      })
 
-      // first and last instruction
-      _this.draw_trace_enter(node.filter(function(d){return !d.guard}))
+    var node = trace_grp.selectAll(".node").data(trace.nodes)
+                .enter().append("svg:g")
+                  .attr("class", function(d){ return 'node ' + d.class })
+                  .attr("transform", function(d) {
+                    d.ix = 0
+                    d.iy = d.index
+                    d.x = 0
+                    d.y = d.iy * 7
+                    return _this._tr(d.x, d.y)
+                  })
 
-      // stitched guards
-      _this.draw_stitched_guard(node.filter(function(d){return d.bridge}))
+    // first and last instruction
+    _this.draw_trace_enter(node.filter(function(d){return !d.guard}))
 
-      // not stitched guards
-      var not_stitched = node.filter(function(d){return d.guard && !d.bridge})
-      _this.draw_guard(not_stitched);
+    // stitched guards
+    _this.draw_stitched_guard(node.filter(function(d){return d.bridge}))
 
-      var trace_connect = function(obj,x,y){
-        var rel = obj.source.visual_trace
-        var x1 = obj.source.x + rel.xoff * 10
-        var y1 = obj.source.y + rel.yoff * 7
+    // not stitched guards
+    var not_stitched = node.filter(function(d){return d.guard && !d.bridge})
+    _this.draw_guard(not_stitched);
 
-        var rel = obj.target.visual_trace
-        var x2 = obj.target.x + rel.xoff * 10
-        var y2 = obj.target.y + rel.yoff * 7
+    var trace_connect = function(obj,x,y){
+      var rel = obj.source.visual_trace
+      var x1 = obj.source.x + rel.xoff * 10
+      var y1 = obj.source.y + rel.yoff * 7
 
-        var line = "M"+x1+","+y1 + " L"+x2+","+y2
-        return line
-      }
+      var rel = obj.target.visual_trace
+      var x2 = obj.target.x + rel.xoff * 10
+      var y2 = obj.target.y + rel.yoff * 7
 
+      var line = "M"+x1+","+y1 + " L"+x2+","+y2
+      return line
     }
 
-    var link = link_layer.selectAll("path.link")
-           .data(links)
-         .enter()
-           .insert("svg:path")
-           .attr("class", 'link')
-           .attr("d", trace_connect)
-  })
+  }
+
+  var link = this.link_layer.selectAll("path.link")
+         .data(links)
+       .enter()
+         .insert("svg:path")
+         .attr("class", 'link')
+         .attr("d", trace_connect)
 }
 
 TraceForest.prototype.position_trace_tree = function(trace, pos) {
