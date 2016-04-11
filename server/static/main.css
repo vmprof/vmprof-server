@@ -202,7 +202,17 @@ span.selected.var {
     height: 150px;
 }
 
-.trunk {
+#forest_legend rect {
+    stroke: silver;
+    stroke-width: 1;
+    fill: white;
+}
+
+#forest_legend text {
+    font-size: 11px;
+}
+
+.trace-enter {
     fill: red;
 }
 

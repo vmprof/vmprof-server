@@ -13,7 +13,42 @@ TraceForest = function(jitlog){
   this._forest = []
 }
 
-TraceForest.BRIDGE_YOFF = 10
+TraceForest.prototype.draw_trace_enter = function(svg){
+    svg.append("svg:circle").attr("r", 3)
+}
+
+TraceForest.prototype.draw_trace_exit = function(svg){
+    svg.append("svg:circle").attr("r", 3)
+}
+
+TraceForest.prototype.draw_stitched_guard = function(svg){
+    svg.append("svg:circle").attr("r", 3)
+}
+
+TraceForest.prototype.draw_guard = function(svg){
+      var node = svg.append("svg:g").attr("class", "guard-not-stitched")
+      var cw = 3 // cross half width
+      node.append("svg:line")
+                    .attr("class", "guard-not-stitched")
+                    .attr("x1", -cw).attr("y1", -cw)
+                    .attr("x2", cw).attr("y2", cw)
+      node.append("svg:line")
+                    .attr("class", "guard-not-stitched")
+                    .attr("x1", cw).attr("y1", -cw)
+                    .attr("x2", -cw).attr("y2", cw)
+      //not_stitched.append("svg:text")
+      //              .attr("class", "guard-not-stitched-text")
+      //              .attr("x", cw * 2)
+      //              .attr("y", cw/2)
+      //              .text(function(d){
+      //                var len = d.shrunk_guards.length || 0
+      //                if (len <= 1) {
+      //                  return ""
+      //                } else {
+      //                  return d.shrunk_guards.length
+      //                }
+      //              })
+}
 
 TraceForest.prototype.grow_forest = function(id){
   var _this = this;
@@ -29,14 +64,16 @@ TraceForest.prototype.grow_forest = function(id){
 
   var bot_margin = 5
   var div = jQuery(id)
-  var root = d3.select(id).append("svg:svg")
+  var root = d3.select(id + "_svg")
   var init_xoff = bot_margin 
   var init_yoff = bot_margin
-  var svg = root
-              .attr("width", div.width())
+  var legend = root.select(id + "_legend")
+  legend.attr("transform", this._tr(div.width()-195,15))
+  var svg = root.attr("width", div.width())
               .attr("height", div.height())
             .append("svg:g")
               .attr("transform", this._tr(init_xoff, init_yoff))
+
 
   svg._slide = false
   svg._slide_offset = {x0:0,y0:0,x:0,y:0}
@@ -47,7 +84,8 @@ TraceForest.prototype.grow_forest = function(id){
     var oy = svg._slide_offset.y0
     var x = ox - dx
     var y = oy - dy
-    svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
+    // currently not necessary, tree grows from top to bottom
+    //svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
   }
   root.on("mouseenter", function(){
     var h2 = div.height()*2
@@ -134,40 +172,20 @@ TraceForest.prototype.grow_forest = function(id){
              .attr("d", diagonal)
 
       // first and last instruction
-      node.filter(function(d){
+      _this.draw_trace_enter(node.filter(function(d){
         return d.guard === undefined
-      }).append("svg:circle").attr("r", 3)
+      }))
 
       // stitched guards
-      node.filter(function(d){
+      _this.draw_stitched_guard(node.filter(function(d){
         return d.guard !== undefined && d.stitched !== undefined
-      }).append("svg:circle").attr("r", 3)
+      }))
 
       // not stitched guards
       var not_stitched = node.filter(function(d){
         return d.guard !== undefined && d.stitched === undefined
-      }).append("svg:g")
-      var cw = 3 // cross half width
-      not_stitched.append("svg:line")
-                    .attr("class", "guard-not-stitched")
-                    .attr("x1", -cw).attr("y1", -cw)
-                    .attr("x2", cw).attr("y2", cw)
-      not_stitched.append("svg:line")
-                    .attr("class", "guard-not-stitched")
-                    .attr("x1", cw).attr("y1", -cw)
-                    .attr("x2", -cw).attr("y2", cw)
-      //not_stitched.append("svg:text")
-      //              .attr("class", "guard-not-stitched-text")
-      //              .attr("x", cw * 2)
-      //              .attr("y", cw/2)
-      //              .text(function(d){
-      //                var len = d.shrunk_guards.length || 0
-      //                if (len <= 1) {
-      //                  return ""
-      //                } else {
-      //                  return d.shrunk_guards.length
-      //                }
-      //              })
+      })
+      _this.draw_guard(not_stitched);
     }
   })
 }
@@ -190,7 +208,7 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces) {
   var _this = this
   var trace = { 'stitches': [], 'links': [], 'nodes': [], 'yoff': yoff }
   traces.push(trace)
-  var node = { 'trace': trace, class: 'trunk', 'order': trace.nodes.length,
+  var node = { 'trace': trace, class: 'trace-enter', 'order': trace.nodes.length,
                'index': 0 }
   var first = node
   var last = node

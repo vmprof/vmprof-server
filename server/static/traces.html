@@ -1,18 +1,30 @@
-
-<div class="trace" ng-if="trace" hover-vars>
-
-    <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
-    <div class="trace-line" ng-repeat="op in ops">
-        <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
-        <div class="trace-asm" ng-if="show_asm">
-            <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
-                <div ng-bind-html="asm"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div id="forest" trace-forest>
+    <svg id="forest_svg">
+        <g id="forest_legend">
+            <rect id="forest_legend" width="200" height="80"
+                                     x="-10" y="-10">
+            </rect>
+           <g>
+                <circle class="trace-enter" r="3" />
+                <text x="8" y="4">Label</text>
+           </g>
+           <g transform="translate(0,15)">
+                <line class="guard-not-stitched" x1="-3" x2="3" y1="-3" y2="3" />
+                <line class="guard-not-stitched" x1="3" x2="-3" y1="-3" y2="3" />
+                <text x="8" y="4">Guard</text>
+           </g>
+           <g transform="translate(0,30)">
+                <circle class="guard" r="3" />
+                <text x="8" y="4">Guard stitched</text>
+           </g>
+           <g transform="translate(0,45)">
+                <text x="0" y="4">Trace trees grow from top to bottom.</text>
+           </g>
+           <g transform="translate(0,60)">
+                <text x="0" y="4">Hover over the tree to expand details.</text>
+           </g>
+        </g>
+    </svg>
 </div>
 
 <ul ng-if="jitlog">
@@ -55,3 +67,15 @@
     </button>
 </div>
 
+<div class="trace" ng-if="trace" hover-vars>
+
+    <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
+    <div class="trace-line" ng-repeat="op in ops">
+        <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
+        <div class="trace-asm" ng-if="show_asm">
+            <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
+                <div ng-bind-html="asm"></div>
+            </div>
+        </div>
+    </div>
+</div>
