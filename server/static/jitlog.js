@@ -33,7 +33,10 @@ var JitLog = function (data) {
   console.log("traces:", this._traces)
 };
 
-JitLog.colorPalette = ['#fc6605','#66fc05','#05fc66'];
+JitLog.colorPalette = [
+  '#801515','#804515','#116611','#3d5898',
+  '#ee001c','#402152','#64ba1d','#ff6c00'
+];
 JitLog.freeColors = clone(JitLog.colorPalette);
 JitLog.liverange_indices = [0,1,2,3,4,5,6,7,8]
 
