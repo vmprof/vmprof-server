@@ -30,7 +30,6 @@ var JitLog = function (data) {
       return true
     })
   }
-  console.log("traces:", this._traces)
 };
 
 JitLog.colorPalette = [
@@ -188,6 +187,66 @@ var Trace = function(jitlog, data) {
   }
 }
 
+Trace.prototype.bridge_count = function(fn) {
+  return this._bridges.length;
+}
+
+Trace.prototype.partition_subtree = function() {
+  var total = this.branch_count()
+  var part = {leftcount:0, left:[], rightcount:0, right:[], total:total}
+
+  this.walk_bridges(function(bridge){
+    if (part.leftcount < part.rightcount) {
+      part.leftcount += bridge.branch_count()
+      part.left.push(bridge)
+    } else {
+      part.rightcount += bridge.branch_count()
+      part.right.push(bridge)
+    }
+  })
+
+  if (part.leftcount + part.rightcount + 1 != part.total) {
+    console.error("partition for rendering has incorrrect branch count!")
+    console.error(part.leftcount, "+", part.rightcount, "!=", total)
+  }
+
+
+  return part
+}
+
+Trace.prototype.align_tree = function(xoff) {
+  // true means right, false means left
+  var part = this.partition_subtree()
+  this.visual_trace.xoff = 1 + xoff + part.leftcount
+
+  var d = 1 + xoff + part.leftcount
+  console.log('l/r', part.leftcount, '/', part.rightcount, d)
+
+  // walk the right side of the trace
+  var t = 1 + xoff + part.leftcount
+  part.right.forEach(function(trace){
+    var p = trace.align_tree(t)
+    t += p.total
+  })
+
+  // walk the left side of the trace
+  var t = xoff
+  part.left.forEach(function(trace){
+    var p = trace.align_tree(t)
+    t += p.total
+  })
+
+  return part
+}
+
+Trace.prototype.walk_bridges = function(fn) {
+  var _this = this;
+  this._bridges.forEach(function(bridge){
+    var trace = _this._jitlog._traces[bridge.target]
+    fn.call(_this, trace);
+  })
+}
+
 Trace.prototype.walk_trace_tree = function(fn) {
   fn.call(this, this);
   var _this = this
@@ -203,6 +262,7 @@ Trace.prototype.link = function() {
   this._bridges.forEach(function(bridge){
     var trace = _this._jitlog._traces[bridge.target]
     trace._parent = _this;
+    bridge.target_obj = trace;
   })
 }
 
@@ -210,70 +270,20 @@ Trace.prototype.parent = function() {
   return this._parent
 }
 
-Trace.prototype.forEachBridge = function(func, sort) {
-  var bridges_json = this._bridges
-  var bridges = [];
-  for (var i = 0; i < bridges_json.length; i++) {
-    var b = bridges_json[i]
-    bridges.push(b)
-  }
-  if (sort) {
-    bridges.sort(sort)
-  }
-  for (var i = 0; i < bridges.length; i++) {
-    var b = bridges[i]
-    if (!func.call(b, b)) {
-      return true
-    }
-  }
-  return false
-}
-
-Trace.prototype.get_trunk = function() {
-  if (!this._parent) {
-    return this;
-  }
-  return this._parent.get_trunk();
-}
-
-Trace.prototype.reduce_to_trunk = function(func, value) {
-  var par = this._parent
-  while (par !== undefined) {
-    value = func.call(this, par, value)
-    par = par._parent
-  }
-  return value
-}
-
-Trace.prototype.forEachParent = function(func) {
-  var par = this._parent
-  while (par !== undefined) {
-    if (!func.call(par, par)) {
-      return true
-    }
-    par = par._parent
-  }
-  return false
-}
-
 Trace.prototype.is_trunk = function() {
   return this.get_type() === 'loop'
 }
 
-Trace.prototype.trace_strips = function() {
-  if (this._trace_strips !== undefined) {
-    return this._trace_strips;
+Trace.prototype.branch_count = function() {
+  if (this._branch_count !== undefined) {
+    return this._branch_count
   }
   var count = 1;
-  var _this = this;
-  this._bridges.forEach(function(bridge){
-    var trace = _this._jitlog._traces[bridge.target]
-    count += trace.trace_strips()
+  this.walk_bridges(function(bridge){
+    count += bridge.branch_count()
   })
-
-  this._trace_strips = count;
-
-  return count;
+  this._branch_count = count;
+  return count
 }
 
 Trace.prototype.ends_with_jump = function() {

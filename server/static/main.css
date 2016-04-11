@@ -197,6 +197,8 @@ span.selected.var {
 }
 
 #forest {
+    cursor: pointer;
+    cursor: hand;
     background: #f8f8f8;
     border: 1px solid #e8e8e8;
     height: 150px;
@@ -231,6 +233,6 @@ span.selected.var {
 
 .link {
   fill: none;
-  stroke: #aaa;
+  stroke: #000;
   stroke-width: 1px;
 }

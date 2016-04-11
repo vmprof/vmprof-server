@@ -1,12 +1,31 @@
 
-offset = function(x,y){
-  return {'x':x, 'y':y}
+VisualTrace = function(trace, yoff){
+  this.trace_obj = trace
+  trace.visual_trace = this
+  this.links = []
+  this.stitches = []
+  this.nodes = []
+  this.yoff = yoff
 }
 
-off_plus = function(a,b) {
-  return { 'x': a.x + b.x, 'y': a.y + b.y }
+VisualTraceNode = function(vtrace, index) {
+  this.visual_trace = vtrace
+  this.class = 'trace-enter'
+  this.order = vtrace.nodes.length
+  this.index = index
+  this.x = 0
+  this.y = 0
+  // nodes that have been consumed (they are not displayed)
+  this.consumed = []
+  this.guard = null
 }
 
+VisualTraceNode.prototype.set_guard = function(op, bridge){
+  this.guard = op
+  op.visual_node = this
+  this.bridge = bridge
+  this.class = 'guard'
+}
 
 TraceForest = function(jitlog){
   this._jitlog = jitlog
@@ -27,7 +46,7 @@ TraceForest.prototype.draw_stitched_guard = function(svg){
 
 TraceForest.prototype.draw_guard = function(svg){
       var node = svg.append("svg:g").attr("class", "guard-not-stitched")
-      var cw = 3 // cross half width
+      var cw = 2 // cross half width
       node.append("svg:line")
                     .attr("class", "guard-not-stitched")
                     .attr("x1", -cw).attr("y1", -cw)
@@ -124,31 +143,34 @@ TraceForest.prototype.grow_forest = function(id){
     }
   })
 
-  var diagonal = d3.svg.diagonal()
-    .projection(function(d) {
-      console.log(d)
-      return [d.x, d.y];
-    });
-
   var link_layer = svg.append("svg:g")
   var node_layer = svg.append("svg:g")
 
   var _this = this;
-  var pos = {l:0,r:0,i:0};
+  //
+  // for each tree root in the known traces
+  //
+  var xxx = 0
+  var links = [];
   this._forest.forEach(function(trunk){
+    if (xxx >= 1) {
+      return
+    }
+    xxx += 1;
     var traces = [];
-    _this.walk_trace_tree(trunk, 0, traces)
+    _this.walk_trace_tree(trunk, 0, traces, links)
     //var off = _this.position_trace_tree(trunk, pos)
 
     var tree_grp = node_layer.append("svg:g")
-    // TODO add offset
+
+    trunk.align_tree(0)
 
     for (var i = 0; i < traces.length; i++) {
       var trace = traces[i]
       var trace_grp = tree_grp.append("svg:g")
                         .attr("class", "trace")
                         .attr("transform", function(d){
-                          var x = i*10
+                          var x = trace.xoff*10
                           var y = trace.yoff*7
                           return _this._tr(x, y)
                         })
@@ -157,36 +179,44 @@ TraceForest.prototype.grow_forest = function(id){
                   .enter().append("svg:g")
                     .attr("class", function(d){ return 'node ' + d.class })
                     .attr("transform", function(d) {
-                      var x = 0
-                      var y = (d.index || 0) * 7
-                      d.x = x + i * 10
-                      d.y = y + trace.yoff * 7
-                      return _this._tr(x, y)
+                      d.ix = 0
+                      d.iy = d.index
+                      d.x = 0
+                      d.y = d.iy * 7
+                      return _this._tr(d.x, d.y)
                     })
 
-      var link = link_layer.selectAll("path.link")
-             .data(trace.links)
-           .enter()
-             .insert("svg:path")
-             .attr("class", function(d){ return 'link ' + d.class })
-             .attr("d", diagonal)
-
       // first and last instruction
-      _this.draw_trace_enter(node.filter(function(d){
-        return d.guard === undefined
-      }))
+      _this.draw_trace_enter(node.filter(function(d){return !d.guard}))
 
       // stitched guards
-      _this.draw_stitched_guard(node.filter(function(d){
-        return d.guard !== undefined && d.stitched !== undefined
-      }))
+      _this.draw_stitched_guard(node.filter(function(d){return d.bridge}))
 
       // not stitched guards
-      var not_stitched = node.filter(function(d){
-        return d.guard !== undefined && d.stitched === undefined
-      })
+      var not_stitched = node.filter(function(d){return d.guard && !d.bridge})
       _this.draw_guard(not_stitched);
+
+      var trace_connect = function(obj,x,y){
+        var rel = obj.source.visual_trace
+        var x1 = obj.source.x + rel.xoff * 10
+        var y1 = obj.source.y + rel.yoff * 7
+
+        var rel = obj.target.visual_trace
+        var x2 = obj.target.x + rel.xoff * 10
+        var y2 = obj.target.y + rel.yoff * 7
+
+        var line = "M"+x1+","+y1 + " L"+x2+","+y2
+        return line
+      }
+
     }
+
+    var link = link_layer.selectAll("path.link")
+           .data(links)
+         .enter()
+           .insert("svg:path")
+           .attr("class", 'link')
+           .attr("d", trace_connect)
   })
 }
 
@@ -204,33 +234,30 @@ TraceForest.prototype._tr = function(a, b) {
   return 'translate(' + a + ',' + b + ')'
 }
 
-TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces) {
+TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
   var _this = this
-  var trace = { 'stitches': [], 'links': [], 'nodes': [], 'yoff': yoff }
-  traces.push(trace)
-  var node = { 'trace': trace, class: 'trace-enter', 'order': trace.nodes.length,
-               'index': 0 }
+  var vtrace = new VisualTrace(trunk, yoff)
+  traces.push(vtrace)
+  var node = new VisualTraceNode(vtrace, 0)
   var first = node
   var last = node
-  trace.nodes.push(node)
+  vtrace.nodes.push(node)
   var i = 1;
   trunk.forEachOp(function(op){
     if (op.is_guard()) {
       // add a new node, give it a connection to the previous
       var bridge = op.get_stitched_trace()
       if (!bridge && last.guard && last.class.indexOf('stitched') == -1) {
-        last.shrunk_guards.push(op)
+        last.consumed.push(op)
         return true;
       }
-      var node = { 'guard': op, class: 'guard',
-                   'trace': trunk, 'stitched': bridge,
-                   'shrunk_guards': [], 'index': i }
-      trace.nodes.push(node)
-      //trace.links.push({'source': last, 'target': node})
-      op._node = node;
+      var node = new VisualTraceNode(vtrace, i)
+      node.set_guard(op, bridge)
+      vtrace.nodes.push(node)
+      links.push({'source': last, 'target': node})
       if (bridge !== undefined) {
         node.class += ' stitched'
-        trace.stitches.push({'op': op, 'order': trace.nodes.length })
+        vtrace.stitches.push({'op': op, 'index': vtrace.nodes.length })
       }
       last = node
       i += 1;
@@ -238,32 +265,27 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces) {
     return true;
   })
 
-  trace.stitches.sort(function(a,b){
-    return b.order - a.order
-  })
-
-  trace.stitches.forEach(function(obj){
+  vtrace.stitches.forEach(function(obj){
     var op = obj.op
     var stitched = op.get_stitched_trace()
     if (stitched !== undefined){
-      var yoff = trace.yoff + obj.order-1
-      var strace = _this.walk_trace_tree(stitched, yoff, traces)
-      trace.links.push({'source': op._node, 'target': strace.nodes[0], class: 'stitch-edge'})
+      var yoff = vtrace.yoff + obj.index-1
+      var vstrace = _this.walk_trace_tree(stitched, yoff, traces, links)
+      var tgt = vstrace.nodes[0]
+      links.push({'source': op.visual_node , 'target': tgt, class: 'stitch-edge'})
     }
   })
 
   if (trunk.ends_with_jump()) {
     // add a node for the jump!
-    var node = {'trace': trunk, class: 'trunk'}
-    trace.nodes.push(node)
+    var node = new VisualTraceNode(vtrace, i)
+    i += 1
+    vtrace.nodes.push(node)
+    links.push({'source': last, 'target': node})
     last = node
-
-    // TODO
-    //links.push({'source': node, 'target': trunk, class: 'jump-edge'})
   }
-  //trace.links.push({'source': trunk, 'target': last})
 
-  return trace
+  return vtrace
 }
 
 
