@@ -204,6 +204,13 @@ Trace.prototype.partition_subtree = function() {
       part.right.push(bridge)
     }
   })
+  // sort the sets left and right to display them correctly!
+  part.left.sort(function(a,b){
+    return a.visual_trace.yoff - b.visual_trace.yoff
+  })
+  part.right.sort(function(a,b){
+    return b.visual_trace.yoff - a.visual_trace.yoff
+  })
 
   if (part.leftcount + part.rightcount + 1 != part.total) {
     console.error("partition for rendering has incorrrect branch count!")
