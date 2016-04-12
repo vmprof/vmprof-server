@@ -337,6 +337,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
 
     $http.get('/api/log/' + $routeParams.log + '/', {cache: true}
         ).then(function (response) {
+            $scope.log = response.data;
             $scope.stats = new Stats(response.data.data);
             display_log($scope, $routeParams, $timeout, $location);
     });
