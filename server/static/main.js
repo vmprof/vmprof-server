@@ -370,13 +370,13 @@ app.directive('traceForest', function($timeout){
 
 app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
                                     $location) {
-    $scope.display_trace = function(trace){
-        trace_forest.display_tree(trace)
-        $scope.$broadcast('trace-update')
-    }
+    // variable defaults
     $scope.loading = true;
+    $scope.ops = []
     $scope.show_asm = false;
+    $scope.trace_type = 'asm'
     $scope.selected_trace = null;
+
     $http.get('/api/log/' + $routeParams.log + '/', {
         cache: true
     }).then(function(response) {
@@ -384,13 +384,15 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         jitlog = new JitLog(response.data.data.jitlog);
         $scope.traces = jitlog.all_traces();
         $scope.jitlog = jitlog;
+        //
+        // if a trace id has been provided display it right away
+        //
         if ($routeParams.trace !== undefined) {
           var trace = jitlog.get_trace_by_id($routeParams.trace);
           $scope.ops = trace.get_operations('asm').list()
           $scope.trace_type = 'asm'
-          $scope.selected_trace = trace
+          $scope.trace = trace
         }
-
         $scope.loading = false;
         $timeout(function(){
           $scope.$broadcast('trace-init')
@@ -398,13 +400,10 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         })
     });
 
-    $scope.switch_trace = function(type) {
+    $scope.switch_trace = function(trace, type) {
       if ($scope.loading) { return; }
+      // set the new type and the subject trace
       $scope.trace_type = type;
-      $scope.trace = undefined
-      var trace = $scope.jitlog.get_trace_by_id($routeParams.trace);
-      var ops = trace.get_operations(type)
-      $scope.ops = ops.list()
       $scope.trace = trace
       $scope.$broadcast('trace-update')
     }

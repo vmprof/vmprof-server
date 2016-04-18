@@ -1,7 +1,10 @@
 <div id="forest" trace-forest>
+    <!-- The svg containing the trace visualisation -->
     <svg id="forest_svg" xmlns="http://www.w3.org/2000/svg"
                          xmlns:xlink="http://www.w3.org/1999/xlink">
-        <g id="forest_legend">
+        <text x="5" y="15"></text>
+        <text ng-show id="select-trace-tree">Select a trace below to see it's tree</text>
+        <g id="forest_legend" transform="translate(-200,-200)">
             <rect id="forest_legend" width="200" height="80"
                                      x="-10" y="-10">
             </rect>
@@ -37,17 +40,17 @@
           </button>
           <ul class="dropdown-menu">
               <li><a ng-class="{'active': trace_type == 'noopt'}"
-                     ng-click="switch_trace('noopt')">Unoptimized Trace
+                     ng-click="switch_trace(trace, 'noopt')">Unoptimized Trace
                      <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
                  </a>
               </li>
               <li><a ng-class="{'active': trace_type == 'opt'}"
-                     ng-click="switch_trace('opt')">Optimized Trace
+                     ng-click="switch_trace(trace, 'opt')">Optimized Trace
                      <span class="fa fa-check" ng-if="trace_type == 'opt'"></span>
                  </a>
               </li>
               <li><a ng-class="{'active': trace_type == 'asm'}"
-                     ng-click="switch_trace('asm')">Assembled Trace
+                     ng-click="switch_trace(trace, 'asm')">Assembled Trace
                      <span class="fa fa-check" ng-if="trace_type == 'asm'"></span>
                  </a>
               </li>
@@ -64,19 +67,21 @@
     <div class="col-sm-6 col-lg-6">
         <input class="form-control input-group-sm" type="text"
                ng-model="filter" value=""
-               placeholder="Hello" />
+               placeholder="Type func name..." />
         <ul>
             <li ng-repeat="trace in traces" ng-show="$index">
-                <a ng-click="display_trace(trace)">
-                    {{trace.get_type()}}: {{trace.get_name()}}
+                <a ng-click="switch_trace(trace, trace_type)">
+                    {{trace.get_type()}}: {{trace.get_func_name()}}
                 </a>
             </li>
         </ul>
     </div>
 
-    <div class="col-md-6" ng-if="selected_trace" hover-vars>
-        <div class="no-trace" ng-if="ops.length == 0">Trace not recorded in JIT log</div>
-        <div class="trace-line" ng-repeat="op in ops">
+    <div class="col-md-6" ng-if="trace" hover-vars>
+        <div class="no-trace" ng-if="trace.get_stage(trace_type).ops.length == 0">
+            Trace not recorded in JIT log
+        </div>
+        <div class="trace-line" ng-repeat="op in trace.get_stage(trace_type).ops">
             <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
             <div class="trace-asm" ng-if="show_asm">
                 <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">

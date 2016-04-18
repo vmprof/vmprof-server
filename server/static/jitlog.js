@@ -10,7 +10,9 @@ var JitLog = function (data) {
   data.traces.forEach(function(trace){
     var objtrace = new Trace(_this, trace);
     // a lookup to find the assembly addr (first byte) -> trace
-    _this._traces[trace.addr[0]] = objtrace
+    if (trace.addr) {
+      _this._traces[trace.addr[0]] = objtrace
+    }
     // a lookup to find the mapping from descr_number -> trace
     _this._unique_ids[trace.unique_id] = objtrace
     _this._trace_list.push(objtrace)
@@ -177,13 +179,13 @@ var Trace = function(jitlog, data) {
   this._stages = {}
   var stages = data.stages;
   if (stages.noopt){
-    this._stages.noopt = new Operations(this._jitlog, stages.noopt)
+    this._stages.noopt = new Stage(this._jitlog, stages.noopt)
   }
   if (stages.opt){
-    this._stages.opt = new Operations(this._jitlog, stages.opt)
+    this._stages.opt = new Stage(this._jitlog, stages.opt)
   }
   if (stages.asm){
-    this._stages.asm = new Operations(this._jitlog, stages.asm)
+    this._stages.asm = new Stage(this._jitlog, stages.asm)
   }
 }
 
@@ -293,7 +295,7 @@ Trace.prototype.branch_count = function() {
 }
 
 Trace.prototype.ends_with_jump = function() {
-  var ops = this.get_operations('asm')
+  var ops = this.get_stage('asm')
   var oplist = ops.list()
   if (oplist.length == 0) {
     return false
@@ -309,8 +311,15 @@ Trace.prototype.is_stitched = function() {
 Trace.prototype.get_type = function() {
   return this._data.type;
 }
-Trace.prototype.get_name = function() {
-  return this._data.name || 'empty'
+Trace.prototype.get_func_name = function() {
+  // return the first enclosed function saved in the first debug_merge_point
+  var stage = this.get_stage('asm')
+  var mp = stage.merge_points
+  var obj = stage.get_first_merge_point()
+  if (obj && obj.enclosed !== '') {
+    return obj.enclosed
+  }
+  return 'unknown'
 }
 
 Trace.prototype.get_unique_id = function() {
@@ -321,7 +330,7 @@ Trace.prototype.get_unique_id = function() {
 }
 
 Trace.prototype.forEachOp = function(fn) {
-  var ops = this.get_operations('asm').list()
+  var ops = this.get_stage('asm').list()
   for (var i = 0; i < ops.length; i++) {
     var op = ops[i]
     if (!fn.call(op, op)) {
@@ -331,28 +340,38 @@ Trace.prototype.forEachOp = function(fn) {
   return false
 }
 
-Trace.prototype.get_operations = function(name) {
+Trace.prototype.get_stage = function(name) {
   if (this._stages[name] !== undefined) {
     return this._stages[name]
   }
-  return new Operations(this._jitlog, {'ops': [], 'tick': -1});
+  return new Stage(this._jitlog, {'ops': [], 'tick': -1});
 }
 
-var Operations = function(jitlog, data) {
+var Stage = function(jitlog, data) {
   this._jitlog = jitlog
-  this._data = data.ops
+  this._data = data
   this._tick = data.tick
-  this._ops = []
-  for (var key in this._data) {
-    var opdata = this._data[key]
+  this.ops = []
+  for (var key in data.ops) {
+    var opdata = data.ops[key]
     var op = new ResOp(this._jitlog, opdata)
-    this._ops.push(op)
+    this.ops.push(op)
   }
 }
 
-Operations.prototype.list = function() {
-  return this._ops;
+Stage.prototype.list = function() {
+  return this.ops;
 }
+
+Stage.prototype.get_first_merge_point = function() {
+  var mp = this._data.merge_points || {}
+  var first_index = mp['first']
+  if (!first_index) {
+    return null
+  }
+  return mp[first_index]
+}
+
 
 
 var ResOp = function(jitlog, data) {
