@@ -382,8 +382,8 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     }).then(function(response) {
         $scope.log = response.data;
         jitlog = new JitLog(response.data.data.jitlog);
-        $scope.traces = jitlog.all_traces();
-        $scope.jitlog = jitlog;
+        $scope.traces = jitlog.filter_traces("", true, false)
+        $scope.jitlog = jitlog
         //
         // if a trace id has been provided display it right away
         //
@@ -406,6 +406,17 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       $scope.trace_type = type;
       $scope.trace = trace
       $scope.$broadcast('trace-update')
+    }
+
+    $scope.filter_traces = function(text, loops, bridges) {
+      if (!text){ text = ""; }
+      //
+      var type = "none"
+      if (loops && bridges) { var type = "both" }
+      else if (loops) { var type = "loop" }
+      else if (bridges) { var type = "bridge" }
+      //
+      return jitlog.filter_traces(text, type)
     }
 });
 

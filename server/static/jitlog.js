@@ -163,9 +163,33 @@ JitLog.hoverVars = function(){
   jQuery('.var').click(enable_or_disable);
 }
 
-JitLog.prototype.all_traces = function() {
-  return this._trace_list;
+JitLog.prototype.filter_traces = function(text, type) {
+  // filter all traces according to the following criteria:
+  // check if the type matches
+  // if any enclosed name (of the debug merge points) matches
+  // if any filename of the debug merge points matches
+  // if any rpython function matches (TODO)
+  var list = []
+  this._trace_list.forEach(function(trace){
+    if (trace.get_type() !== type && type !== "both") {
+      return
+    }
+    var hit_break = trace.for_each_merge_point(function(merge_point){
+      if (merge_point.enclosed.indexOf(text) !== -1) {
+        return false; // break this loop
+      } else if (merge_point.filename.indexOf(text) !== -1) {
+        return false; // break this loop
+      }
+      return true
+    })
+    if (hit_break) {
+      list.push(trace)
+    }
+  })
+
+  return list
 }
+
 JitLog.prototype.get_trace_by_id = function(id) {
   return this._traces[id]
 }
@@ -340,6 +364,11 @@ Trace.prototype.forEachOp = function(fn) {
   return false
 }
 
+Trace.prototype.for_each_merge_point = function(fn) {
+  return this.get_stage('asm').for_each_merge_point(fn)
+}
+
+
 Trace.prototype.get_stage = function(name) {
   if (this._stages[name] !== undefined) {
     return this._stages[name]
@@ -361,6 +390,24 @@ var Stage = function(jitlog, data) {
 
 Stage.prototype.list = function() {
   return this.ops;
+}
+
+Stage.prototype.for_each_merge_point = function(fn) {
+  // merge_points is a hash: integer (index) -> [merge points]
+  // a single index can have several merge points. thus
+  // the double nested loop
+  var mps = this._data.merge_points || {}
+  for (var key in mps) {
+    if (key === "first"){ continue }
+    var points = mps[key]
+    for (var i = 0; i < points.length; i++) {
+      var mp = points[i]
+      if (!fn.call(mp, mp)) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 Stage.prototype.get_first_merge_point = function() {

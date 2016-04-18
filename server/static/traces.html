@@ -64,12 +64,23 @@
         </div>
     </div>
 
-    <div class="col-sm-6 col-lg-6">
-        <input class="form-control input-group-sm" type="text"
-               ng-model="filter" value=""
-               placeholder="Type func name..." />
+    <div class="col-sm-6 col-lg-6" ng-if="jitlog">
+        <div class="form-inline">
+            <input class="form-control input-group-sm" type="text"
+                   ng-model="filter_text" value=""
+                   placeholder="Type func name..." />
+            <div class="checkbox">
+                <input type="checkbox" ng-model="filter_loop" checked="true" />
+                Loops
+            </div>
+            <div class="checkbox">
+                <input type="checkbox" ng-model="filter_bridge" />
+                Bridges
+            </div>
+        </div>
         <ul>
-            <li ng-repeat="trace in traces" ng-show="$index">
+            <li ng-repeat="trace in filter_traces(filter_text, filter_loop, filter_bridge)"
+                ng-show="$index">
                 <a ng-click="switch_trace(trace, trace_type)">
                     {{trace.get_type()}}: {{trace.get_func_name()}}
                 </a>

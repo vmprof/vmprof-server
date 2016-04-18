@@ -71,7 +71,7 @@ TraceForest.prototype.draw_guard = function(svg){
 
 TraceForest.prototype.setup_once = function(id){
   var _this = this;
-  this._jitlog.all_traces().forEach(function(trace) {
+  this._jitlog.filter_traces("", "both").forEach(function(trace) {
     if (trace.is_trunk()) {
       // only add traces that are trunks, bridges will
       // be visited/visible by walking trunk traces
