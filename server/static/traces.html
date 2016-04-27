@@ -67,32 +67,39 @@
     <div class="col-sm-6 col-lg-6" ng-if="jitlog">
         <div class="form-inline">
             <input class="form-control input-group-sm" type="text"
-                   ng-model="filter_text" value=""
+                   ng-model="$storage.filter_text" value=""
                    placeholder="Type func name..." />
             <div class="checkbox">
-                <input type="checkbox" ng-model="filter_loop" checked="true" />
+                <input type="checkbox" ng-model="$storage.filter_loop" checked="true" />
                 Loops
             </div>
             <div class="checkbox">
-                <input type="checkbox" ng-model="filter_bridge" />
+                <input type="checkbox" ng-model="$storage.filter_bridge" />
                 Bridges
             </div>
         </div>
-        <ul>
-            <li ng-repeat="trace in filter_traces(filter_text, filter_loop, filter_bridge)"
-                ng-show="$index">
-                <a ng-click="switch_trace(trace, trace_type)">
-                    {{trace.get_type()}}: {{trace.get_func_name()}}
-                </a>
+        <ul class="trace-entries">
+            <li class="trace-entry"
+                ng-repeat="trace in filter_traces($storage.filter_text, $storage.filter_loop, $storage.filter_bridge)"
+                ng-class="{'active': trace == selected_trace}"
+                ng-click="switch_trace(trace, trace_type)">
+                <div>
+                    <span class="trace-type">{{trace.get_type()}}</span>
+                    <span class="trace-name">{{trace.get_func_name()}}</span>
+                </div>
+                <div class="trace-info">
+                    <span class="filename">{{trace.get_filename()}}</span>
+                    <span class="lineno">{{trace.get_lineno()}}</span>
+                </div>
             </li>
         </ul>
     </div>
 
-    <div class="col-md-6" ng-if="trace" hover-vars>
-        <div class="no-trace" ng-if="trace.get_stage(trace_type).ops.length == 0">
+    <div class="resops col-md-6" ng-if="selected_trace" hover-vars>
+        <div class="no-trace" ng-if="selected_trace.get_stage(trace_type).ops.length == 0">
             Trace not recorded in JIT log
         </div>
-        <div class="trace-line" ng-repeat="op in trace.get_stage(trace_type).ops">
+        <div class="trace-line" ng-repeat="op in selected_trace.get_stage(trace_type).ops">
             <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
             <div class="trace-asm" ng-if="show_asm">
                 <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">

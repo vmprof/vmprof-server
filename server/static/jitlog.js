@@ -38,8 +38,12 @@ JitLog.colorPalette = [
   '#801515','#804515','#116611','#3d5898',
   '#ee001c','#402152','#64ba1d','#ff6c00'
 ];
-JitLog.freeColors = clone(JitLog.colorPalette);
-JitLog.liverange_indices = [0,1,2,3,4,5,6,7,8]
+
+JitLog.resetState = function() {
+  JitLog.freeColors = clone(JitLog.colorPalette);
+  JitLog.liverange_indices = [0,1,2,3,4,5,6,7,8]
+}
+JitLog.resetState();
 
 var extract_class = function(str, prefix){
   // returns the first occurance!
@@ -174,16 +178,20 @@ JitLog.prototype.filter_traces = function(text, type) {
     if (trace.get_type() !== type && type !== "both") {
       return
     }
-    var hit_break = trace.for_each_merge_point(function(merge_point){
-      if (merge_point.enclosed.indexOf(text) !== -1) {
-        return false; // break this loop
-      } else if (merge_point.filename.indexOf(text) !== -1) {
-        return false; // break this loop
-      }
-      return true
-    })
-    if (hit_break) {
+    if (text === "") {
       list.push(trace)
+    } else {
+      var merge_point = trace.get_stage('opt').get_first_merge_point()
+      if (!merge_point) {
+        return
+      }
+      var scope = merge_point._data['scope']
+      var filename = merge_point._data['filename']
+      if (scope && scope.indexOf(text) !== -1) {
+        list.push(trace)
+      } else if (filename && filename.indexOf(text) !== -1) {
+        list.push(trace)
+      }
     }
   })
 
@@ -335,16 +343,23 @@ Trace.prototype.is_stitched = function() {
 Trace.prototype.get_type = function() {
   return this._data.type;
 }
-Trace.prototype.get_func_name = function() {
+
+var gen_first_mp_info = function(name, default_value) {
   // return the first enclosed function saved in the first debug_merge_point
-  var stage = this.get_stage('asm')
-  var mp = stage.merge_points
-  var obj = stage.get_first_merge_point()
-  if (obj && obj.enclosed !== '') {
-    return obj.enclosed
+  var f = function() {
+    var stage = this.get_stage('opt')
+    var mp = stage.get_first_merge_point()
+    if (mp && mp._data[name] !== undefined) {
+      return mp._data[name]
+    }
+    return default_value
   }
-  return 'unknown'
+  return f
 }
+
+Trace.prototype.get_func_name = gen_first_mp_info('scope', 'implement get_location in jitdriver')
+Trace.prototype.get_filename = gen_first_mp_info('filename', '-')
+Trace.prototype.get_lineno = gen_first_mp_info('lineno', '0')
 
 Trace.prototype.get_unique_id = function() {
   if ('addr' in this._data) {
@@ -365,7 +380,9 @@ Trace.prototype.forEachOp = function(fn) {
 }
 
 Trace.prototype.for_each_merge_point = function(fn) {
-  return this.get_stage('asm').for_each_merge_point(fn)
+  // the stage 'asm' does not carry any information about
+  // the debug merge point. the rewrite step throws away this information
+  return this.get_stage('opt').for_each_merge_point(fn)
 }
 
 
@@ -374,6 +391,10 @@ Trace.prototype.get_stage = function(name) {
     return this._stages[name]
   }
   return new Stage(this._jitlog, {'ops': [], 'tick': -1});
+}
+
+var MergePoint = function(data) {
+  this._data = data
 }
 
 var Stage = function(jitlog, data) {
@@ -401,7 +422,7 @@ Stage.prototype.for_each_merge_point = function(fn) {
     if (key === "first"){ continue }
     var points = mps[key]
     for (var i = 0; i < points.length; i++) {
-      var mp = points[i]
+      var mp = new MergePoint(points[i])
       if (!fn.call(mp, mp)) {
         return true
       }
@@ -416,7 +437,11 @@ Stage.prototype.get_first_merge_point = function() {
   if (!first_index) {
     return null
   }
-  return mp[first_index]
+  var list = mp[first_index]
+  if (list.length == 0) {
+    return null
+  }
+  return new MergePoint(list[0])
 }
 
 

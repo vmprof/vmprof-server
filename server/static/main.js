@@ -1,5 +1,5 @@
 var app = angular.module(
-    'vmprof', ['ngRoute', 'ngCookies', 'ngSanitize'], function($routeProvider) {
+    'vmprof', ['ngRoute', 'ngCookies', 'ngSanitize', 'ngStorage'], function($routeProvider) {
 
         $routeProvider
             .when('/', {
@@ -369,8 +369,12 @@ app.directive('traceForest', function($timeout){
 });
 
 app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
-                                    $location) {
+                                    $location, $localStorage) {
     // variable defaults
+    $scope.$storage = $localStorage.$default({
+      filter_loop: true,
+      filter_bridge: false,
+    })
     $scope.loading = true;
     $scope.ops = []
     $scope.show_asm = false;
@@ -391,7 +395,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
           var trace = jitlog.get_trace_by_id($routeParams.trace);
           $scope.ops = trace.get_operations('asm').list()
           $scope.trace_type = 'asm'
-          $scope.trace = trace
+          $scope.selected_trace = trace
         }
         $scope.loading = false;
         $timeout(function(){
@@ -403,8 +407,9 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $scope.switch_trace = function(trace, type) {
       if ($scope.loading) { return; }
       // set the new type and the subject trace
+      JitLog.resetState()
       $scope.trace_type = type;
-      $scope.trace = trace
+      $scope.selected_trace = trace
       $scope.$broadcast('trace-update')
     }
 

@@ -141,6 +141,7 @@ svg rect, svg text {
 }
 
 .trace-line {
+    white-space: nowrap;
 }
 
 span.resop-name {
@@ -190,6 +191,7 @@ span.selected.var {
 
 .asm-mnemoic {
     color: #088A29;
+    white-space: nowrap;
 }
 
 .trace-asm-line {
@@ -236,3 +238,47 @@ span.selected.var {
   stroke: #000;
   stroke-width: 1px;
 }
+
+.resops {
+    overflow: scroll;
+    max-height: 768px;
+}
+
+ul.trace-entries {
+    list-style: none;
+    padding-left: 0;
+}
+
+.trace-entry {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.trace-entry.active {
+    background: #eee;
+}
+
+.trace-entry:hover {
+    background: #eee;
+}
+
+.trace-info {
+    font-size: 10px;
+    color: gray;
+}
+
+.trace-type {
+    font-size: 10px;
+    color: gray;
+}
+
+.trace-name {
+    color: #008B31;
+}
+
+.trace-descr {
+    display: inline-block;
+    width: 100%;
+}
+
+
