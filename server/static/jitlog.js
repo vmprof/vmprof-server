@@ -450,6 +450,7 @@ var ResOp = function(jitlog, data) {
   this._jitlog = jitlog
   this._data = data
   this._index = -1
+  this._assembly = null
 }
 
 ResOp.prototype.getindex = function() {
@@ -520,6 +521,9 @@ ResOp.prototype.to_s = function(index) {
 }
 
 ResOp.prototype.get_disassembly = function() {
+  if (this._assembly) {
+    return this._assembly;
+  }
   var array = [];
   if (!('dump' in this._data)) {
     return array;
@@ -548,5 +552,6 @@ ResOp.prototype.get_disassembly = function() {
                instr.mnemonic + "</span> " + rfmt(instr.op_str));
   });
   cs.delete();
+  this._assembly = array;
   return array;
 }

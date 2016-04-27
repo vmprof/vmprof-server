@@ -374,10 +374,10 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $scope.$storage = $localStorage.$default({
       filter_loop: true,
       filter_bridge: false,
+      show_asm: true,
     })
     $scope.loading = true;
     $scope.ops = []
-    $scope.show_asm = false;
     $scope.trace_type = 'asm'
     $scope.selected_trace = null;
 

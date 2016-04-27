@@ -150,9 +150,11 @@ span.resop-name {
 }
 
 .trace-asm {
+    margin-top: 5px;
     margin-left: 15px;
     color: #969896;
     font-size: 14px;
+    margin-bottom: -5px;
 }
 
 .instr {
@@ -195,7 +197,7 @@ span.selected.var {
 }
 
 .trace-asm-line {
-    margin-left: 20px;
+    margin-left: 40px;
 }
 
 #forest {

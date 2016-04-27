@@ -64,10 +64,10 @@
                   </li>
               </li>
             </div>
-            <button class="btn btn-default btn-sm" ng-click="show_asm=!show_asm">
+            <button class="btn btn-default btn-sm" ng-click="$storage.show_asm=!$storage.show_asm">
                 <i class="fa fa-code"></i>
-                <span ng-if="!show_asm">Show Assembler</span>
-                <span ng-if="show_asm">Hide Assembler</span>
+                <span ng-if="!$storage.show_asm">Show Assembler</span>
+                <span ng-if="$storage.show_asm">Hide Assembler</span>
             </button>
             <div class="checkbox">
                 <input type="checkbox" ng-model="$storage.filter_loop" checked="true" />
@@ -89,6 +89,7 @@
                 </div>
                 <div class="trace-info">
                     <span class="filename">{{trace.get_filename()}}</span>
+                    line
                     <span class="lineno">{{trace.get_lineno()}}</span>
                 </div>
             </li>
@@ -101,7 +102,7 @@
         </div>
         <div class="trace-line" ng-repeat="op in selected_trace.get_stage(trace_type).ops">
             <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
-            <div class="trace-asm" ng-if="show_asm">
+            <div class="trace-asm" ng-if="$storage.show_asm">
                 <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
                     <div ng-bind-html="asm"></div>
                 </div>
