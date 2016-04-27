@@ -242,6 +242,9 @@ span.selected.var {
 .resops {
     overflow: scroll;
     max-height: 768px;
+    background: #fafafa;
+    margin-left: 2px;
+    margin-right: -2px;
 }
 
 ul.trace-entries {
@@ -252,6 +255,8 @@ ul.trace-entries {
 .trace-entry {
     padding: 5px;
     cursor: pointer;
+    background: #fafafa;
+    margin-bottom: 2px;
 }
 
 .trace-entry.active {
@@ -281,4 +286,6 @@ ul.trace-entries {
     width: 100%;
 }
 
-
+.breathing-row {
+    margin-bottom: 5px;
+}

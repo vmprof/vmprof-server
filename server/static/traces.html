@@ -1,4 +1,6 @@
-<div id="forest" trace-forest>
+<img ng-show="loading && !noprofile" class="center-block loading" src="/static/images/loader.gif" />
+
+<div id="forest" class="row breathing-row" trace-forest>
     <!-- The svg containing the trace visualisation -->
     <svg id="forest_svg" xmlns="http://www.w3.org/2000/svg"
                          xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -31,44 +33,42 @@
     </svg>
 </div>
 
-<div class="row trace-type-ctrl" ng-if="traces">
-    <div class="col-sm-12 col-lg-12">
-        <div class="btn-group" role="group">
-          <button type="button" class="btn btn-default btn-sm dropdown-toggle"
-                  data-toggle="dropdown">
-                 Stage <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu">
-              <li><a ng-class="{'active': trace_type == 'noopt'}"
-                     ng-click="switch_trace(trace, 'noopt')">Unoptimized Trace
-                     <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
-                 </a>
-              </li>
-              <li><a ng-class="{'active': trace_type == 'opt'}"
-                     ng-click="switch_trace(trace, 'opt')">Optimized Trace
-                     <span class="fa fa-check" ng-if="trace_type == 'opt'"></span>
-                 </a>
-              </li>
-              <li><a ng-class="{'active': trace_type == 'asm'}"
-                     ng-click="switch_trace(trace, 'asm')">Assembled Trace
-                     <span class="fa fa-check" ng-if="trace_type == 'asm'"></span>
-                 </a>
-              </li>
-          </li>
-        </div>
-        <button class="btn btn-default btn-sm" ng-click="show_asm=!show_asm">
-            <i class="fa fa-code"></i>
-            <span ng-if="!show_asm">Show Assembler</span>
-            <span ng-if="show_asm">Hide Assembler</span>
-        </button>
-        </div>
-    </div>
-
-    <div class="col-sm-6 col-lg-6" ng-if="jitlog">
-        <div class="form-inline">
+<div class="row breathing-row" ng-if="traces">
+    <div class="col-sm-4 col-lg-4" ng-if="jitlog">
+        <div class="breathing-row">
             <input class="form-control input-group-sm" type="text"
                    ng-model="$storage.filter_text" value=""
-                   placeholder="Type func name..." />
+                   placeholder="Type funcname or filename" />
+        </div>
+        <div class="breathing-row form-inline">
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+                      data-toggle="dropdown">
+                     Stage <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu">
+                  <li><a ng-class="{'active': trace_type == 'noopt'}"
+                         ng-click="switch_trace(trace, 'noopt')">Unoptimized Trace
+                         <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
+                     </a>
+                  </li>
+                  <li><a ng-class="{'active': trace_type == 'opt'}"
+                         ng-click="switch_trace(trace, 'opt')">Optimized Trace
+                         <span class="fa fa-check" ng-if="trace_type == 'opt'"></span>
+                     </a>
+                  </li>
+                  <li><a ng-class="{'active': trace_type == 'asm'}"
+                         ng-click="switch_trace(trace, 'asm')">Assembled Trace
+                         <span class="fa fa-check" ng-if="trace_type == 'asm'"></span>
+                     </a>
+                  </li>
+              </li>
+            </div>
+            <button class="btn btn-default btn-sm" ng-click="show_asm=!show_asm">
+                <i class="fa fa-code"></i>
+                <span ng-if="!show_asm">Show Assembler</span>
+                <span ng-if="show_asm">Hide Assembler</span>
+            </button>
             <div class="checkbox">
                 <input type="checkbox" ng-model="$storage.filter_loop" checked="true" />
                 Loops
@@ -95,7 +95,7 @@
         </ul>
     </div>
 
-    <div class="resops col-md-6" ng-if="selected_trace" hover-vars>
+    <div class="resops col-md-8 col-lg-8" ng-if="selected_trace" hover-vars>
         <div class="no-trace" ng-if="selected_trace.get_stage(trace_type).ops.length == 0">
             Trace not recorded in JIT log
         </div>

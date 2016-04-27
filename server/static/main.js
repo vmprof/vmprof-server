@@ -411,6 +411,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       $scope.trace_type = type;
       $scope.selected_trace = trace
       $scope.$broadcast('trace-update')
+      trace_forest.display_tree(trace)
     }
 
     $scope.filter_traces = function(text, loops, bridges) {
