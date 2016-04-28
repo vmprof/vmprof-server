@@ -1,4 +1,19 @@
 
+scale = function(elem, scale) {
+  var trans = elem.attr("transform")
+  var i = trans.indexOf("scale(")
+  if (i !== -1) {
+    var first = trans.substr(0, i)
+    var second = trans.substr(i)
+    if (second.indexOf(")") !== -1) {
+      trans = first + second.substr(second.indexOf(")")+1)
+    } else {
+      trans = first
+    }
+  }
+  elem.attr("transform", trans + ' scale(' + scale+ ')')
+}
+
 VisualTrace = function(trace, yoff){
   this.trace_obj = trace
   trace.visual_trace = this
@@ -99,8 +114,6 @@ TraceForest.prototype.setup_once = function(id){
     }
   })
 
-  //this._forest.sort(function(a,b){return a._width-b._width})
-
   var bot_margin = 5
   var div = jQuery(id)
   var root = d3.select(id + "_svg")
@@ -108,12 +121,19 @@ TraceForest.prototype.setup_once = function(id){
   var init_yoff = bot_margin
   this.init_xoff = init_xoff
   this.init_yoff = init_yoff
-  var legend = root.select(id + "_legend")
-  legend.attr("transform", this._tr(div.width()-195,15))
-  var svg = root.attr("width", div.width())
+  var g = root.select("#legend-indicator")
+              .attr("transform", translate(div.width()-35,15))
+  this.legend = new PopOver(root.select("#legend"), div.width()-10, div.height()-10)
+  g.on("mouseenter", function(){
+    _this.legend.show({})
+  })
+  g.on("mouseleave", function(){
+    _this.legend.hide()
+  })
+  root.attr("width", div.width())
               .attr("height", div.height())
-            .append("svg:g")
-              .attr("transform", this._tr(init_xoff, init_yoff))
+  var svg = root.select(id + "_grp")
+                .attr("transform", this._tr(init_xoff, init_yoff))
   this.svg = svg
   this.reset_slide()
   root.on("mouseleave", function(){
@@ -141,38 +161,26 @@ TraceForest.prototype.setup_once = function(id){
 
   this.link_layer = svg.append("svg:g")
   this.node_layer = svg.append("svg:g")
-  this.pop_over = svg.append("svg:g")
-}
-
-TraceForest.prototype.show_popover = function(trace) {
-  var pop_over = this.pop_over
-
-  var rect = pop_over.append("svg:rect")
-
-  var title = pop_over.append("svg:text")
-  title.text(trace.get_func_name())
-
-
-
-  return pop_over
-}
-
-TraceForest.prototype.hide_popover = function() {
-  this.pop_over.removeChildren()
+  var g = root.select("g#trace-details")
+  this.pop_over = new PopOver(g, 150, 100)
 }
 
 TraceForest.prototype.mouse_enter_trace = function(){
   var jthis = jQuery(this)
-  jthis.attr("class", "trace-bg-active")
-  var trace = jitlog.get_trace_by_id(jthis.attr('data-trace-id'))
-  var pop_over = trace_forest.show_popover(trace)
-  pop_over.attr("transform", "translate("+d3.event.x+","+d3.event.y+")")
+  jthis.addClass("trace-bg-active")
+  var trace = jitlog.get_trace_by_id(jthis.data('trace-id'))
+  var values = {
+    funcname: trace.get_func_name(),
+    entrycount: numeral(trace.get_enter_count()).format('0,0 a'),
+    entrypercent: numeral(trace.get_enter_percent()).format('0.00%'),
+  }
+  trace_forest.pop_over.show(values)
 }
 
 TraceForest.prototype.mouse_leave_trace = function(){
   var jthis = jQuery(this)
-  jthis.attr("class", "trace-bg")
-  trace_forest.hide_popover()
+  jthis.removeClass("trace-bg-active")
+  trace_forest.pop_over.hide()
 }
 
 TraceForest.prototype.display_tree = function(trunk){
@@ -203,14 +211,14 @@ TraceForest.prototype.display_tree = function(trunk){
                         var y = trace.yoff*7
                         return _this._tr(x, y)
                       })
+                      .attr("data-trace-id", trace.trace_obj.get_id())
     var rect = trace_grp.append("svg:rect")
-                       .attr("class", "trace-bg")
+                       .attr("class", "empty-rect")
                        .attr("transform", "translate(-5,-5)")
                        .attr("width", 10)
                        .attr("height", trace.nodes.length * 7 + 10)
-                       .attr("data-trace-id", trace.trace_obj.get_id())
-    rect.on("mouseenter", this.mouse_enter_trace)
-    rect.on("mouseleave", this.mouse_leave_trace)
+    trace_grp.on("mouseenter", this.mouse_enter_trace)
+    trace_grp.on("mouseleave", this.mouse_leave_trace)
 
     var node = trace_grp.selectAll(".node").data(trace.nodes)
                 .enter().append("svg:g")
@@ -221,6 +229,16 @@ TraceForest.prototype.display_tree = function(trunk){
                     d.x = 0
                     d.y = d.iy * 7
                     return _this._tr(d.x, d.y)
+                  })
+                  .on("mouseenter", function(){
+                    scale(jQuery(this), 2)
+                    var values = {
+                      // TODO
+                    }
+                    //trace_forest.pop_over.show(values)
+                  })
+                  .on("mouseleave", function(){
+                    scale(jQuery(this), 1)
                   })
 
     // first and last instruction
@@ -268,9 +286,10 @@ TraceForest.prototype.position_trace_tree = function(trace, pos) {
   return off
 }
 
-TraceForest.prototype._tr = function(a, b) {
+translate = function(a, b) {
   return 'translate(' + a + ',' + b + ')'
 }
+TraceForest.prototype._tr = translate
 
 TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
   var _this = this

@@ -4,31 +4,47 @@
     <!-- The svg containing the trace visualisation -->
     <svg id="forest_svg" xmlns="http://www.w3.org/2000/svg"
                          xmlns:xlink="http://www.w3.org/1999/xlink">
-        <text x="5" y="15"></text>
-        <text ng-show id="select-trace-tree">Select a trace below to see it's tree</text>
-        <g id="forest_legend" transform="translate(-200,-200)">
-            <rect id="forest_legend" width="200" height="80"
-                                     x="-10" y="-10">
-            </rect>
-           <g>
-                <circle class="trace-enter" r="3" />
-                <text x="8" y="4">Label</text>
-           </g>
-           <g transform="translate(0,15)">
-                <line class="guard-not-stitched" x1="-3" x2="3" y1="-3" y2="3" />
-                <line class="guard-not-stitched" x1="3" x2="-3" y1="-3" y2="3" />
-                <text x="8" y="4">Guard</text>
-           </g>
-           <g transform="translate(0,30)">
-                <circle class="guard" r="3" />
-                <text x="8" y="4">Guard stitched</text>
-           </g>
-           <g transform="translate(0,45)">
-                <text x="0" y="4">Trace trees grow from top to bottom.</text>
-           </g>
-           <g transform="translate(0,60)">
-                <text x="0" y="4">Hover over the tree to expand details.</text>
-           </g>
+        <g id="forest_grp">
+        </g>
+        <text x=20 y=20 ng-show="0 && !selected_trace" id="select-trace-tree">Select a trace below to see it's tree</text>
+        <g id="legend" class="trace-popover" transform="translate(5,5)" style="visibility: hidden;">
+            <rect class="background" x=0 y=0></rect>
+            <g transform="translate(10,10)">
+                <g>
+                     <circle class="trace-enter" r="3" />
+                     <text x="8" y="4">Label</text>
+                </g>
+                <g transform="translate(0,15)">
+                     <line class="guard-not-stitched" x1="-3" x2="3" y1="-3" y2="3" />
+                     <line class="guard-not-stitched" x1="3" x2="-3" y1="-3" y2="3" />
+                     <text x="8" y="4">Guard</text>
+                </g>
+                <g transform="translate(0,30)">
+                     <circle class="guard" r="3" />
+                     <text x="8" y="4">Guard stitched</text>
+                </g>
+                <g transform="translate(0,45)">
+                     <text x="0" y="4">Trace trees grow from top to bottom.</text>
+                </g>
+                <g transform="translate(0,60)">
+                     <text x="0" y="4">Hover over the tree to expand details.</text>
+                </g>
+                <g transform="translate(0,75)">
+                     <text x="0" y="4">"Entry count" is an integral number counting how many times program flow entered that specific trace</text>
+                </g>
+            </g>
+        </g>
+        <g id="trace-details" class="trace-popover" transform="translate(5,5)">
+            <rect class="background" x=0 y=0></rect>
+            <g transform="translate(5,5)">
+                <text x=0 y=10>Function: <tspan data-key="funcname">{funcname}</tspan></text>
+                <text x=0 y=25>Entered: <tspan data-key="entrycount">{entrycount}</tspan></text>
+                <text x=0 y=40>Percent: <tspan data-key="entrypercent">{entrypercent}</tspan></text>
+            </g>
+        </g>
+        <g id="legend-indicator" transform="translate(-200,-200)">
+            <rect x="-5" y="-8" rx=3 ry=3 width=30 height=18 />
+            <text x=0 y=4>Help</text>
         </g>
     </svg>
 </div>

@@ -8,6 +8,7 @@ var JitLog = function (data) {
   this._resops = data.resops
   this._trace_list = []
   var _this = this
+  var total_entries = 0
   data.traces.forEach(function(trace){
     var objtrace = new Trace(_this, trace);
     // a lookup to find the assembly addr (first byte) -> trace
@@ -17,17 +18,20 @@ var JitLog = function (data) {
     // a lookup to find the mapping from id -> trace
     _this._id_to_traces[objtrace.get_id()] = objtrace
     _this._trace_list.push(objtrace)
+
+    total_entries += objtrace.get_enter_count()
   })
   for (var key in this._id_to_traces) {
     var trace = this._id_to_traces[key]
     trace.link();
+    trace.entry_percent = (trace.get_enter_count() / total_entries) * 100.0
   }
-};
+}
 
 JitLog.colorPalette = [
   '#801515','#804515','#116611','#3d5898',
   '#ee001c','#402152','#64ba1d','#ff6c00'
-];
+]
 
 JitLog.resetState = function() {
   JitLog.freeColors = clone(JitLog.colorPalette);
@@ -192,7 +196,7 @@ JitLog.prototype.get_trace_by_id = function(id) {
   return this._id_to_traces[id]
 }
 
-var Trace = function(jitlog, data) {
+Trace = function(jitlog, data) {
   this._jitlog = jitlog
   this._data = data
   this._bridges = data.bridges || []
@@ -209,6 +213,16 @@ var Trace = function(jitlog, data) {
   if (stages.asm){
     this._stages.asm = new Stage(this._jitlog, stages.asm)
   }
+}
+
+Trace.prototype.get_enter_percent = function() {
+    // when this trace has been entered 10 times,
+    // and the sum of every other trace.get_enter_count() is 100
+    // then this function returns 10.0
+    return this.entry_percent
+}
+Trace.prototype.get_enter_count = function() {
+  return this._data.counter
 }
 
 Trace.prototype.get_id = function() {

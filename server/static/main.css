@@ -157,10 +157,6 @@ span.resop-name {
     margin-bottom: -5px;
 }
 
-.trace-bg {
-    fill: #f8f8f8;
-}
-
 .trace-bg-active {
     fill: #a8a8a8;
 }
@@ -208,22 +204,16 @@ span.selected.var {
     margin-left: 40px;
 }
 
+.empty-rect {
+    fill: none;
+}
+
 #forest {
     cursor: pointer;
     cursor: hand;
     background: #f8f8f8;
     border: 1px solid #e8e8e8;
     height: 150px;
-}
-
-#forest_legend rect {
-    stroke: silver;
-    stroke-width: 1;
-    fill: white;
-}
-
-#forest_legend text {
-    font-size: 11px;
 }
 
 .trace-enter {
@@ -298,4 +288,33 @@ ul.trace-entries {
 
 .breathing-row {
     margin-bottom: 5px;
+}
+
+.trace-popover {
+    fill
+}
+
+.trace-popover rect {
+    stroke: silver;
+    stroke-width: 1;
+    fill: white;
+}
+
+.trace-popover text {
+    font-size: 11px;
+}
+
+
+#legend-indicator > rect {
+    cursor: hand;
+    fill: black;
+    stroke: #e8e8e8;
+}
+
+#legend-indicator > text {
+    cursor: hand;
+    fill: white;
+    font: serif;
+    font-size: 11px;
+    stroke: #e8e8e8;
 }
