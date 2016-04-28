@@ -36,7 +36,11 @@ TraceForest.prototype.draw_trace_enter = function(svg){
     svg.append("svg:circle").attr("r", 3)
 }
 
-TraceForest.prototype.draw_trace_exit = function(svg){
+TraceForest.prototype.draw_trace_jump = function(svg){
+    svg.append("svg:circle").attr("r", 3)
+}
+
+TraceForest.prototype.draw_trace_finish = function(svg){
     svg.append("svg:circle").attr("r", 3)
 }
 
@@ -69,6 +73,22 @@ TraceForest.prototype.draw_guard = function(svg){
       //              })
 }
 
+TraceForest.prototype.reset_slide = function(){
+  this.svg._slide = false
+  this.svg._slide_offset = {x0:0,y0:0,x:0,y:0}
+  this.update_slide(0,0)
+}
+
+TraceForest.prototype.update_slide = function(mx,my) {
+  var dx = this.svg._slide_offset.x - mx
+  var dy = this.svg._slide_offset.y - my
+  var ox = this.svg._slide_offset.x0
+  var oy = this.svg._slide_offset.y0
+  var x = ox - dx
+  var y = oy - dy
+  this.svg.attr("transform", this._tr(this.init_xoff + x,this.init_yoff + y))
+}
+
 TraceForest.prototype.setup_once = function(id){
   var _this = this;
   this._jitlog.filter_traces("", "both").forEach(function(trace) {
@@ -84,41 +104,19 @@ TraceForest.prototype.setup_once = function(id){
   var bot_margin = 5
   var div = jQuery(id)
   var root = d3.select(id + "_svg")
-  var init_xoff = bot_margin 
+  var init_xoff = bot_margin + div.width() / 2
   var init_yoff = bot_margin
+  this.init_xoff = init_xoff
+  this.init_yoff = init_yoff
   var legend = root.select(id + "_legend")
   legend.attr("transform", this._tr(div.width()-195,15))
   var svg = root.attr("width", div.width())
               .attr("height", div.height())
             .append("svg:g")
               .attr("transform", this._tr(init_xoff, init_yoff))
-
-  svg._slide = false
-  svg._slide_offset = {x0:0,y0:0,x:0,y:0}
-  var update_slide = function(mx,my) {
-    var dx = svg._slide_offset.x - mx
-    var dy = svg._slide_offset.y - my
-    var ox = svg._slide_offset.x0
-    var oy = svg._slide_offset.y0
-    var x = ox - dx
-    var y = oy - dy
-    svg.attr("transform", _this._tr(init_xoff + x,init_yoff + y))
-  }
-  //root.on("mouseenter", function(){
-  //  var h2 = div.height()*2
-  //  init_yoff += div.height();
-  //  div.height(h2)
-  //  root.attr("height", div.height())
-  //  update_slide(svg._slide_offset.x,
-  //               svg._slide_offset.y)
-  //})
+  this.svg = svg
+  this.reset_slide()
   root.on("mouseleave", function(){
-    //var h2 = div.height()/2
-    //init_yoff -= h2
-    //div.height(h2)
-    //root.attr("height", div.height())
-    //update_slide(svg._slide_offset.x,
-    //             svg._slide_offset.y)
     if (svg._slide) {
       svg._slide = false;
       svg._slide_offset.x0 -= (svg._slide_offset.x - d3.event.x)
@@ -137,17 +135,49 @@ TraceForest.prototype.setup_once = function(id){
   })
   root.on("mousemove", function(){
     if (svg._slide) {
-      update_slide(d3.event.x, d3.event.y);
+      _this.update_slide(d3.event.x, d3.event.y);
     }
   })
 
-  this.svg = svg
   this.link_layer = svg.append("svg:g")
   this.node_layer = svg.append("svg:g")
+  this.pop_over = svg.append("svg:g")
+}
+
+TraceForest.prototype.show_popover = function(trace) {
+  var pop_over = this.pop_over
+
+  var rect = pop_over.append("svg:rect")
+
+  var title = pop_over.append("svg:text")
+  title.text(trace.get_func_name())
+
+
+
+  return pop_over
+}
+
+TraceForest.prototype.hide_popover = function() {
+  this.pop_over.removeChildren()
+}
+
+TraceForest.prototype.mouse_enter_trace = function(){
+  var jthis = jQuery(this)
+  jthis.attr("class", "trace-bg-active")
+  var trace = jitlog.get_trace_by_id(jthis.attr('data-trace-id'))
+  var pop_over = trace_forest.show_popover(trace)
+  pop_over.attr("transform", "translate("+d3.event.x+","+d3.event.y+")")
+}
+
+TraceForest.prototype.mouse_leave_trace = function(){
+  var jthis = jQuery(this)
+  jthis.attr("class", "trace-bg")
+  trace_forest.hide_popover()
 }
 
 TraceForest.prototype.display_tree = function(trunk){
   var _this = this;
+  this.reset_slide()
   //
   // for each tree root in the known traces
   //
@@ -173,6 +203,14 @@ TraceForest.prototype.display_tree = function(trunk){
                         var y = trace.yoff*7
                         return _this._tr(x, y)
                       })
+    var rect = trace_grp.append("svg:rect")
+                       .attr("class", "trace-bg")
+                       .attr("transform", "translate(-5,-5)")
+                       .attr("width", 10)
+                       .attr("height", trace.nodes.length * 7 + 10)
+                       .attr("data-trace-id", trace.trace_obj.get_id())
+    rect.on("mouseenter", this.mouse_enter_trace)
+    rect.on("mouseleave", this.mouse_leave_trace)
 
     var node = trace_grp.selectAll(".node").data(trace.nodes)
                 .enter().append("svg:g")
@@ -186,7 +224,9 @@ TraceForest.prototype.display_tree = function(trunk){
                   })
 
     // first and last instruction
-    _this.draw_trace_enter(node.filter(function(d){return !d.guard}))
+    _this.draw_trace_enter(node.filter(function(d){return d.label}))
+    _this.draw_trace_jump(node.filter(function(d){return d.jump}))
+    _this.draw_trace_finish(node.filter(function(d){return d.finish}))
 
     // stitched guards
     _this.draw_stitched_guard(node.filter(function(d){return d.bridge}))
@@ -236,30 +276,50 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
   var _this = this
   var vtrace = new VisualTrace(trunk, yoff)
   traces.push(vtrace)
-  var node = new VisualTraceNode(vtrace, 0)
-  var first = node
-  var last = node
-  vtrace.nodes.push(node)
-  var i = 1;
+  var labels = {}
+  var label_counter = 1
+  var last = null
+  var node = null
+  var i = 0;
   trunk.forEachOp(function(op){
-    if (op.is_guard()) {
+    if (op.is_label() || op.is_jump()) {
+      node = new VisualTraceNode(vtrace, i)
+      vtrace.nodes.push(node)
+      if (op.get_descr_nmr() in labels) {
+        node.label = labels[op.get_descr_nmr()]
+      } else {
+        node.label = label_counter
+        labels[op.get_descr_nmr()] = label_counter
+        label_counter += 1
+      }
+      i += 1
+    } else if (op.is_guard()) {
       // add a new node, give it a connection to the previous
       var bridge = op.get_stitched_trace()
-      if (!bridge && last.guard && last.class.indexOf('stitched') == -1) {
+      if (last && !bridge && last.guard && last.class.indexOf('stitched') == -1) {
         last.consumed.push(op)
         return true;
       }
-      var node = new VisualTraceNode(vtrace, i)
+      node = new VisualTraceNode(vtrace, i)
       node.set_guard(op, bridge)
       vtrace.nodes.push(node)
-      links.push({'source': last, 'target': node})
       if (bridge !== undefined) {
         node.class += ' stitched'
         vtrace.stitches.push({'op': op, 'index': vtrace.nodes.length })
       }
-      last = node
       i += 1;
+    } else if (op.is_finish()) {
+      node = new VisualTraceNode(vtrace, i)
+      vtrace.nodes.push(node)
+      node.finish = true
+      i += 1
+    } else {
+      return true // continue to next iteration
     }
+    if (last) {
+      links.push({'source': last, 'target': node})
+    }
+    last = node
     return true;
   })
 
@@ -273,15 +333,6 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
       links.push({'source': op.visual_node , 'target': tgt, class: 'stitch-edge'})
     }
   })
-
-  if (trunk.ends_with_jump()) {
-    // add a node for the jump!
-    var node = new VisualTraceNode(vtrace, i)
-    i += 1
-    vtrace.nodes.push(node)
-    links.push({'source': last, 'target': node})
-    last = node
-  }
 
   return vtrace
 }

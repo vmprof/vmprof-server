@@ -380,6 +380,11 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $scope.ops = []
     $scope.trace_type = 'asm'
     $scope.selected_trace = null;
+    var lh = $scope.$storage.last_trace_hash
+    if (lh !== $scope.$storage.last_trace_hash) {
+      $scope.$storage.last_trace_id = null
+    }
+    $scope.$storage.last_trace_hash = $routeParams.log
 
     $http.get('/api/log/' + $routeParams.log + '/', {
         cache: true
@@ -402,6 +407,14 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
           $scope.$broadcast('trace-init')
           $scope.$broadcast('trace-update')
         })
+
+        var last_id = $scope.$storage.last_trace_id
+        var trace = jitlog.get_trace_by_id(last_id)
+        if (last_id && trace) {
+          $timeout(function(){
+            $scope.switch_trace(trace, $scope.trace_type)
+          })
+        }
     });
 
     $scope.switch_trace = function(trace, type) {
@@ -412,6 +425,8 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       $scope.selected_trace = trace
       $scope.$broadcast('trace-update')
       trace_forest.display_tree(trace)
+      //
+      $scope.$storage.last_trace_id = trace.get_id()
     }
 
     $scope.filter_traces = function(text, loops, bridges) {

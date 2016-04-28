@@ -1,36 +1,26 @@
 
 
 var JitLog = function (data) {
-  this._traces = {};
-  this._unique_ids = {};
-  this._descrs = {}
+  this._id_to_traces = {};
+  this._addr_to_trace = {}
+  this._descrnmr_to_trace = {}
+  this._descrnmr_to_op = {}
   this._resops = data.resops
-  this._trace_list = [];
+  this._trace_list = []
   var _this = this
   data.traces.forEach(function(trace){
     var objtrace = new Trace(_this, trace);
     // a lookup to find the assembly addr (first byte) -> trace
     if (trace.addr) {
-      _this._traces[trace.addr[0]] = objtrace
+      _this._addr_to_trace[trace.addr[0]] = objtrace
     }
-    // a lookup to find the mapping from descr_number -> trace
-    _this._unique_ids[trace.unique_id] = objtrace
+    // a lookup to find the mapping from id -> trace
+    _this._id_to_traces[objtrace.get_id()] = objtrace
     _this._trace_list.push(objtrace)
   })
-  for (var key in this._traces) {
-    var trace = this._traces[key]
+  for (var key in this._id_to_traces) {
+    var trace = this._id_to_traces[key]
     trace.link();
-    var i = 0;
-    var index = 0;
-    trace.forEachOp(function(op){
-      op._index = index
-      if (op.is_guard() && op.has_stitched_trace()){
-        op._stitch_index = i;
-        i++;
-      }
-      index += 1;
-      return true
-    })
   }
 };
 
@@ -199,7 +189,7 @@ JitLog.prototype.filter_traces = function(text, type) {
 }
 
 JitLog.prototype.get_trace_by_id = function(id) {
-  return this._traces[id]
+  return this._id_to_traces[id]
 }
 
 var Trace = function(jitlog, data) {
@@ -219,6 +209,10 @@ var Trace = function(jitlog, data) {
   if (stages.asm){
     this._stages.asm = new Stage(this._jitlog, stages.asm)
   }
+}
+
+Trace.prototype.get_id = function() {
+  return this._data.unique_id
 }
 
 Trace.prototype.bridge_count = function(fn) {
@@ -282,7 +276,7 @@ Trace.prototype.align_tree = function(xoff) {
 Trace.prototype.walk_bridges = function(fn) {
   var _this = this;
   this._bridges.forEach(function(bridge){
-    var trace = _this._jitlog._traces[bridge.target]
+    var trace = _this._jitlog._addr_to_trace[bridge.target]
     fn.call(_this, trace);
   })
 }
@@ -291,7 +285,7 @@ Trace.prototype.walk_trace_tree = function(fn) {
   fn.call(this, this);
   var _this = this
   this._bridges.forEach(function(bridge){
-    var trace = _this._jitlog._traces[bridge.target]
+    var trace = _this._jitlog._addr_to_trace[bridge.target]
     fn.call(trace, trace);
     trace.walk_trace_tree(fn)
   })
@@ -300,9 +294,16 @@ Trace.prototype.walk_trace_tree = function(fn) {
 Trace.prototype.link = function() {
   var _this = this;
   this._bridges.forEach(function(bridge){
-    var trace = _this._jitlog._traces[bridge.target]
+    var trace = _this._jitlog._addr_to_trace[bridge.target]
+    _this._jitlog._descrnmr_to_trace[bridge.descr_number] = trace
     trace._parent = _this;
     bridge.target_obj = trace;
+  })
+  this.forEachOp(function(op){
+    if (op.get_descr_nmr()) {
+      _this._jitlog._descrnmr_to_op[op.get_descr_nmr()] = op
+    }
+    return true
   })
 }
 
@@ -361,11 +362,8 @@ Trace.prototype.get_func_name = gen_first_mp_info('scope', 'implement get_locati
 Trace.prototype.get_filename = gen_first_mp_info('filename', '-')
 Trace.prototype.get_lineno = gen_first_mp_info('lineno', '0')
 
-Trace.prototype.get_unique_id = function() {
-  if ('addr' in this._data) {
-    return this._data.addr[0]
-  }
-  return this._data.unique_id
+Trace.prototype.get_memory_addr = function() {
+  return this._data.addr[0]
 }
 
 Trace.prototype.forEachOp = function(fn) {
@@ -453,6 +451,10 @@ var ResOp = function(jitlog, data) {
   this._assembly = null
 }
 
+ResOp.prototype.get_descr_nmr = function() {
+  return this._data.descr_number
+}
+
 ResOp.prototype.getindex = function() {
   return this._index
 }
@@ -463,17 +465,28 @@ ResOp.prototype.opname = function() {
   return opname
 }
 
+ResOp.prototype.is_finish = function() {
+  return this.opname() === "finish"
+}
+
+ResOp.prototype.is_jump = function() {
+  return this.opname() === "jump"
+}
+
+ResOp.prototype.is_label = function() {
+  return this.opname() === "label"
+}
+
 ResOp.prototype.is_guard = function() {
   return this.opname().indexOf('guard') !== -1
 }
 
 ResOp.prototype.has_stitched_trace = function() {
-  var stitched = this._jitlog._unique_ids[this._data.descr_number]
-  return stitched !== undefined
+  return this.get_descr_nmr() && this.get_descr_nmr() in this._jitlog._descrnmr_to_stichted_trace
 }
 
 ResOp.prototype.get_stitched_trace = function() {
-  var stitched = this._jitlog._unique_ids[this._data.descr_number]
+  var stitched = this._jitlog._descrnmr_to_trace[this._data.descr_number]
   return stitched
 }
 

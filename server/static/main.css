@@ -157,6 +157,14 @@ span.resop-name {
     margin-bottom: -5px;
 }
 
+.trace-bg {
+    fill: #f8f8f8;
+}
+
+.trace-bg-active {
+    fill: #a8a8a8;
+}
+
 .instr {
     height: 20px;
     font-size: 15px;
