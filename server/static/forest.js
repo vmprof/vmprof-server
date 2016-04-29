@@ -257,7 +257,7 @@ TraceForest.prototype.display_tree = function($scope, trunk){
                        .attr("class", "empty-rect")
                        .attr("transform", "translate(-5,-5)")
                        .attr("width", 10)
-                       .attr("height", trace.nodes.length * 7 + 10)
+                       .attr("height", trace.nodes.length * 7 + 4)
     trace_grp.on("mouseenter", this.mouse_enter_trace)
     trace_grp.on("mouseleave", this.mouse_leave_trace)
     trace_grp.on("click", this.mouse_click_trace)
