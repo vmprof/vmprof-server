@@ -277,6 +277,7 @@ Trace.prototype.align_tree = function(xoff) {
     t += p.total
   })
 
+
   // walk the left side of the trace
   var t = xoff
   part.left.forEach(function(trace){
@@ -414,15 +415,24 @@ var Stage = function(jitlog, data) {
   this._data = data
   this._tick = data.tick
   this.ops = []
+  var i = 0
   for (var key in data.ops) {
     var opdata = data.ops[key]
-    var op = new ResOp(this._jitlog, opdata)
+    var op = new ResOp(this._jitlog, opdata, i)
     this.ops.push(op)
+    i += 1
   }
 }
 
 Stage.prototype.list = function() {
   return this.ops;
+}
+
+Stage.prototype.get_operation_by_index = function(index) {
+  if (index < 0 || index >= this.ops.length) {
+    return null
+  }
+  return this.ops[index]
 }
 
 Stage.prototype.for_each_merge_point = function(fn) {
@@ -458,19 +468,19 @@ Stage.prototype.get_first_merge_point = function() {
 
 
 
-var ResOp = function(jitlog, data) {
+var ResOp = function(jitlog, data, index) {
   this._jitlog = jitlog
   this._data = data
-  this._index = -1
   this._assembly = null
+  this.index = index
 }
 
 ResOp.prototype.get_descr_nmr = function() {
   return this._data.descr_number
 }
 
-ResOp.prototype.getindex = function() {
-  return this._index
+ResOp.prototype.get_index = function() {
+  return this.index
 }
 
 ResOp.prototype.opname = function() {
@@ -496,7 +506,7 @@ ResOp.prototype.is_guard = function() {
 }
 
 ResOp.prototype.has_stitched_trace = function() {
-  return this.get_descr_nmr() && this.get_descr_nmr() in this._jitlog._descrnmr_to_stichted_trace
+  return this.get_descr_nmr() && this.get_descr_nmr() in this._jitlog._descrnmr_to_trace
 }
 
 ResOp.prototype.get_stitched_trace = function() {
@@ -560,11 +570,10 @@ ResOp.prototype.get_disassembly = function() {
 
   var buffer = [];
   var offset = 0x0;
-  var lookup = "0123456789ABCDEF";
-  for (var i = 0; i < dump.length; i+=2) {
-    var m = lookup.indexOf(dump[i]);
-    var n = lookup.indexOf(dump[i+1]);
-    buffer.push((m << 4) | n)
+  // machine code dump is encoded as base64
+  var buffer_str = atob(dump)
+  for (var i = 0; i < buffer_str.length; ++i) {
+    buffer.push(buffer_str.charCodeAt(i));
   }
 
   var rfmt = function(text){

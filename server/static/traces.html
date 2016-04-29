@@ -34,12 +34,27 @@
                 </g>
             </g>
         </g>
-        <g id="trace-details" class="trace-popover" transform="translate(5,5)">
+        <g id="trace-details" class="trace-popover" style="visibility: hidden;" transform="translate(5,5)">
             <rect class="background" x=0 y=0></rect>
+            <g transform="translate(240,10) scale(1.5)">
+                <!-- guards -->
+                <line class="guard-not-stitched" x1="-3" x2="3" y1="-3" y2="3" data-if="c.node_type === 'guard'" />
+                <line class="guard-not-stitched" x1="3" x2="-3" y1="-3" y2="3" data-if="c.node_type === 'guard'" />
+                <!-- label, jump or finish -->
+                <circle class="trace-enter" r="3" data-if="c.node_type !== 'guard' && c.node_type !== 'guard-stitched'" />
+                <!-- guard stitched -->
+                <circle class="guard" r="3" data-if="c.node_type == 'guard-stitched'" />
+            </g>
             <g transform="translate(5,5)">
                 <text x=0 y=10>Function: <tspan data-key="funcname">{funcname}</tspan></text>
-                <text x=0 y=25>Entered: <tspan data-key="entrycount">{entrycount}</tspan></text>
+                <text x=0 y=25>Entered: <tspan data-key="entrycount">{entrycount}</tspan> times</text>
                 <text x=0 y=40>Percent: <tspan data-key="entrypercent">{entrypercent}</tspan></text>
+                <text x=0 y=55><tspan data-key="filename">{filename}</tspan><tspan dx="5" data-key="lineno">{lineno}</tspan></text>
+
+                <g data-if="c.node_type == 'guard-stitched'" transform="translate(0,70)">
+                    <text x=0 y=0>Stitched to <tspan data-key="tgt_funcname">{tgt_funcname}</tspan></text>
+                    <text x=0 y=15><tspan data-key="tgt_filename">{tgt_filename}</tspan><tspan dx="5" data-key="tgt_lineno">{tgt_lineno}</tspan></text>
+                </g>
             </g>
         </g>
         <g id="legend-indicator" transform="translate(-200,-200)">

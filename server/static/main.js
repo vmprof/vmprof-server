@@ -391,6 +391,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     }).then(function(response) {
         $scope.log = response.data;
         jitlog = new JitLog(response.data.data.jitlog);
+        jitlog.trace_type = $scope.trace_type
         $scope.traces = jitlog.filter_traces("", true, false)
         $scope.jitlog = jitlog
         //
@@ -421,10 +422,11 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       if ($scope.loading) { return; }
       // set the new type and the subject trace
       JitLog.resetState()
-      $scope.trace_type = type;
+      $scope.trace_type = type
+      jitlog.trace_type = type
       $scope.selected_trace = trace
       $scope.$broadcast('trace-update')
-      trace_forest.display_tree(trace)
+      trace_forest.display_tree($scope, trace)
       //
       $scope.$storage.last_trace_id = trace.get_id()
     }

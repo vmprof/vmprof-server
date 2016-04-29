@@ -23,11 +23,12 @@ VisualTrace = function(trace, yoff){
   this.yoff = yoff
 }
 
-VisualTraceNode = function(vtrace, index) {
+VisualTraceNode = function(vtrace, index, op) {
   this.visual_trace = vtrace
   this.class = 'trace-enter'
   this.order = vtrace.nodes.length
   this.index = index
+  this.op = op
   this.x = 0
   this.y = 0
   // nodes that have been consumed (they are not displayed)
@@ -162,28 +163,65 @@ TraceForest.prototype.setup_once = function(id){
   this.link_layer = svg.append("svg:g")
   this.node_layer = svg.append("svg:g")
   var g = root.select("g#trace-details")
-  this.pop_over = new PopOver(g, 150, 100)
+  this.pop_over = new PopOver(g, 250, div.height()-10)
+}
+
+TraceForest.prototype.mouse_click_trace = function(){
+  var jthis = jQuery(this)
+  var trace = jitlog.get_trace_by_id(jthis.data('trace-id'))
+  var $scope = trace_forest.$scope
+  $scope.switch_trace(trace, $scope.trace_type)
 }
 
 TraceForest.prototype.mouse_enter_trace = function(){
   var jthis = jQuery(this)
-  jthis.addClass("trace-bg-active")
+  jthis.find('rect').attr("class","trace-bg-active")
   var trace = jitlog.get_trace_by_id(jthis.data('trace-id'))
   var values = {
     funcname: trace.get_func_name(),
     entrycount: numeral(trace.get_enter_count()).format('0,0 a'),
     entrypercent: numeral(trace.get_enter_percent()).format('0.00%'),
+    filename: trace.get_filename(),
+    lineno: trace.get_lineno(),
   }
   trace_forest.pop_over.show(values)
 }
 
 TraceForest.prototype.mouse_leave_trace = function(){
   var jthis = jQuery(this)
-  jthis.removeClass("trace-bg-active")
+  jthis.find('rect').attr("class","empty-rect")
   trace_forest.pop_over.hide()
 }
 
-TraceForest.prototype.display_tree = function(trunk){
+TraceForest.prototype.mouse_enter_node = function() {
+  var jthis = jQuery(this)
+  scale(jthis, 2)
+  var trace = jitlog.get_trace_by_id(jthis.data('trace-id'))
+  var stage = trace.get_stage('asm')
+  var op = stage.get_operation_by_index(jthis.data('op-index'))
+  var values = {
+    node_type: 'op',
+  }
+  if (op.has_stitched_trace()) {
+    values.node_type = 'guard-stitched'
+    var strace = op.get_stitched_trace()
+    values['op'] = op
+    values['tgt_trace'] = strace
+    values['tgt_funcname'] = strace.get_func_name()
+    values['tgt_filename'] = strace.get_filename()
+    values['tgt_lineno'] = strace.get_lineno()
+  } else if (op.is_guard()) {
+    values.node_type = 'guard'
+  }
+  trace_forest.pop_over.show(values)
+}
+TraceForest.prototype.mouse_leave_node = function() {
+  var jthis = jQuery(this)
+  scale(jthis, 1)
+}
+
+TraceForest.prototype.display_tree = function($scope, trunk){
+  this.$scope = $scope
   var _this = this;
   this.reset_slide()
   //
@@ -200,7 +238,10 @@ TraceForest.prototype.display_tree = function(trunk){
 
   var tree_grp = this.node_layer.append("svg:g")
 
-  trunk.align_tree(0)
+  var part = trunk.align_tree(0)
+  var width = (part.leftcount + 1 + part.rightcount) * 10
+  this.link_layer.attr("transform", translate(-width/2,0))
+  this.node_layer.attr("transform", translate(-width/2,0))
 
   for (var i = 0; i < traces.length; i++) {
     var trace = traces[i]
@@ -219,10 +260,15 @@ TraceForest.prototype.display_tree = function(trunk){
                        .attr("height", trace.nodes.length * 7 + 10)
     trace_grp.on("mouseenter", this.mouse_enter_trace)
     trace_grp.on("mouseleave", this.mouse_leave_trace)
+    trace_grp.on("click", this.mouse_click_trace)
 
     var node = trace_grp.selectAll(".node").data(trace.nodes)
                 .enter().append("svg:g")
                   .attr("class", function(d){ return 'node ' + d.class })
+                  .attr("data-trace-id", trace.trace_obj.get_id())
+                  .attr("data-op-index", function(d){
+                    return d.op.get_index()
+                  })
                   .attr("transform", function(d) {
                     d.ix = 0
                     d.iy = d.index
@@ -230,16 +276,8 @@ TraceForest.prototype.display_tree = function(trunk){
                     d.y = d.iy * 7
                     return _this._tr(d.x, d.y)
                   })
-                  .on("mouseenter", function(){
-                    scale(jQuery(this), 2)
-                    var values = {
-                      // TODO
-                    }
-                    //trace_forest.pop_over.show(values)
-                  })
-                  .on("mouseleave", function(){
-                    scale(jQuery(this), 1)
-                  })
+                  .on("mouseenter", this.mouse_enter_node)
+                  .on("mouseleave", this.mouse_leave_node)
 
     // first and last instruction
     _this.draw_trace_enter(node.filter(function(d){return d.label}))
@@ -292,6 +330,8 @@ translate = function(a, b) {
 TraceForest.prototype._tr = translate
 
 TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
+  // iterate the trace tree and create visual objects that can later be easily
+  // aligned and rendered in the SVG chart
   var _this = this
   var vtrace = new VisualTrace(trunk, yoff)
   traces.push(vtrace)
@@ -302,7 +342,7 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
   var i = 0;
   trunk.forEachOp(function(op){
     if (op.is_label() || op.is_jump()) {
-      node = new VisualTraceNode(vtrace, i)
+      node = new VisualTraceNode(vtrace, i, op)
       vtrace.nodes.push(node)
       if (op.get_descr_nmr() in labels) {
         node.label = labels[op.get_descr_nmr()]
@@ -319,7 +359,7 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
         last.consumed.push(op)
         return true;
       }
-      node = new VisualTraceNode(vtrace, i)
+      node = new VisualTraceNode(vtrace, i, op)
       node.set_guard(op, bridge)
       vtrace.nodes.push(node)
       if (bridge !== undefined) {
@@ -328,7 +368,7 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
       }
       i += 1;
     } else if (op.is_finish()) {
-      node = new VisualTraceNode(vtrace, i)
+      node = new VisualTraceNode(vtrace, i, op)
       vtrace.nodes.push(node)
       node.finish = true
       i += 1
