@@ -1,5 +1,5 @@
 -r base.txt
 
-pdbpp==0.7.2
 pytest==2.6.4
 pytest-django==2.7.0
+pdbpp==0.7.2

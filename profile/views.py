@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
 
-from .models import Log
+from profile.models import Log
 
 
 username_max = auth.models.User._meta.get_field('username').max_length
@@ -83,7 +83,7 @@ class LogViewSet(viewsets.ModelViewSet):
         return LogListSerializer
 
     def create(self, request):
-        data = json.dumps(request.data)
+        data = json.dumps(request.data).encode('utf-8')
         checksum = hashlib.md5(data).hexdigest()
         user = request.user if request.user.is_authenticated() else None
         log, _ = self.queryset.get_or_create(

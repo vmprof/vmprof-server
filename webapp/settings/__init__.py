@@ -19,7 +19,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
 
-    'server',
+    'profile',
     'log',
 )
 
@@ -33,8 +33,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'server.urls'
-WSGI_APPLICATION = 'server.wsgi.app'
+ROOT_URLCONF = 'webapp.urls'
+WSGI_APPLICATION = 'webapp.wsgi.app'
 
 DATABASES = {
     'default': {
@@ -58,7 +58,7 @@ STATICFILES_FINDERS = (
 )
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'server', 'static')
+    os.path.join(BASE_DIR, 'profile', 'static'),
     os.path.join(BASE_DIR, 'log', 'static')
 )
 
