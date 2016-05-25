@@ -9,9 +9,9 @@ before_install:
   - psql -c 'create database vmprof;' -U postgres
   
 install:
-  - pip install -r requirements/development.txt
-  - python manage.py syncdb --noinput
-  - python manage.py migrate
+  - pip install -r requirements/testing.txt
+  - DJANGO_SETTINGS_MODULE=webapp.settings.tests python manage.py syncdb --noinput
+  - DJANGO_SETTINGS_MODULE=webapp.settings.tests python manage.py migrate
 
 
 script:
