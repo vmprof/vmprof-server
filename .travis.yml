@@ -10,7 +10,6 @@ before_install:
   
 install:
   - pip install -r requirements/testing.txt
-  - DJANGO_SETTINGS_MODULE=webapp.settings.tests python manage.py syncdb --noinput
   - DJANGO_SETTINGS_MODULE=webapp.settings.tests python manage.py migrate
 
 
