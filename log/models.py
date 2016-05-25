@@ -15,6 +15,16 @@ class BinaryJitLog(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
     profile = models.ForeignKey(Profile, null=True, blank=False)
 
+    def decompressed_jitlog(self):
+        jitlog = []
+        lzc = lzma.LZMADecompressor()
+        for chunk in self.file.chunks():
+            out = lzc.compress(chunk)
+            jitlog.append(out)
+        out = lzc.flush()
+        jitlog.append(out)
+
+        return ''.join(jitlog)
 
 @admin.register(BinaryJitLog)
 class BinaryJitLogAdmin(admin.ModelAdmin):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
-import urllib
 import hashlib
+from urllib import request, parse
 
 from django.conf.urls import url, include
 from django.contrib import auth
@@ -34,9 +34,10 @@ class UserSerializer(serializers.ModelSerializer):
         default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
         size = 40
 
-        gravatar_hash = hashlib.md5(obj.email.lower()).hexdigest()
+        email_bytes = obj.email.lower().encode('utf-8')
+        gravatar_hash = hashlib.md5(email_bytes).hexdigest()
         gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
-        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+        gravatar_url += parse.urlencode({'d': default, 's': str(size)})
 
         return gravatar_url
 
@@ -177,34 +178,3 @@ class TokenViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data)
 
-
-class JitLogViewSet(viewsets.ModelViewSet):
-    queryset = Log.objects.select_related('user')
-    serializer_class = LogListSerializer
-    permission_classes = (permissions.AllowAny,)
-
-    def get_serializer_class(self):
-        if 'pk' in self.kwargs:
-            return LogSerializer
-        return LogListSerializer
-
-    def create(self, request):
-        zlib_compressed_binary_data = request.data
-        checksum = hashlib.md5(data).hexdigest()
-        user = request.user if request.user.is_authenticated() else None
-        log, _ = self.queryset.get_or_create(
-            data=data,
-            checksum=checksum,
-            user=user,
-            vm='pypy'
-        )
-
-        return Response(log.checksum)
-
-    def get_queryset(self):
-        if not self.request.user.is_authenticated():
-            return self.queryset
-
-        if not bool(self.request.GET.get('all', False)) and 'pk' not in self.kwargs:
-            return self.queryset.filter(user=self.request.user)
-        return self.queryset

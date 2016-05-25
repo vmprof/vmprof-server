@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.conf import settings
 
 from rest_framework import routers
-from profile.views import MeView, LogViewSet, TokenViewSet, JitLogViewSet
-from log.views import BinaryJitLogFileUploadView
+from profile.views import MeView, LogViewSet, TokenViewSet
+from log.views import BinaryJitLogFileUploadView, MetaJitlogViewSet
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
 
@@ -12,6 +12,7 @@ router = routers.DefaultRouter()
 router.register(r'log', LogViewSet)
 router.register(r'profile', LogViewSet)
 router.register(r'token', TokenViewSet, base_name="token")
+router.register(r'log/meta', MetaJitlogViewSet)
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
