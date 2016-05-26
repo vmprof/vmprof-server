@@ -10,7 +10,7 @@ before_install:
   
 install:
   - pip install -r requirements/testing.txt
-  - pip install -e git://github.com/vmprof/vmprof-python.git@$TRAVIS_BRANCH
+  - pip install -e git://github.com/vmprof/vmprof-python.git@$TRAVIS_BRANCH#egg=vmprof
   - DJANGO_SETTINGS_MODULE=webapp.settings.tests python manage.py migrate
 
 script:
