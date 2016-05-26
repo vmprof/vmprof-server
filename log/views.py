@@ -49,14 +49,26 @@ class BinaryJitLogFileUploadView(views.APIView):
 
         return Response(log.checksum)
 
-class BinaryJitLogSerializer(BaseSerializer):
+class LogMetaSerializer(BaseSerializer):
     def to_representation(self, jlog):
-        # TODO use instance method of jitlog
-        with get_reader(jlog.path) as fileobj: 
-            jitlog = _parse_jitlog(fileobj)
-            return jitlog.serialize('meta-info')
+        forest = jlog.decode_forest()
+        traces = {}
+        for id, trace in forest.traces.items():
+            mp = trace.get_first_merge_point()
+            mp_meta = { 'scope': 'unknown', 'lineno': -1, 'filename': '' }
+            traces[id] = mp_meta
+            if mp:
+                mp_meta['scope'] = mp.get_scope()
+                lineno, filename = mp.get_source_line()
+                mp_meta['lineno'] = lineno
+                mp_meta['filename'] = filename
+        #
+        return {
+            'resops': forest.resops,
+            'traces': traces
+        }
 
 class MetaJitlogViewSet(viewsets.ModelViewSet):
     queryset = BinaryJitLog.objects.all()
-    serializer_class = BinaryJitLogSerializer
+    serializer_class = LogMetaSerializer
     permission_classes = (permissions.AllowAny,)

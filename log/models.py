@@ -27,7 +27,7 @@ class BinaryJitLog(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
     profile = models.ForeignKey(Profile, null=True, blank=False)
 
-    def decode_jitlog(self):
+    def decode_forest(self):
         with get_reader(self.file.name) as fd:
             return _parse_jitlog(fd)
 
