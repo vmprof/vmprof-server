@@ -4,15 +4,13 @@ import urllib
 import hashlib
 import tempfile
 import os
-import lzma
-import bz2
 
 from django.conf.urls import url, include
 from django.contrib import auth
 from django.http.response import HttpResponseBadRequest
 
-from log.models import BinaryJitLog
-from profile.models import Log
+from log.models import BinaryJitLog, get_reader
+from vmprofile.models import Log
 from vmprof.log.parser import _parse_jitlog
 
 
@@ -51,15 +49,9 @@ class BinaryJitLogFileUploadView(views.APIView):
 
         return Response(log.checksum)
 
-def get_reader(filename):
-    if filename.endswith(".bz2"):
-        return bz2.BZ2File(filename, "rb", 2048)
-    elif filename.endswith(".xz"):
-        return lzma.LZMAFile(filename)
-    assert(0, "only bz2 and xz are supported!")
-
 class BinaryJitLogSerializer(BaseSerializer):
     def to_representation(self, jlog):
+        # TODO use instance method of jitlog
         with get_reader(jlog.path) as fileobj: 
             jitlog = _parse_jitlog(fileobj)
             return jitlog.serialize('meta-info')

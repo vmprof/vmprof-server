@@ -1,10 +1,22 @@
 import hashlib
+import io
+import bz2
+import lzma
+
+from vmprof.log.parser import _parse_jitlog
 
 from django.db import models
 from django.conf import settings
 from django.contrib import admin
 
-from profile.models import Log as Profile
+from vmprofile.models import Log as Profile
+
+def get_reader(filename):
+    if filename.endswith(".bz2"):
+        return bz2.BZ2File(filename, "rb", 2048)
+    elif filename.endswith(".xz"):
+        return lzma.LZMAFile(filename)
+    assert(0, "only bz2 and xz are supported!")
 
 
 class BinaryJitLog(models.Model):
@@ -15,16 +27,9 @@ class BinaryJitLog(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
     profile = models.ForeignKey(Profile, null=True, blank=False)
 
-    def decompressed_jitlog(self):
-        jitlog = []
-        lzc = lzma.LZMADecompressor()
-        for chunk in self.file.chunks():
-            out = lzc.compress(chunk)
-            jitlog.append(out)
-        out = lzc.flush()
-        jitlog.append(out)
-
-        return ''.join(jitlog)
+    def decode_jitlog(self):
+        with get_reader(self.file.name) as fd:
+            return _parse_jitlog(fd)
 
 @admin.register(BinaryJitLog)
 class BinaryJitLogAdmin(admin.ModelAdmin):

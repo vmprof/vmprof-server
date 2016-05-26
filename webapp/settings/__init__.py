@@ -19,7 +19,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
 
-    'profile',
+    'vmprofile',
     'log',
 )
 
@@ -58,7 +58,7 @@ STATICFILES_FINDERS = (
 )
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'profile', 'static'),
+    os.path.join(BASE_DIR, 'vmprofile', 'static'),
     os.path.join(BASE_DIR, 'log', 'static')
 )
 

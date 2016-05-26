@@ -1,7 +1,7 @@
 import pytest
 
 from django.contrib import auth
-from profile.models import Log as Profile
+from vmprofile.models import Log as Profile
 
 
 @pytest.mark.django_db

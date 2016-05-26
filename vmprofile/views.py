@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
 
-from profile.models import Log
+from vmprofile.models import Log
 
 
 username_max = auth.models.User._meta.get_field('username').max_length

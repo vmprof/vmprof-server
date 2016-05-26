@@ -1,0 +1,6 @@
+- model: log.binaryjitlog
+  pk: 1111
+  fields:
+    created: !!timestamp '2016-05-20 11:07:21.149913+00:00'
+    file: 'log/test/data/log-richards.bz2'
+    user: null

@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.conf import settings
 
 from rest_framework import routers
-from profile.views import MeView, LogViewSet, TokenViewSet
+from vmprofile.views import MeView, LogViewSet, TokenViewSet
 from log.views import BinaryJitLogFileUploadView, MetaJitlogViewSet
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
