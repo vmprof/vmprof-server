@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('profile', '0004_auto_20150921_1116'),
+        ('vmprofile', '0004_auto_20150921_1116'),
     ]
 
     operations = [
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('checksum', models.CharField(max_length=32, primary_key=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('file', models.FileField(upload_to='uploads/%Y/%m/%d')),
-                ('profile', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='profile.Log')),
+                ('profile', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='vmprofile.Log')),
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),

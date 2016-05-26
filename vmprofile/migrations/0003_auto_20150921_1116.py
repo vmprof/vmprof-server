@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profile', '0002_log_user'),
+        ('vmprofile', '0002_log_user'),
     ]
 
     operations = [

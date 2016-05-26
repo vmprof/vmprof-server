@@ -4,7 +4,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'f$tyieh#&bd_4_&691^ok!#$l+(%y4a8j$z9je9xojr++4n(u1'
 
 DEBUG = True
-TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 
@@ -32,6 +31,26 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+TEMPLATES = [
+    { 'BACKEND': 'django.template.backends.django.DjangoTemplates',
+      'APP_DIRS': True,
+      'DEBUG': True,
+      'OPTIONS': {
+        'context_processors': [
+           # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
+           # list if you haven't customized them:
+           'django.contrib.auth.context_processors.auth',
+           'django.template.context_processors.debug',
+           'django.template.context_processors.i18n',
+           'django.template.context_processors.media',
+           'django.template.context_processors.static',
+           'django.template.context_processors.tz',
+           'django.contrib.messages.context_processors.messages',
+        ],
+      },
+    },
+]
 
 ROOT_URLCONF = 'webapp.urls'
 WSGI_APPLICATION = 'webapp.wsgi.app'
