@@ -1,4 +1,4 @@
-from .tests import *
+from . import *
 
 DATABASES = {
     'default': {
