@@ -19,7 +19,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
 
     'vmprofile',
-    #'log',
+    'log',
 )
 
 MIDDLEWARE_CLASSES = (
