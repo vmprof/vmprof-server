@@ -55,7 +55,8 @@ class LogMetaSerializer(BaseSerializer):
         traces = {}
         for id, trace in forest.traces.items():
             mp = trace.get_first_merge_point()
-            mp_meta = { 'scope': 'unknown', 'lineno': -1, 'filename': '' }
+            mp_meta = { 'scope': 'unknown', 'lineno': -1, 'filename': '',
+                        'type': trace.type }
             traces[id] = mp_meta
             if mp:
                 mp_meta['scope'] = mp.get_scope()

@@ -1,6 +1,6 @@
 <img ng-show="loading && !noprofile" class="center-block loading" src="/static/images/loader.gif" />
 
-<div id="forest" class="row breathing-row" trace-forest>
+<div id="forest" status="{{loading}}" class="row breathing-row" trace-forest>
     <!-- The svg containing the trace visualisation -->
     <svg id="forest_svg" xmlns="http://www.w3.org/2000/svg"
                          xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -67,7 +67,7 @@
 <div class="row breathing-row" ng-if="traces">
     <div class="col-sm-4 col-lg-4" ng-if="jitlog">
         <div class="breathing-row">
-            <input class="form-control input-group-sm" type="text"
+            <input id="filter_text" class="form-control input-group-sm" type="text"
                    ng-model="$storage.filter_text" value=""
                    placeholder="Type funcname or filename" />
         </div>
@@ -101,11 +101,11 @@
                 <span ng-if="$storage.show_asm">Hide Assembler</span>
             </button>
             <div class="checkbox">
-                <input type="checkbox" ng-model="$storage.filter_loop" checked="true" />
+                <input id="filter_loop" type="checkbox" ng-model="$storage.filter_loop" checked="true" />
                 Loops
             </div>
             <div class="checkbox">
-                <input type="checkbox" ng-model="$storage.filter_bridge" />
+                <input id="filter_bridge" type="checkbox" ng-model="$storage.filter_bridge" />
                 Bridges
             </div>
         </div>

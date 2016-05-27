@@ -5,27 +5,8 @@ var JitLog = function (data) {
   this._addr_to_trace = {}
   this._descrnmr_to_trace = {}
   this._descrnmr_to_op = {}
-  this._resops = data.resops
   this._trace_list = []
-  var _this = this
-  var total_entries = 0
-  data.traces.forEach(function(trace){
-    var objtrace = new Trace(_this, trace);
-    // a lookup to find the assembly addr (first byte) -> trace
-    if (trace.addr) {
-      _this._addr_to_trace[trace.addr[0]] = objtrace
-    }
-    // a lookup to find the mapping from id -> trace
-    _this._id_to_traces[objtrace.get_id()] = objtrace
-    _this._trace_list.push(objtrace)
-
-    total_entries += objtrace.get_enter_count()
-  })
-  for (var key in this._id_to_traces) {
-    var trace = this._id_to_traces[key]
-    trace.link();
-    trace.entry_percent = (trace.get_enter_count() / total_entries) * 100.0
-  }
+  this._resops = {}
 }
 
 JitLog.colorPalette = [
@@ -161,6 +142,30 @@ JitLog.hoverVars = function(){
   jQuery('.var').click(enable_or_disable);
 }
 
+JitLog.prototype.set_meta = function(meta) {
+  this._resops = meta.resops
+  var total_entries = 0
+  var traces = meta.traces
+  for (var key in traces) {
+    var trace = traces[key]
+    var objtrace = new Trace(this, key, trace);
+    // a lookup to find the assembly addr (first byte) -> trace
+    if (trace.addr) {
+      this._addr_to_trace[trace.addr[0]] = objtrace
+    }
+    // a lookup to find the mapping from id -> trace
+    this._id_to_traces[objtrace.get_id()] = objtrace
+    this._trace_list.push(objtrace)
+
+    total_entries += objtrace.get_enter_count()
+  }
+  for (var key in this._id_to_traces) {
+    var trace = this._id_to_traces[key]
+    trace.link();
+    trace.entry_percent = (trace.get_enter_count() / total_entries) * 100.0
+  }
+}
+
 JitLog.prototype.filter_traces = function(text, type) {
   // filter all traces according to the following criteria:
   // check if the type matches
@@ -175,12 +180,19 @@ JitLog.prototype.filter_traces = function(text, type) {
     if (text === "") {
       list.push(trace)
     } else {
-      var merge_point = trace.get_stage('opt').get_first_merge_point()
-      if (!merge_point) {
-        return
-      }
-      var scope = merge_point._data['scope']
-      var filename = merge_point._data['filename']
+      //var merge_point = trace.get_stage('opt').get_first_merge_point()
+      //if (!merge_point) {
+      //  return
+      //}
+      //var scope = merge_point._data['scope']
+      //var filename = merge_point._data['filename']
+      //if (scope && scope.indexOf(text) !== -1) {
+      //  list.push(trace)
+      //} else if (filename && filename.indexOf(text) !== -1) {
+      //  list.push(trace)
+      //}
+      var scope = trace.get_func_name()
+      var filename = trace.get_filename()
       if (scope && scope.indexOf(text) !== -1) {
         list.push(trace)
       } else if (filename && filename.indexOf(text) !== -1) {
@@ -196,13 +208,19 @@ JitLog.prototype.get_trace_by_id = function(id) {
   return this._id_to_traces[id]
 }
 
-Trace = function(jitlog, data) {
+Trace = function(jitlog, id, meta) {
   this._jitlog = jitlog
-  this._data = data
-  this._bridges = data.bridges || []
-  this._parent = undefined
-  var _this = this;
+  this.id = id
+  this.scope = meta.scope
+  this.filename = meta.filename
+  this.lineno = meta.lineno
+  this.type = meta.type
+  this._bridges = []
   this._stages = {}
+}
+
+Trace.prototype.set_data = function(data) {
+  var _this = this;
   var stages = data.stages;
   if (stages.noopt){
     this._stages.noopt = new Stage(this._jitlog, stages.noopt)
@@ -222,11 +240,11 @@ Trace.prototype.get_enter_percent = function() {
     return this.entry_percent
 }
 Trace.prototype.get_enter_count = function() {
-  return this._data.counter
+  return 0; // TODO this._data.counter
 }
 
 Trace.prototype.get_id = function() {
-  return this._data.unique_id
+  return this.id
 }
 
 Trace.prototype.bridge_count = function(fn) {
@@ -357,7 +375,7 @@ Trace.prototype.is_stitched = function() {
 }
 
 Trace.prototype.get_type = function() {
-  return this._data.type;
+  return this.type;
 }
 
 var gen_first_mp_info = function(name, default_value) {
@@ -373,9 +391,9 @@ var gen_first_mp_info = function(name, default_value) {
   return f
 }
 
-Trace.prototype.get_func_name = gen_first_mp_info('scope', 'implement get_location in jitdriver')
-Trace.prototype.get_filename = gen_first_mp_info('filename', '-')
-Trace.prototype.get_lineno = gen_first_mp_info('lineno', '0')
+Trace.prototype.get_func_name = function(){return this.scope;} // gen_first_mp_info('scope', 'implement get_location in jitdriver')
+Trace.prototype.get_filename = function(){return this.filename;} //gen_first_mp_info('filename', '-')
+Trace.prototype.get_lineno = function(){return this.lineno;} //gen_first_mp_info('lineno', '0')
 
 Trace.prototype.get_memory_addr = function() {
   return this._data.addr[0]
