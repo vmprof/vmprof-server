@@ -1,7 +1,10 @@
 sudo: required
 dist: trusty
 language: python
-python: 3.5
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
 env:
   - DJANGO_SETTINGS_MODULE=webapp.settings.travis
 
@@ -14,7 +17,6 @@ addons:
 
 before_install:
   - psql -c 'create database vmprof;' -U postgres
-  
 install:
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb

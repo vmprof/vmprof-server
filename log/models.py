@@ -1,7 +1,7 @@
 import hashlib
 import io
 import bz2
-#import lzma
+import lzma
 
 from vmprof.log.parser import _parse_jitlog
 
@@ -14,8 +14,8 @@ from vmprofile.models import Log as Profile
 def get_reader(filename):
     if filename.endswith(".bz2"):
         return bz2.BZ2File(filename, "rb", 2048)
-    #elif filename.endswith(".xz"):
-    #    return lzma.LZMAFile(filename)
+    elif filename.endswith(".xz"):
+        return lzma.LZMAFile(filename)
     raise NotImplementedError("only bz2 and xz are supported!")
 
 class BinaryJitLog(models.Model):
