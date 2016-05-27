@@ -10,16 +10,16 @@ before_install:
   - psql -c 'create database vmprof;' -U postgres
   
 install:
-  - pip install -r requirements/testing.txt
-  - pip install -e git://github.com/vmprof/vmprof-python.git@$TRAVIS_BRANCH#egg=vmprof
-  - python manage.py migrate
-
-before_script:
-  - export CHROME_BIN=/usr/bin/google-chrome
   - sudo apt-get update
   - sudo apt-get install -y libappindicator1 fonts-liberation
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
+  - pip install -r requirements/testing.txt
+  - pip install -e git://github.com/vmprof/vmprof-python.git@$TRAVIS_BRANCH#egg=vmprof
+
+before_script:
+  - python manage.py migrate
+  - export CHROME_BIN=/usr/bin/google-chrome
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - sleep 3 # give xvfb some time to start
