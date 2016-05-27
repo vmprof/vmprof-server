@@ -16,8 +16,7 @@ def get_reader(filename):
         return bz2.BZ2File(filename, "rb", 2048)
     elif filename.endswith(".xz"):
         return lzma.LZMAFile(filename)
-    assert(0, "only bz2 and xz are supported!")
-
+    raise NotImplementedError("only bz2 and xz are supported!")
 
 class BinaryJitLog(models.Model):
     checksum = models.CharField(max_length=32, primary_key=True)
