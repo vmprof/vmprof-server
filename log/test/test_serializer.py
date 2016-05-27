@@ -24,5 +24,6 @@ def test_to_json_meta_info():
     stage.get_ops().append(filename_mergepoint('my_func'))
     assert LogMetaSerializer().to_representation(FakeJitLog(forest)) == \
             { 'resops': { 15: 'divide' },
-              'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0 } },
+              'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
+                               'type': 'loop' } },
             }
