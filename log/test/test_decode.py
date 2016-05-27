@@ -27,3 +27,11 @@ class TestBinaryJitLogDecode(TestCase):
                 break
         else:
             pytest.fail("profile did not contain the function name schedule")
+
+    def test_get_trace_missing_id(self):
+        response = self.client.get('/api/log/trace/1111/') # missing id
+        assert response.status_code == 404
+
+    def test_get_trace_as_json(self):
+        response = self.client.get('/api/log/trace/1111/?id=0') # missing id
+        assert response.status_code == 200

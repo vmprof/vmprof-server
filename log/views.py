@@ -8,6 +8,8 @@ import os
 from django.conf.urls import url, include
 from django.contrib import auth
 from django.http.response import HttpResponseBadRequest
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 from log.models import BinaryJitLog, get_reader
 from vmprofile.models import Log
@@ -69,7 +71,32 @@ class LogMetaSerializer(BaseSerializer):
             'traces': traces
         }
 
-class MetaJitlogViewSet(viewsets.ModelViewSet):
+class MetaForestViewSet(viewsets.ModelViewSet):
     queryset = BinaryJitLog.objects.all()
     serializer_class = LogMetaSerializer
     permission_classes = (permissions.AllowAny,)
+
+def get_forest_for(jlog):
+    return jlog.decode_forest()
+
+class TraceSerializer(BaseSerializer):
+    def to_representation(self, trace):
+        return str(trace)
+
+
+class TraceViewSet(viewsets.ModelViewSet):
+    queryset = BinaryJitLog.objects.all()
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = TraceSerializer
+
+    def get_object(self):
+        if 'id' not in self.request.GET:
+            raise Http404("mandatory id GET parameter missing")
+        id = int(self.request.GET['id'], 16)
+        queryset = self.get_queryset()
+        filter = {}
+        obj = get_object_or_404(queryset, **filter)
+        self.check_object_permissions(self.request, obj)
+        forest = get_forest_for(obj)
+        trace = forest.get_trace_by_id(id)
+        return trace

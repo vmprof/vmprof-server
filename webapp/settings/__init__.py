@@ -35,7 +35,6 @@ MIDDLEWARE_CLASSES = (
 TEMPLATES = [
     { 'BACKEND': 'django.template.backends.django.DjangoTemplates',
       'APP_DIRS': True,
-      'DEBUG': True,
       'OPTIONS': {
         'context_processors': [
            # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
