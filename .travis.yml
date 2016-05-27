@@ -7,13 +7,17 @@ env:
 
 addons:
   postgresql: "9.3"
+  apt:
+    packages:
+      - lzma
+      - lzma-dev
+      - libappindicator1
+      - fonts-liberation
 
 before_install:
   - psql -c 'create database vmprof;' -U postgres
   
 install:
-  - sudo apt-get update
-  - sudo apt-get install -y libappindicator1 fonts-liberation
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
   - pip install -r requirements/testing.txt
@@ -24,12 +28,12 @@ before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - sleep 3 # give xvfb some time to start
+  - python manage.py migrate
   - python manage.py loaddata log/test/fixtures.yaml
   - python manage.py runserver &
   - sleep 3 # wait for django
 
 script:
-  - python manage.py migrate
   - py.test . -v
 
 notifications:
