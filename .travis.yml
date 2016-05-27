@@ -14,7 +14,6 @@ addons:
       - fonts-liberation
 
 before_install:
-  - psql -c 'drop database vmprof;' -U postgres
   - psql -c 'create database vmprof;' -U postgres
 install:
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
