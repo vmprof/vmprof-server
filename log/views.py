@@ -6,6 +6,7 @@ import tempfile
 import base64
 import os
 from collections import defaultdict
+from vmprof.log import constants as const
 
 from django.conf.urls import url, include
 from django.contrib import auth
@@ -93,7 +94,11 @@ def get_forest_for(jlog):
 class OperationSerializer(BaseSerializer):
     def to_representation(self, op):
         if isinstance(op, MergePoint):
-            raise NotImplementedError
+            mp_dict = {}
+            for sem_type, value in op.values.items():
+                name = const.SEM_TYPE_NAMES[sem_type]
+                mp_dict[name] = value
+            return mp_dict
         else:
             dict = { 'num': op.opnum }
             if op.args: dict['args'] = op.args

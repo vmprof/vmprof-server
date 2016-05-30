@@ -7,9 +7,6 @@ from log.views import LogMetaSerializer, TraceSerializer
 
 PY3 = sys.version_info[0] >= 3
 
-def filename_mergepoint(name):
-    return MergePoint({const.MP_SCOPE[0]: name})
-
 class FakeJitLog(object):
     def __init__(self, forest):
         self.forest = forest
@@ -23,7 +20,7 @@ def test_to_json_meta_info():
     trace = forest.add_trace('loop', 0)
     trace.counter = 42
     stage = trace.start_mark(const.MARK_TRACE_OPT)
-    stage.get_ops().append(filename_mergepoint('my_func'))
+    stage.get_ops().append(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
     assert LogMetaSerializer().to_representation(FakeJitLog(forest)) == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
@@ -95,4 +92,26 @@ def test_serialize_trace(forest):
                 { 'num': 15, 'descr':'guarddescr', 'res': 'i2', 'descr_number': '0x2' }]
     }
 
+def test_serialize_debug_merge_point(forest):
+    forest = TraceForest(1)
+    trunk = forest.add_trace('loop', 0)
+    _ = trunk.start_mark(const.MARK_TRACE_OPT)
+    trunk.add_instr(MergePoint({ 0x1: '/x.py',
+                                 0x2: 2,
+                                 0x4: 4,
+                                 0x8: 'funcname',
+                                 0x10: 'LOAD_FAST'}))
+    dict = TraceSerializer().to_representation(trunk)
+    stage = dict['stages']['opt']
+    assert len(stage['merge_points']) == 2 # plus the 'first' key
+    merge_points = stage['merge_points']
+    assert 0 in merge_points.keys()
+    assert merge_points['first'] == 0
+    assert merge_points[0][0] == {
+            'filename': '/x.py',
+            'lineno': 2,
+            'scope': 'funcname',
+            'index': 4,
+            'opcode': 'LOAD_FAST'
+           }
 
