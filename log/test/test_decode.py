@@ -17,8 +17,9 @@ class TestBinaryJitLogDecode(TestCase):
         response = self.client.get('/api/log/meta/1111/')
         jsondata = response.data
         traces = jsondata['traces']
-        assert len(jsondata) == 2
+        assert len(jsondata) == 3
         assert 'resops' in jsondata and 'traces' in jsondata
+        assert 'bridges' in jsondata
         assert len(jsondata['resops']) > 0
         assert len(traces) > 20
         # this is the jitlog for richards. there must be the scope 'schedule'
