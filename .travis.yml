@@ -34,6 +34,7 @@ before_script:
   - sudo mv chromedriver /usr/bin
   # migrate the application and load debug data
   - python manage.py migrate
+  - python log/test/data/loggen.py
   - python manage.py loaddata log/test/fixtures.yaml
   - python manage.py runserver &
   - sleep 3 # wait for django

@@ -158,8 +158,7 @@ class TraceViewSet(viewsets.ModelViewSet):
             raise Http404("mandatory id GET parameter missing")
         id = int(self.request.GET['id'], 16)
         queryset = self.get_queryset()
-        filter = {}
-        obj = get_object_or_404(queryset, **filter)
+        obj = get_object_or_404(queryset, **self.kwargs)
         self.check_object_permissions(self.request, obj)
         forest = get_forest_for(obj)
         trace = forest.get_trace_by_id(id)

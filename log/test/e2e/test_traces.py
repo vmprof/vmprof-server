@@ -16,12 +16,20 @@ def _url(path):
         return host + path
     return host + "/" + path
 
+
+def query1(elem, q):
+    return elem.find_element_by_css_selector(q)
+
+def query(elem, q):
+    return elem.find_elements_by_css_selector(q)
+
 class TestTracesView(object):
     def test_display_schedule(self, drivers):
         for driver in drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1111/traces"))
-            wait.until(lambda d: d.find_element_by_id('forest').get_attribute('status') == 'false')
+            wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+
             for elem in driver.find_elements_by_css_selector('li.trace-entry span.trace-name'):
                 if 'schedule' in elem.text:
                     break
@@ -32,7 +40,7 @@ class TestTracesView(object):
         for driver in drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1111/traces"))
-            wait.until(lambda d: d.find_element_by_id('forest').get_attribute('status') == 'false')
+            wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
             for elem in driver.find_elements_by_css_selector('li.trace-entry span.trace-name'):
                 if 'schedule' in elem.text:
                     break
@@ -59,8 +67,37 @@ class TestTracesView(object):
         for driver in drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1111/traces"))
-            wait.until(lambda d: d.find_element_by_id('forest').get_attribute('status') == 'false')
+            wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
             search_input = driver.find_element_by_id("filter_text")
             search_input.send_keys("schedule")
             assert len(driver.find_elements_by_css_selector('li.trace-entry')) == 1
 
+    def test_load_trace(self, drivers):
+        for driver in drivers:
+            wait = ui.WebDriverWait(driver,10)
+            driver.get(_url("#/1v1/traces"))
+            wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+            trace_lines = driver.find_elements_by_css_selector("li.trace-entry")
+            for line in trace_lines:
+                line.click()
+                wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+                names = set()
+                for line in driver.find_elements_by_css_selector(".resops > .trace-line"):
+                    names.add(query1(line, ".resop-name").text)
+                assert 'int_add' in names
+                assert 'guard_true' in names
+
+    def test_switch_trace(self, drivers):
+        for driver in drivers:
+            wait = ui.WebDriverWait(driver,10)
+            driver.get(_url("#/1v1/traces"))
+            wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+            trace_lines = driver.find_elements_by_css_selector("li.trace-entry")
+            for line in trace_lines:
+                line.click()
+                wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+                names = set()
+                for line in driver.find_elements_by_css_selector(".resops > .trace-line"):
+                    names.add(query1(line, ".resop-name").text)
+                assert 'int_add' in names
+                assert 'guard_true' in names
