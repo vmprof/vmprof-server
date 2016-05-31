@@ -84,10 +84,11 @@ class TestTracesView(object):
                 names = set()
                 for line in driver.find_elements_by_css_selector(".resops > .trace-line"):
                     names.add(query1(line, ".resop-name").text)
+                assert len(names) == 2
                 assert 'int_add' in names
                 assert 'guard_true' in names
 
-    def test_switch_trace(self, drivers):
+    def test_switch_to_opt(self, drivers):
         for driver in drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1v1/traces"))
@@ -96,8 +97,12 @@ class TestTracesView(object):
             for line in trace_lines:
                 line.click()
                 wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+                query1(driver, "#switch_trace_btn").click()
+                query1(driver, "#switch_trace_opt").click()
                 names = set()
-                for line in driver.find_elements_by_css_selector(".resops > .trace-line"):
+                for line in query(driver, ".resops > .trace-line"):
                     names.add(query1(line, ".resop-name").text)
+                assert len(names) == 3
+                assert 'jump' in names
                 assert 'int_add' in names
                 assert 'guard_true' in names

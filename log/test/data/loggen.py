@@ -26,6 +26,7 @@ c.MARK_START_TRACE + addr(0) + encode_str('loop') + addr(0) +
   c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/home/user") +
   c.MARK_RESOP_DESCR + u16(3) + encode_str('?,i2,guard_resume') + addr(0xaffe) +
+  c.MARK_RESOP + u16(7) + encode_str('i2,i1') +
 
   c.MARK_TRACE_ASM + addr(0) +
   c.MARK_INPUT_ARGS  + encode_str('i0,i1') +

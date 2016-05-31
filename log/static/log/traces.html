@@ -73,23 +73,26 @@
         </div>
         <div class="breathing-row form-inline">
             <div class="btn-group" role="group">
-              <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+              <button id="switch_trace_btn" type="button" class="btn btn-default btn-sm dropdown-toggle"
                       data-toggle="dropdown">
                      Stage <span class="caret"></span>
               </button>
               <ul class="dropdown-menu">
                   <li><a ng-class="{'active': trace_type == 'noopt'}"
-                         ng-click="switch_trace(trace, 'noopt')">Unoptimized Trace
+                         ng-click="switch_trace(selected_trace, 'noopt')"
+                         id="switch_trace_noopt">Unoptimized Trace
                          <span class="fa fa-check" ng-if="trace_type == 'noopt'"></span>
                      </a>
                   </li>
                   <li><a ng-class="{'active': trace_type == 'opt'}"
-                         ng-click="switch_trace(trace, 'opt')">Optimized Trace
+                         ng-click="switch_trace(selected_trace, 'opt')"
+                         id="switch_trace_opt">Optimized Trace
                          <span class="fa fa-check" ng-if="trace_type == 'opt'"></span>
                      </a>
                   </li>
                   <li><a ng-class="{'active': trace_type == 'asm'}"
-                         ng-click="switch_trace(trace, 'asm')">Assembled Trace
+                         ng-click="switch_trace(selected_trace, 'asm')"
+                         id="switch_trace_asm">Assembled Trace
                          <span class="fa fa-check" ng-if="trace_type == 'asm'"></span>
                      </a>
                   </li>
