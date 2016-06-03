@@ -21,11 +21,13 @@ def test_to_json_meta_info():
     trace.counter = 42
     stage = trace.start_mark(const.MARK_TRACE_OPT)
     stage.get_ops().append(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
-    assert LogMetaSerializer().to_representation(FakeJitLog(forest)) == \
+    json = LogMetaSerializer().to_representation(FakeJitLog(forest))
+    del json['bridges'] # do not care for this test
+    assert json == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
-                               'type': 'loop', 'counter': 42 } },
-              'bridges': { 0: {} }
+                               'type': 'loop', 'counter': 42, 'visual_trace': '',
+                               'stitched_descrs': [] } },
             }
 
 def test_to_json_meta_bridges():

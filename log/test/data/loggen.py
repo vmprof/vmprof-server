@@ -1,5 +1,5 @@
 import os
-import lzma
+import gzip
 
 from vmprof.log import constants as c
 from vmprof.binary import (encode_le_u16 as u16,
@@ -37,6 +37,6 @@ c.MARK_START_TRACE + addr(0) + encode_str('loop') + addr(0) +
 if __name__ == "__main__":
     path = os.path.dirname(__file__)
     for i, (version, log) in enumerate(test_logs):
-        with lzma.open(os.path.join(path, "log-test-%d-%s.jlog.xz" % (i+1, version)),
+        with gzip.open(os.path.join(path, "log-test-%d-%s.jlog.zip" % (i+1, version)),
                        mode="wb") as fd:
             fd.write(log)

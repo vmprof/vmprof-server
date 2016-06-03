@@ -106,3 +106,22 @@ class TestTracesView(object):
                 assert 'jump' in names
                 assert 'int_add' in names
                 assert 'guard_true' in names
+
+    def test_display_asm(self, drivers):
+        for driver in drivers:
+            wait = ui.WebDriverWait(driver,10)
+            driver.get(_url("#/1v1/traces"))
+            wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+            trace_lines = driver.find_elements_by_css_selector("li.trace-entry")
+            for line in trace_lines:
+                line.click()
+                wait.until(lambda d: query1(d, '#forest').get_attribute('status') == 'false')
+                query1(driver, "#switch_trace_btn").click()
+                query1(driver, "#switch_trace_opt").click()
+                names = set()
+                for line in query(driver, ".resops > .trace-line"):
+                    names.add(query1(line, ".resop-name").text)
+                assert len(names) == 3
+                assert 'jump' in names
+                assert 'int_add' in names
+                assert 'guard_true' in names

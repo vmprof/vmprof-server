@@ -40,9 +40,8 @@ class BinaryJitLogFileUploadView(views.APIView):
         file_obj = request.FILES['file']
 
         filename = file_obj.name
-        if not filename.endswith('.bz2') and \
-           not filename.endswith('.xz'):
-            return HttpResponseBadRequest("must be either bzip2 or lzma compressed")
+        if not filename.endswith('.zip'):
+            return HttpResponseBadRequest("must be gzip compressed")
 
         checksum = compute_checksum(file_obj)
 
@@ -54,6 +53,31 @@ class BinaryJitLogFileUploadView(views.APIView):
 
         return Response(log.checksum)
 
+def visual_trace(trace):
+    # returns a string matching the regex [0-9]*
+    # 0 -> a guard instruction
+    # 1 -> a stitched guard instruction
+    # 2 -> label
+    # 3 -> jump
+    # 4 -> finish
+    descrs = []
+    l = []
+    stage = trace.get_stage('asm')
+    for op in stage.get_ops():
+        if op.is_guard():
+            if op.is_stitched():
+                l.append('1')
+                descrs.append(hex(op.get_descr_nmr()))
+            else:
+                # only append guard if there is no previous guard
+                if len(l) == 0 or l[-1] != '0':
+                    l.append('0')
+        if op.opname == "label": l.append('2')
+        if op.opname == "jump": l.append('3')
+        if op.opname == "finish": l.append('4')
+
+    return descrs, ''.join(l)
+
 class LogMetaSerializer(BaseSerializer):
     def to_representation(self, jlog):
         forest = jlog.decode_forest()
@@ -62,7 +86,10 @@ class LogMetaSerializer(BaseSerializer):
         for id, trace in forest.traces.items():
             mp = trace.get_first_merge_point()
             mp_meta = { 'scope': 'unknown', 'lineno': -1, 'filename': '',
-                    'type': trace.type, 'counter': trace.counter }
+                        'type': trace.type, 'counter': trace.counter }
+            descr_nmrs, encoding = visual_trace(trace)
+            mp_meta['visual_trace'] = encoding
+            mp_meta['stitched_descrs'] = descr_nmrs
             traces[id] = mp_meta
             if mp:
                 mp_meta['scope'] = mp.get_scope()

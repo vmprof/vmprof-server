@@ -2,6 +2,7 @@ import hashlib
 import io
 import bz2
 import lzma
+import gzip
 
 from vmprof.log.parser import _parse_jitlog
 
@@ -12,7 +13,9 @@ from django.contrib import admin
 from vmprofile.models import Log as Profile
 
 def get_reader(filename):
-    if filename.endswith(".bz2"):
+    if filename.endswith(".zip"):
+        return gzip.GzipFile(filename)
+    elif filename.endswith(".bz2"):
         return bz2.BZ2File(filename, "rb", 2048)
     elif filename.endswith(".xz"):
         return lzma.LZMAFile(filename)

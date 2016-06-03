@@ -2,11 +2,11 @@
   pk: 1v1
   fields:
     created: !!timestamp '2016-05-29 12:07:21.149913+00:00'
-    file: 'log/test/data/log-test-1-v1.jlog.xz'
+    file: 'log/test/data/log-test-1-v1.jlog.zip'
     user: null
 - model: log.binaryjitlog
   pk: 1111
   fields:
     created: !!timestamp '2016-05-20 11:07:21.149913+00:00'
-    file: 'log/test/data/log-richards.bz2'
+    file: 'log/test/data/log-richards.zip'
     user: null
