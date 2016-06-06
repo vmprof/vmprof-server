@@ -3,7 +3,8 @@ import struct, py, sys
 from vmprof.log.objects import (FlatOp, TraceForest, Trace,
         MergePoint, iter_ranges)
 from vmprof.log import constants as const
-from log.views import LogMetaSerializer, TraceSerializer
+from log.views import (LogMetaSerializer, TraceSerializer,
+        VisualTraceTreeSerializer)
 
 PY3 = sys.version_info[0] >= 3
 
@@ -20,14 +21,13 @@ def test_to_json_meta_info():
     trace = forest.add_trace('loop', 0)
     trace.counter = 42
     stage = trace.start_mark(const.MARK_TRACE_OPT)
-    stage.get_ops().append(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
+    stage.append_op(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
     json = LogMetaSerializer().to_representation(FakeJitLog(forest))
     del json['bridges'] # do not care for this test
     assert json == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
-                               'type': 'loop', 'counter': 42, 'visual_trace': '',
-                               'stitched_descrs': [] } },
+                               'type': 'loop', 'counter': 42 } },
             }
 
 def test_to_json_meta_bridges():
@@ -55,7 +55,10 @@ DEFAULT_TEST_RESOPS = {
     # do NOT edit this numbers
     15: 'guard_true',
     16: 'int_add',
-    17: 'load'
+    17: 'load',
+    18: 'label',
+    19: 'jump',
+    20: 'finish',
 }
 
 assert max(set(DEFAULT_TEST_RESOPS.keys())) < 255
@@ -95,7 +98,6 @@ def test_serialize_trace(forest):
     }
 
 def test_serialize_debug_merge_point(forest):
-    forest = TraceForest(1)
     trunk = forest.add_trace('loop', 0)
     _ = trunk.start_mark(const.MARK_TRACE_OPT)
     trunk.add_instr(MergePoint({ 0x1: '/x.py',
@@ -117,3 +119,22 @@ def test_serialize_debug_merge_point(forest):
             'opcode': 'LOAD_FAST'
            }
 
+def test_serialize_visual_trace_tree(forest):
+    trunk = forest.add_trace('loop', 0)
+    _ = trunk.start_mark(const.MARK_TRACE_ASM)
+    add_instr(trunk, 'label', None, 'i1,i1', descr=(None, 0xa))
+    add_instr(trunk, 'int_add', 'i2', 'i1,i1')
+    add_instr(trunk, 'guard_true', 'i2', None, descr=('guarddescr', 0x2))
+    add_instr(trunk, 'jump', None, 'i1,i1', descr=(None, 0xa))
+    #
+    bridge1 = forest.add_trace('bridge', 1)
+    forest.stitch_bridge(2, 1)
+    _ = bridge1.start_mark(const.MARK_TRACE_ASM)
+    add_instr(bridge1, 'finish', None, 'i1,i1', descr=(None, 0xb))
+    #
+    t = VisualTraceTreeSerializer().to_representation(trunk)
+    assert t['root'] == '0x0'
+    assert t['stitches'] == {
+        '0x0': ['l,0,0xa','g,2,0x2,0x1','j,3,0xa'],
+        '0x1': ['f,0,0xb']
+    }

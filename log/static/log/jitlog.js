@@ -589,7 +589,7 @@ ResOp.prototype.get_disassembly = function() {
     return array;
   }
 
-  var dump = this._data.dump[1];
+  var dump = this._data.dump;
 
   var buffer = [];
   var offset = 0x0;

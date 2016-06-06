@@ -31,7 +31,25 @@ c.MARK_START_TRACE + addr(0) + encode_str('loop') + addr(0) +
   c.MARK_TRACE_ASM + addr(0) +
   c.MARK_INPUT_ARGS  + encode_str('i0,i1') +
   c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
-  c.MARK_RESOP_DESCR + u16(3) + encode_str('?,i2,guard_resume') + addr(0xaffe)
+  c.MARK_RESOP_DESCR + u16(3) + encode_str('?,i2,guard_resume') + addr(0xaffe) +
+
+# trace with id 1, this is a loop with one bridge
+c.MARK_START_TRACE + addr(1) + encode_str('loop') + addr(0) +
+  c.MARK_TRACE_ASM + addr(1) +
+  c.MARK_INIT_MERGE_POINT + u16(1) + bytes([c.MP_FILENAME[0]]) + b"s" +
+  c.MARK_INPUT_ARGS  + encode_str('i0,i1') +
+  c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
+  c.MARK_MERGE_POINT + b"\xff" + encode_str("/home/user") +
+  c.MARK_RESOP_DESCR + u16(3) + encode_str('?,i2,guard_resume') + addr(0x1234) +
+  c.MARK_RESOP_DESCR + u16(7) + encode_str('i2,i1,jmpdescr') + addr(0x0011) +
+
+# the bridge
+c.MARK_START_TRACE + addr(2) + encode_str('bridge') + addr(0) +
+  c.MARK_TRACE_ASM + addr(2) +
+  c.MARK_INPUT_ARGS  + encode_str('i0,i1') +
+
+# stitch the bridge
+c.MARK_STITCH_BRIDGE + addr(0x1234) + addr(0x2)
 )]
 
 if __name__ == "__main__":

@@ -4,7 +4,8 @@ from django.conf import settings
 
 from rest_framework import routers
 from vmprofile.views import MeView, LogViewSet, TokenViewSet
-from log.views import BinaryJitLogFileUploadView, MetaForestViewSet, TraceViewSet
+from log.views import (BinaryJitLogFileUploadView, MetaForestViewSet, TraceViewSet,
+        VisualTraceTreeViewSet)
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
 
@@ -14,6 +15,7 @@ router.register(r'profile', LogViewSet)
 router.register(r'token', TokenViewSet, base_name="token")
 router.register(r'log/meta', MetaForestViewSet)
 router.register(r'log/trace', TraceViewSet)
+router.register(r'log/stitches', VisualTraceTreeViewSet)
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),

@@ -53,30 +53,6 @@ class BinaryJitLogFileUploadView(views.APIView):
 
         return Response(log.checksum)
 
-def visual_trace(trace):
-    # returns a string matching the regex [0-9]*
-    # 0 -> a guard instruction
-    # 1 -> a stitched guard instruction
-    # 2 -> label
-    # 3 -> jump
-    # 4 -> finish
-    descrs = []
-    l = []
-    stage = trace.get_stage('asm')
-    for op in stage.get_ops():
-        if op.is_guard():
-            if op.is_stitched():
-                l.append('1')
-                descrs.append(hex(op.get_descr_nmr()))
-            else:
-                # only append guard if there is no previous guard
-                if len(l) == 0 or l[-1] != '0':
-                    l.append('0')
-        if op.opname == "label": l.append('2')
-        if op.opname == "jump": l.append('3')
-        if op.opname == "finish": l.append('4')
-
-    return descrs, ''.join(l)
 
 class LogMetaSerializer(BaseSerializer):
     def to_representation(self, jlog):
@@ -87,9 +63,6 @@ class LogMetaSerializer(BaseSerializer):
             mp = trace.get_first_merge_point()
             mp_meta = { 'scope': 'unknown', 'lineno': -1, 'filename': '',
                         'type': trace.type, 'counter': trace.counter }
-            descr_nmrs, encoding = visual_trace(trace)
-            mp_meta['visual_trace'] = encoding
-            mp_meta['stitched_descrs'] = descr_nmrs
             traces[id] = mp_meta
             if mp:
                 mp_meta['scope'] = mp.get_scope()
@@ -190,3 +163,48 @@ class TraceViewSet(viewsets.ModelViewSet):
         forest = get_forest_for(obj)
         trace = forest.get_trace_by_id(id)
         return trace
+
+
+class VisualTraceTreeSerializer(BaseSerializer):
+    def to_representation(self, trace):
+        stitches = {}
+        errors = []
+        d = { 'root': hex(trace.unique_id),
+              'stitches': stitches,
+            }
+
+        worklist = [trace]
+        while worklist:
+            trace = worklist.pop()
+            hex_unique_id = hex(trace.unique_id)
+            stage = trace.get_stage('asm')
+            if not stage:
+                continue
+            oplist = []
+            for i,op in enumerate(stage.get_ops()):
+                descr_nmr = hex(op.get_descr_nmr() or 0)
+                if op.is_guard():
+                    target = trace.forest.get_stitch_target(op.get_descr_nmr())
+                    if target:
+                        to_trace = trace.forest.get_trace_by_id(target)
+                        if to_trace:
+                            worklist.append(to_trace)
+                        else:
+                            errors.append("No 'asm' stage of trace (0x%x)" % target)
+                        target = hex(target)
+                    else:
+                        target = '0x0'
+                    oplist.append(','.join(['g',str(i), descr_nmr, target]))
+                if op.opname == "label":
+                    oplist.append(','.join(['l',str(i), descr_nmr]))
+                if op.opname == "jump":
+                    oplist.append(','.join(['j',str(i), descr_nmr]))
+                if op.opname == "finish":
+                    oplist.append(','.join(['f',str(i), descr_nmr]))
+            stitches[hex(trace.unique_id)] = oplist
+        if errors:
+            d['errors'] = errors
+        return d
+
+class VisualTraceTreeViewSet(TraceViewSet):
+    serializer_class = VisualTraceTreeSerializer

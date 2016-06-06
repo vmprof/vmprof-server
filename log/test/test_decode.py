@@ -37,3 +37,14 @@ class TestBinaryJitLogDecode(TestCase):
         response = self.client.get('/api/log/trace/1v1/?id=0')
         assert response.status_code == 200
         assert response.data != {}
+
+    def test_get_visual_trace(self):
+        response = self.client.get('/api/log/stitches/1v1/?id=1')
+        assert response.status_code == 200
+        assert response.data == {
+            'root': '0x1',
+            'stitches': {
+                '0x1': ['g,1,0x1234,0x2', 'j,2,0x11'],
+                '0x2': []
+            }
+        }
