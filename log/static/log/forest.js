@@ -15,20 +15,89 @@ scale = function(elem, scale) {
 }
 
 VisualTrace = function(trace, yoff){
-  this.trace_obj = trace
-  trace.visual_trace = this
+  this.id = trace
   this.links = []
   this.stitches = []
   this.nodes = []
   this.yoff = yoff
 }
 
-VisualTraceNode = function(vtrace, index, op) {
+VisualTrace.prototype.branch_count = function() {
+  if (this._branch_count !== undefined) {
+    return this._branch_count
+  }
+  var count = 1;
+  this.stitches.forEach(function(obj){
+    count += obj.node.branch_count()
+  })
+  this._branch_count = count;
+  return count
+}
+
+
+VisualTrace.prototype.align_tree = function(xoff) {
+  // true means right, false means left
+  var part = this.partition_subtree()
+  this.xoff = 1 + xoff + part.leftcount
+
+  var d = 1 + xoff + part.leftcount
+
+  // walk the right side of the trace
+  var t = 1 + xoff + part.leftcount
+  part.right.forEach(function(trace){
+    var p = trace.align_tree(t)
+    t += p.total
+  })
+
+
+  // walk the left side of the trace
+  var t = xoff
+  part.left.forEach(function(trace){
+    var p = trace.align_tree(t)
+    t += p.total
+  })
+
+  return part
+}
+
+VisualTrace.prototype.partition_subtree = function() {
+  var total = this.branch_count()
+  var part = {leftcount:0, left:[], rightcount:0, right:[], total:total}
+
+  this.stitches.forEach(function(obj){
+    if (part.leftcount < part.rightcount) {
+      part.leftcount += obj.node.branch_count()
+      part.left.push(obj.node)
+    } else {
+      part.rightcount += obj.node.branch_count()
+      part.right.push(obj.node)
+    }
+  })
+  // sort the sets left and right to display them correctly!
+  part.left.sort(function(a,b){
+    return a.visual_trace.yoff - b.visual_trace.yoff
+  })
+  part.right.sort(function(a,b){
+    return b.visual_trace.yoff - a.visual_trace.yoff
+  })
+
+  if (part.leftcount + part.rightcount + 1 != part.total) {
+    console.error("partition for rendering has incorrrect branch count!")
+    console.error(part.leftcount, "+", part.rightcount, "!=", total)
+  }
+
+
+  return part
+}
+
+VisualTraceNode = function(vtrace, order, index, type, descr_nmr, target) {
   this.visual_trace = vtrace
   this.class = 'trace-enter'
-  this.order = vtrace.nodes.length
   this.index = index
-  this.op = op
+  this.order = order
+  this.type = type
+  this.descr_nmr = descr_nmr
+  this.target = target || ''
   this.x = 0
   this.y = 0
   // nodes that have been consumed (they are not displayed)
@@ -220,7 +289,7 @@ TraceForest.prototype.mouse_leave_node = function() {
   scale(jthis, 1)
 }
 
-TraceForest.prototype.display_tree = function($scope, trunk){
+TraceForest.prototype.display_tree = function($scope, trunk, visual_trace){
   this.$scope = $scope
   var _this = this;
   this.reset_slide()
@@ -229,7 +298,7 @@ TraceForest.prototype.display_tree = function($scope, trunk){
   //
   var links = [];
   var traces = [];
-  _this.walk_trace_tree(trunk, 0, traces, links)
+  var vtrace = _this.walk_visual_trace_tree(visual_trace, 0, traces, links)
 
   this.node_layer.remove()
   this.link_layer.remove()
@@ -238,7 +307,7 @@ TraceForest.prototype.display_tree = function($scope, trunk){
 
   var tree_grp = this.node_layer.append("svg:g")
 
-  var part = trunk.align_tree(0)
+  var part = vtrace.align_tree(0)
   var width = (part.leftcount + 1 + part.rightcount) * 10
   this.link_layer.attr("transform", translate(-width/2,0))
   this.node_layer.attr("transform", translate(-width/2,0))
@@ -252,7 +321,7 @@ TraceForest.prototype.display_tree = function($scope, trunk){
                         var y = trace.yoff*7
                         return _this._tr(x, y)
                       })
-                      .attr("data-trace-id", trace.trace_obj.get_id())
+                      .attr("data-trace-id", trace.id)
     var rect = trace_grp.append("svg:rect")
                        .attr("class", "empty-rect")
                        .attr("transform", "translate(-5,-5)")
@@ -265,9 +334,9 @@ TraceForest.prototype.display_tree = function($scope, trunk){
     var node = trace_grp.selectAll(".node").data(trace.nodes)
                 .enter().append("svg:g")
                   .attr("class", function(d){ return 'node ' + d.class })
-                  .attr("data-trace-id", trace.trace_obj.get_id())
+                  .attr("data-trace-id", trace.id)
                   .attr("data-op-index", function(d){
-                    return d.op.get_index()
+                    return d.index
                   })
                   .attr("transform", function(d) {
                     d.ix = 0
@@ -330,10 +399,11 @@ translate = function(a, b) {
 TraceForest.prototype._tr = translate
 
 TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
+  // OLD, use walk_visual_trace_tree instead
   // iterate the trace tree and create visual objects that can later be easily
   // aligned and rendered in the SVG chart
   var _this = this
-  var vtrace = new VisualTrace(trunk, yoff)
+  var vtrace = new VisualTrace(trunk.get_id(), yoff)
   traces.push(vtrace)
   var labels = {}
   var label_counter = 1
@@ -396,5 +466,88 @@ TraceForest.prototype.walk_trace_tree = function(trunk, yoff, traces, links) {
   return vtrace
 }
 
+TraceForest.prototype.walk_visual_trace_tree = function(json, yoff, traces, links) {
+  // iterate the trace tree and create visual objects that can later be easily
+  // aligned and rendered in the SVG chart
+  var _this = this
+  var vtrace = new VisualTrace(json.root, yoff)
+  traces.push(vtrace)
+  var labels = {}
+  var label_counter = 1
+  var last = null
+  var node = null
+  var i = 0;
+  var visual_nodes = json.stitches[json.root]
+  for (var i = 0; i < visual_nodes.length; i++) {
+    var vn = visual_nodes[i].split(',')
+    var type = vn[0]
+    var index = parseInt(vn[1])
+    var descr_nmr = parseInt(vn[2], 16)
+    var target = parseInt(vn[3], 16)
+    var node = new VisualTraceNode(vtrace, i, index, type, descr_nmr, target)
+    vtrace.nodes.push(node)
+  }
 
+  // create the links between the nodes
+  var last = null
+  vtrace.nodes.forEach(function(node,index){
+    if (last !== null) {
+      links.push({'source': last, 'target': node});
+    }
+    last = node;
+  });
 
+  // xxx
+  //vtrace.stitches.forEach(function(obj){
+  //  var op = obj.op
+  //  var stitched = op.get_stitched_trace()
+  //  if (stitched !== undefined){
+  //    var yoff = vtrace.yoff + obj.index-1
+  //    var vstrace = _this.walk_visual_trace_tree(stitched, yoff, traces, links)
+  //    var tgt = vstrace.nodes[0]
+  //    links.push({'source': op.visual_node , 'target': tgt, class: 'stitch-edge'})
+  //  }
+  //})
+//  trunk.forEachOp(function(op){
+//    if (op.is_label() || op.is_jump()) {
+//      vtrace.nodes.push(node)
+//      if (op.get_descr_nmr() in labels) {
+//        node.label = labels[op.get_descr_nmr()]
+//      } else {
+//        node.label = label_counter
+//        labels[op.get_descr_nmr()] = label_counter
+//        label_counter += 1
+//      }
+//      i += 1
+//    } else if (op.is_guard()) {
+//      // add a new node, give it a connection to the previous
+//      var bridge = op.get_stitched_trace()
+//      if (last && !bridge && last.guard && last.class.indexOf('stitched') == -1) {
+//        last.consumed.push(op)
+//        return true;
+//      }
+//      node = new VisualTraceNode(vtrace, i, op)
+//      node.set_guard(op, bridge)
+//      vtrace.nodes.push(node)
+//      if (bridge !== undefined) {
+//        node.class += ' stitched'
+//        vtrace.stitches.push({'op': op, 'index': vtrace.nodes.length })
+//      }
+//      i += 1;
+//    } else if (op.is_finish()) {
+//      node = new VisualTraceNode(vtrace, i, op)
+//      vtrace.nodes.push(node)
+//      node.finish = true
+//      i += 1
+//    } else {
+//      return true // continue to next iteration
+//    }
+//    if (last) {
+//      links.push({'source': last, 'target': node})
+//    }
+//    last = node
+//    return true;
+//  })
+
+  return vtrace
+}

@@ -94,7 +94,15 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         trace.set_data(response.data)
         $scope.selected_trace = trace
         $scope.$broadcast('trace-update')
-        trace_forest.display_tree($scope, trace)
+        $scope.loading = false
+      })
+
+      $http.get('/api/log/stitches/' + jitlog.checksum + "/?id=" + trace.get_id(), {
+          cache: true
+      }).then(function(response) {
+        // set the new type and the subject trace
+        var visual_trace = response.data
+        trace_forest.display_tree($scope, trace, visual_trace)
         $scope.loading = false
       })
     }

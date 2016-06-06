@@ -240,7 +240,7 @@ Trace.prototype.get_enter_percent = function() {
     return this.entry_percent
 }
 Trace.prototype.get_enter_count = function() {
-  return 0; // TODO this._data.counter
+  return this.counter
 }
 
 Trace.prototype.get_id = function() {
@@ -250,62 +250,6 @@ Trace.prototype.get_id = function() {
 Trace.prototype.bridge_count = function(fn) {
   return this._bridges.length;
 }
-
-Trace.prototype.partition_subtree = function() {
-  var total = this.branch_count()
-  var part = {leftcount:0, left:[], rightcount:0, right:[], total:total}
-
-  this.walk_bridges(function(bridge){
-    if (part.leftcount < part.rightcount) {
-      part.leftcount += bridge.branch_count()
-      part.left.push(bridge)
-    } else {
-      part.rightcount += bridge.branch_count()
-      part.right.push(bridge)
-    }
-  })
-  // sort the sets left and right to display them correctly!
-  part.left.sort(function(a,b){
-    return a.visual_trace.yoff - b.visual_trace.yoff
-  })
-  part.right.sort(function(a,b){
-    return b.visual_trace.yoff - a.visual_trace.yoff
-  })
-
-  if (part.leftcount + part.rightcount + 1 != part.total) {
-    console.error("partition for rendering has incorrrect branch count!")
-    console.error(part.leftcount, "+", part.rightcount, "!=", total)
-  }
-
-
-  return part
-}
-
-Trace.prototype.align_tree = function(xoff) {
-  // true means right, false means left
-  var part = this.partition_subtree()
-  this.visual_trace.xoff = 1 + xoff + part.leftcount
-
-  var d = 1 + xoff + part.leftcount
-
-  // walk the right side of the trace
-  var t = 1 + xoff + part.leftcount
-  part.right.forEach(function(trace){
-    var p = trace.align_tree(t)
-    t += p.total
-  })
-
-
-  // walk the left side of the trace
-  var t = xoff
-  part.left.forEach(function(trace){
-    var p = trace.align_tree(t)
-    t += p.total
-  })
-
-  return part
-}
-
 Trace.prototype.walk_bridges = function(fn) {
   var _this = this;
   this._bridges.forEach(function(bridge){
