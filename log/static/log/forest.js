@@ -320,7 +320,7 @@ TraceForest.prototype.display_tree = function($scope, trunk, visual_trace){
                         var y = trace.yoff*7
                         return translate(x, y)
                       })
-                      .attr("data-trace-id", trace.id)
+                      .attr("data-trace-id", parseInt(trace.id,16))
     var rect = trace_grp.append("svg:rect")
                        .attr("class", "empty-rect")
                        .attr("transform", "translate(-5,-5)")
@@ -353,7 +353,7 @@ TraceForest.prototype.display_tree = function($scope, trunk, visual_trace){
     _this.draw_trace_finish(node.filter(function(d){return d.type == 'f'}))
 
     // stitched guards
-    _this.draw_stitched_guard(node.filter(function(d){return d.type == 'g' && d.target }))
+    _this.draw_stitched_guard(node.filter(function(d){return d.type == 'g' && !d.target }))
 
     // not stitched guards
     var not_stitched = node.filter(function(d){return d.type == 'g' && d.target })
@@ -418,7 +418,7 @@ TraceForest.prototype.walk_visual_trace_tree = function(json, yoff, traces, link
     if (vn.length > 3) {
       var target = parseInt(vn[3], 16)
     }
-    var node = new VisualTraceNode(vtrace, i, index, type, descr_nmr, target)
+    var node = new VisualTraceNode(vtrace, index, i, type, descr_nmr, target)
     vtrace.nodes.push(node)
   }
 

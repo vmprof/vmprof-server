@@ -149,6 +149,11 @@ span.resop-name {
     font-weight: italic;
 }
 
+span.resop-descr {
+    font-size: 0.7em;
+    color: gray;
+}
+
 .trace-asm {
     margin-top: 5px;
     margin-left: 15px;

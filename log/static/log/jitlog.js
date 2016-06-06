@@ -503,7 +503,7 @@ ResOp.prototype.to_s = function(index) {
   }
   var opnum = this._data.num
   var opname = this._jitlog._resops[opnum]
-  var args = this._data.args
+  var args = this._data.args || []
   var descr = this._data.descr
   var format = function(prefix, opname, args, descr) {
     var arg_str = ''
@@ -514,9 +514,9 @@ ResOp.prototype.to_s = function(index) {
       }
     }
     if (descr) {
-      descr = '#' + descr
+      descr = ' <span class="resop-descr">' + descr.replace("<","").replace(">","") + "</span>";
     } else {
-      descr = ''
+      descr = '';
     }
     return prefix + '<span class="resop-name">' +
            opname + '</span>(' + arg_str + ')' + descr
