@@ -140,6 +140,16 @@ svg rect, svg text {
     padding: 5px;
 }
 
+.trace-nav-up {
+    color: black;
+}
+
+.svg-arrow {
+    fill: white;
+    stroke: white;
+    stroke-width: 1px;
+}
+
 .trace-line {
     white-space: nowrap;
 }

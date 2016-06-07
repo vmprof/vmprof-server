@@ -42,14 +42,16 @@ c.MARK_START_TRACE + addr(1) + encode_str('loop') + addr(0) +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/home/user") +
   c.MARK_RESOP_DESCR + u16(3) + encode_str('?,i2,guard_resume') + addr(0x1234) +
   c.MARK_RESOP_DESCR + u16(7) + encode_str('i2,i1,jmpdescr') + addr(0x0011) +
+  c.MARK_ASM_ADDR + addr(0x100) + addr(0x200) +
 
 # the bridge
 c.MARK_START_TRACE + addr(2) + encode_str('bridge') + addr(0) +
   c.MARK_TRACE_ASM + addr(2) +
   c.MARK_INPUT_ARGS  + encode_str('i0,i1') +
+  c.MARK_ASM_ADDR + addr(0x300) + addr(0x400) +
 
 # stitch the bridge
-c.MARK_STITCH_BRIDGE + addr(0x1234) + addr(0x2)
+c.MARK_STITCH_BRIDGE + addr(0x1234) + addr(0x300)
 )]
 
 if __name__ == "__main__":

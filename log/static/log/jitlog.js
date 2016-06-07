@@ -69,7 +69,7 @@ JitLog.hoverVars = function(){
         span.data('hover-color', color)
       }
       // get the min. max positions for this live range
-      var integer = parseInt(jQuery(this).parent().data('index'))
+      var integer = parseInt(jQuery(this).get_parent().data('index'))
       if (integer < min_index) { min_index = integer; }
       if (integer > max_index) { max_index = integer; }
     })
@@ -215,6 +215,7 @@ Trace = function(jitlog, id, meta) {
   this.filename = meta.filename
   this.lineno = meta.lineno
   this.type = meta.type
+  this._parent = meta.parent
   this._bridges = []
   this._stages = {}
 }
@@ -273,7 +274,6 @@ Trace.prototype.link = function() {
   this._bridges.forEach(function(bridge){
     var trace = _this._jitlog._addr_to_trace[bridge.target]
     _this._jitlog._descrnmr_to_trace[bridge.descr_number] = trace
-    trace._parent = _this;
     bridge.target_obj = trace;
   })
   this.forEachOp(function(op){
@@ -284,7 +284,7 @@ Trace.prototype.link = function() {
   })
 }
 
-Trace.prototype.parent = function() {
+Trace.prototype.get_parent = function() {
   return this._parent
 }
 

@@ -69,12 +69,14 @@ class LogMetaSerializer(BaseSerializer):
                 lineno, filename = mp.get_source_line()
                 mp_meta['lineno'] = lineno
                 mp_meta['filename'] = filename
+            if trace.parent:
+                mp_meta['parent'] = hex(trace.parent.unique_id)
             # serialize all trace connections
             bridgemap = {}
             bridges[id] = bridgemap
             for bridge in trace.bridges:
-                descr_nmr = hex(bridge[1])
-                target_addr = hex(bridge[2])
+                descr_nmr = bridge.get_stitched_descr_number()
+                target_addr = bridge.addrs[0]
                 bridgemap[descr_nmr] = target_addr
 
         return {
@@ -189,9 +191,10 @@ class VisualTraceTreeSerializer(BaseSerializer):
                         to_trace = trace.forest.get_trace_by_id(target)
                         if to_trace:
                             worklist.append(to_trace)
+                            target = hex(to_trace.unique_id)
                         else:
                             errors.append("No 'asm' stage of trace (0x%x)" % target)
-                        target = hex(target)
+                            target = '0x0'
                     else:
                         target = '0x0'
                     oplist.append(','.join(['g',str(i), descr_nmr, target]))
