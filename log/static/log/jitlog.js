@@ -1,4 +1,20 @@
 
+var Loading = function($scope) {
+  this._requests = []
+  this.$scope = $scope
+}
+
+Loading.prototype.start = function(msg) {
+  this._requests.push(msg)
+}
+
+Loading.prototype.stop = function() {
+  this._requests.pop()
+}
+
+Loading.prototype.complete = function() {
+  return this._requests.length === 0
+}
 
 var JitLog = function (data) {
   this._id_to_traces = {};
@@ -29,9 +45,7 @@ var extract_class = function(str, prefix){
   return str
 }
 
-
-// static call
-JitLog.hoverVars = function(){
+JitLog.hoverVars = function() {
   //
   // enable a variable (by coloring it and all it's occurances)
   //
@@ -69,7 +83,7 @@ JitLog.hoverVars = function(){
         span.data('hover-color', color)
       }
       // get the min. max positions for this live range
-      var integer = parseInt(jQuery(this).get_parent().data('index'))
+      var integer = parseInt(jQuery(this).parent().first().data('index'))
       if (integer < min_index) { min_index = integer; }
       if (integer > max_index) { max_index = integer; }
     })

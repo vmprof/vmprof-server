@@ -31,8 +31,9 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       filter_loop: true,
       filter_bridge: false,
       show_asm: true,
+      show_source_code: true,
     })
-    $scope.loading = true;
+    $scope.loading = new Loading($scope)
     $scope.ops = []
     $scope.trace_type = 'asm'
     $scope.selected_trace = null;
@@ -64,7 +65,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         $scope.trace_type = 'asm'
         $scope.selected_trace = trace
       }
-      $scope.loading = false;
+      $scope.loading.stop()
       $timeout(function(){
         $scope.$broadcast('trace-init')
         $scope.$broadcast('trace-update')
@@ -79,22 +80,26 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       }
     });
 
-    $scope.switch_trace = function(trace, type) {
-      if ($scope.loading) { return; }
-      $scope.loading = true
+    $scope.switch_trace = function(trace, type, asm) {
+      $scope.trace_type = type
+      jitlog.trace_type = type
+      //
+      $scope.show_asm = asm
+      //
+      if (!$scope.loading.complete()) { return; }
+      $scope.loading.start("trace")
+      JitLog.resetState()
+      $scope.selected_trace = null
       //
       $scope.$storage.last_trace_id = trace.get_id()
       $http.get('/api/log/trace/' + jitlog.checksum + "/?id=" + trace.get_id(), {
           cache: true
       }).then(function(response) {
         // set the new type and the subject trace
-        JitLog.resetState()
-        $scope.trace_type = type
-        jitlog.trace_type = type
         trace.set_data(response.data)
         $scope.selected_trace = trace
         $scope.$broadcast('trace-update')
-        $scope.loading = false
+        $scope.loading.stop()
       })
 
       $http.get('/api/log/stitches/' + jitlog.checksum + "/?id=" + trace.get_id(), {
@@ -103,7 +108,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         // set the new type and the subject trace
         var visual_trace = response.data
         trace_forest.display_tree($scope, trace, visual_trace)
-        $scope.loading = false
+        $scope.loading.stop()
       })
     }
 

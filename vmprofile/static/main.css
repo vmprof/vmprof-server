@@ -1,124 +1,124 @@
 nav .navbar-right a.dropdown-toggle {
-	padding: 2px 6px 2px 4px;
+    padding: 2px 6px 2px 4px;
 }
 
 #list .display-control{
-	margin-bottom: 15px;
+    margin-bottom: 15px;
 }
 
 #list img.media-object{
-	width: 42px;
-	height: 42px;
+    width: 42px;
+    height: 42px;
 }
 
 #list .media {
-	margin-top: 0;
-	border-bottom: 1px solid #eee;
-	padding: 10px 0 10px 10px;
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding: 10px 0 10px 10px;
 }
 
 #list .media:first-child {
-	border-top: 1px solid #eee;
+    border-top: 1px solid #eee;
 }
 
 
 #list .media .times:hover {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 #list .media .media-body {
-	padding-left: 2px;
+    padding-left: 2px;
 }
 
 
 #register {
-	padding: 40px;
-	max-width: 800px;
+    padding: 40px;
+    max-width: 800px;
 }
 
 #register {
-	padding: 40px;
-	max-width: 900px;
+    padding: 40px;
+    max-width: 900px;
 }
 
 #register h1 {
-	text-align: center;
-	margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 #register .control-label {
-	padding-right: 10px;
+    padding-right: 10px;
 }
 
 #register .help-block {
-	padding-left: 10px;
-	font-size: 13px;
+    padding-left: 10px;
+    font-size: 13px;
 }
 
 #login {
-	padding: 40px;
-	max-width: 500px;
+    padding: 40px;
+    max-width: 500px;
 }
 
 #login .logo, #register .logo {
-	width: 150px
+    width: 150px
 }
 
 #login h1 {
-	text-align: center;
-	margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 #login input {
-	margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 #login button {
-	margin-top: 20px;
+    margin-top: 20px;
 }
 
 img.loading {
-	position: fixed;
-	width: 60px;
-	top: 40%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+    position: fixed;
+    width: 60px;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #item header {
-	padding-left: 15px;
-	margin-bottom: 30px;
+    padding-left: 15px;
+    margin-bottom: 30px;
 }
 
 #item header .times {
-	font-size: 30px;
-	margin-bottom: 10px;
+    font-size: 30px;
+    margin-bottom: 10px;
 }
 
 #item header .metadata {
-	font-size: 16px;
-	display: block;
+    font-size: 16px;
+    display: block;
 }
 
 #item header .metadata .label {
-	margin-right: 5px;
+    margin-right: 5px;
 }
 
 .paths {
-	margin-left: 10px;
+    margin-left: 10px;
 }
 
 .table {
-	margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 svg rect, svg text {
-	cursor: pointer;
-	cursor: hand;
+    cursor: pointer;
+    cursor: hand;
 }
 
 .footer {
-	padding: 20px;
+    padding: 20px;
 }
 
 #visualization {
@@ -165,11 +165,9 @@ span.resop-descr {
 }
 
 .trace-asm {
-    margin-top: 5px;
-    margin-left: 15px;
+    margin-left: 31px;
     color: #969896;
     font-size: 14px;
-    margin-bottom: -5px;
 }
 
 .trace-bg-active {
@@ -200,12 +198,12 @@ span.selected.var {
     display: inline-block;
     width: 2px;
     margin-right: 1px;
-    height: 100%;
 }
 
 .trace-line-number {
     display: inline-block;
-    min-width: 1.5em;
+    width: 30px;
+    height: 20px;
     text-align: right;
     margin-right: 5px;
 }
@@ -216,7 +214,7 @@ span.selected.var {
 }
 
 .trace-asm-line {
-    margin-left: 40px;
+    margin-left: 35px;
 }
 
 .empty-rect {
@@ -229,6 +227,7 @@ span.selected.var {
     background: #f8f8f8;
     border: 1px solid #e8e8e8;
     height: 150px;
+    margin-bottom: 10px;
 }
 
 .trace-enter {
@@ -265,11 +264,75 @@ span.selected.var {
 }
 
 .resops {
-    overflow: scroll;
-    max-height: 768px;
+    overflow: hidden;
+    overflow-x: hidden;
     background: #fafafa;
-    margin-left: 2px;
-    margin-right: -2px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 1px solid #e8e8e8;
+}
+
+.trace-control {
+    padding-right: 10px;
+}
+
+ul.trace-type-switch {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: inline-block;
+}
+
+ul.trace-type-switch li {
+    display: inline-block;
+    cursor: hand;
+}
+
+.opt-pipeline-help {
+    background: black;
+    color: white;
+    padding: 3px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+}
+
+ul.trace-type-switch li a {
+    display: inline-block;
+    color: black;
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    margin-bottom: -4px;
+}
+
+span.placeholder {
+    display: inline-block;
+    width 1.5em;
+}
+
+ul.trace-type-switch li a:hover {
+    background: #fafafa;
+    text-decoration: none;
+    border: 1px solid #e8e8e8;
+}
+
+ul.trace-type-switch li a.active {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+}
+
+.resops-control {
+    height: 32px;
+    line-height: 32px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 ul.trace-entries {
@@ -309,6 +372,7 @@ ul.trace-entries {
 .trace-descr {
     display: inline-block;
     width: 100%;
+    line-height: 20px;
 }
 
 .breathing-row {
