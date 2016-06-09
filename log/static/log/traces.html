@@ -36,14 +36,7 @@
         </g>
         <g id="trace-details" class="trace-popover" style="visibility: hidden;" transform="translate(5,5)">
             <rect class="background" x=0 y=0></rect>
-            <g transform="translate(240,10) scale(1.5)">
-                <!-- guards -->
-                <line class="guard-not-stitched" x1="-3" x2="3" y1="-3" y2="3" data-if="c.node_type === 'guard'" />
-                <line class="guard-not-stitched" x1="3" x2="-3" y1="-3" y2="3" data-if="c.node_type === 'guard'" />
-                <!-- label, jump or finish -->
-                <circle class="trace-enter" r="3" data-if="c.node_type !== 'guard' && c.node_type !== 'guard-stitched'" />
-                <!-- guard stitched -->
-                <circle class="guard" r="3" data-if="c.node_type == 'guard-stitched'" />
+            <g id="popover-trace-node" class="node" transform="translate(240,10) scale(1.5)">
             </g>
             <g transform="translate(5,5)">
                 <text x=0 y=10>Function: <tspan data-key="funcname">{funcname}</tspan></text>

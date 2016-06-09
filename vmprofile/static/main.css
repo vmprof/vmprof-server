@@ -235,8 +235,18 @@ span.selected.var {
     fill: red;
 }
 
-.guard {
-    fill: green;
+.node .stitched {
+    fill: #17BF17;
+}
+
+.node line.guard {
+    stroke-width: 2px;
+    stroke: #1D5D9B;
+}
+
+.node line.jump {
+    stroke: black;
+    stroke-width: 2px;
 }
 
 .guard-not-stitched {
