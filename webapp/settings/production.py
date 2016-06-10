@@ -41,3 +41,5 @@ LOGGING = {
         },
     },
 }
+
+CACHES['forest-cache']['BACKEND'] = 'django.core.cache.backends.locmem.LocMemCache'
