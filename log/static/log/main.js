@@ -6,7 +6,7 @@ app.directive('hoverVars', function($timeout){
         // need the timeout, otherwise the wrong variables
         // will be selected
         $timeout(function(){
-          JitLog.hoverVars.call(this)
+          JitLog.hoverVars.call(this, scope)
         });
       });
     }
@@ -24,6 +24,29 @@ app.directive('traceForest', function($timeout){
   }
 });
 
+app.directive('liveRange', function(){
+  return {
+    'link': function(scope, element, attrs) {
+      var jelem = jQuery(element);
+      var column = parseInt(jelem.data('column'));
+      var index = scope.$index;
+      scope.$on('live-range-' + column, function(e, from, to, color) {
+        if (from <= index && index <= to) {
+          jelem.css('background-color', color);
+          if (color == '') {
+            jelem.height(1);
+          } else {
+            var jparent = jelem.parent();
+            var height = jparent.parent().first().height();
+            jelem.height(height);
+            jparent.height(height);
+          }
+        }
+      })
+    }
+  }
+});
+
 app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
                                     $location, $localStorage) {
     // variable defaults
@@ -33,6 +56,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       show_asm: true,
       show_source_code: true,
     })
+    $scope.live_ranges = { 8: { 0: {'background-color': 'green', 'height': '20px', 'width': '2px'}} }
     $scope.loading = new Loading($scope)
     $scope.ops = []
     $scope.trace_type = 'asm'
@@ -56,20 +80,6 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       //$scope.log = response.data;
       jitlog.trace_type = $scope.trace_type
       $scope.traces = jitlog.filter_traces("", true, false)
-      //
-      // if a trace id has been provided display it right away
-      //
-      if ($routeParams.trace !== undefined) {
-        var trace = jitlog.get_trace_by_id($routeParams.trace);
-        $scope.ops = trace.get_operations('asm').list()
-        $scope.trace_type = 'asm'
-        $scope.selected_trace = trace
-      }
-      $scope.loading.stop()
-      $timeout(function(){
-        $scope.$broadcast('trace-init')
-        $scope.$broadcast('trace-update')
-      })
 
       var last_id = $scope.$storage.last_trace_id
       var trace = jitlog.get_trace_by_id(last_id)
@@ -78,6 +88,12 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
           $scope.switch_trace(trace, $scope.trace_type)
         })
       }
+
+      $timeout(function(){
+        $scope.$broadcast('trace-init')
+        $scope.$broadcast('trace-update')
+      })
+      $scope.loading.stop()
     });
 
     $scope.switch_trace = function(trace, type, asm) {
@@ -98,7 +114,9 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         // set the new type and the subject trace
         trace.set_data(response.data)
         $scope.selected_trace = trace
-        $scope.$broadcast('trace-update')
+        $timeout(function(){
+          $scope.$broadcast('trace-update')
+        })
         $scope.loading.stop()
       })
 

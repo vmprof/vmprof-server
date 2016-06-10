@@ -45,7 +45,7 @@ var extract_class = function(str, prefix){
   return str
 }
 
-JitLog.hoverVars = function() {
+JitLog.hoverVars = function($scope) {
   //
   // enable a variable (by coloring it and all it's occurances)
   //
@@ -56,18 +56,18 @@ JitLog.hoverVars = function() {
     var min_index = Number.MAX_VALUE;
     var max_index = -1;
     var color = undefined
-    var curlr = undefined
+    var column = undefined
     if (hovered) {
       // if it is already hovered we know which color to take
       color = jQuery(this).data('hover-color')
-      curlr = jQuery(this).data('live-range')
+      column = jQuery(this).data('live-range')
     }
-    if (!curlr) {
-      curlr = JitLog.liverange_indices.pop()
+    if (!column) {
+      column = JitLog.liverange_indices.pop()
     }
     jQuery("." + varid).each(function(){
       var span = jQuery(this)
-      span.data('live-range', curlr)
+      span.data('live-range', column)
       if (clicked) {
         // mark this var as clicked
         span.data('_stay_selected', clicked)
@@ -88,21 +88,16 @@ JitLog.hoverVars = function() {
       if (integer > max_index) { max_index = integer; }
     })
     console.log("found min,max index: %d,%d", min_index, max_index);
-    for (var i = min_index; i <= max_index; i++) {
-      var lr = jQuery('.live-range-' + curlr + '-' + (i+1))
-      if (clicked) {
-        lr.data('_stay_selected', curlr)
-      }
-      lr.addClass('selected')
-      lr.css('background-color', color)
-    }
+    var broadcast_key = 'live-range-' + column;
+    $scope.$broadcast(broadcast_key, min_index, max_index, color)
   }
   //
   // disable a hovered variable
   //
   var disable = function(e, varid, click){
     var $this = jQuery(this)
-    var lr = $this.data('live-range')
+    var lr = parseInt($this.data('live-range'))
+    var columns_to_disable = []
 
     if (!$this.data('_stay_selected') || click) {
       var color = $this.data('hover-color')
@@ -111,6 +106,7 @@ JitLog.hoverVars = function() {
       }
       if (lr) {
         JitLog.liverange_indices.push(lr)
+        columns_to_disable.push(lr)
       }
     }
     jQuery('.var').each(function(){
@@ -128,20 +124,9 @@ JitLog.hoverVars = function() {
         }
       }
     })
-    jQuery('.live-range').each(function(){
-      var elem = jQuery(this)
-      var staysel = elem.data('_stay_selected')
-      var lrclass = 'live-range-col-'+ lr;
-      if (!staysel ||
-          (staysel && varid && lr && elem.hasClass(lrclass))) {
-        if (click){ 
-          elem.removeData('_stay_selected');
-          elem.removeData('live-range');
-        } else {
-          elem.removeClass('selected')
-          elem.css('background-color', '');
-        }
-      }
+
+    columns_to_disable.forEach(function(column){
+      $scope.$broadcast('live-range-' + column, 0, Number.MAX_VALUE, '');
     })
   }
   var enable_or_disable = function(){
@@ -496,11 +481,6 @@ ResOp.prototype.get_stitch_id = function() {
 
 ResOp.prototype.to_s = function(index) {
   var prefix = ''
-  for (var i = 0; i < JitLog.liverange_indices.length; i++) {
-    var j = JitLog.liverange_indices[i]
-    prefix += '<span class="live-range live-range-'+j+'-'+index+' ' +
-              'live-range-col-'+i+'"></span>'
-  }
   prefix += '<span class="trace-line-number">'+index+':</span> '
   var fvar = function(variable) {
     var type = 'const';

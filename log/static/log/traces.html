@@ -154,10 +154,22 @@ Assembled: Rewritten instructions including machine code.">
                   <p class="lead text-center">Stage not recorded in log</p>
               </div>
               <div class="trace-line" ng-repeat="op in selected_trace.get_stage(trace_type).ops">
-                  <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
-                  <div class="trace-asm" ng-if="$storage.show_asm">
-                      <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
-                          <div ng-bind-html="asm"></div>
+                  <div class="live-ranges">
+                      <span class="live-range" live-range data-column="1"></span><!--
+                      --><span class="live-range" live-range data-column="2"></span><!--
+                      --><span class="live-range" live-range data-column="3"></span><!--
+                      --><span class="live-range" live-range data-column="4"></span><!--
+                      --><span class="live-range" live-range data-column="5"></span><!--
+                      --><span class="live-range" live-range data-column="6"></span><!--
+                      --><span class="live-range" live-range data-column="7"></span><!--
+                      --><span class="live-range" live-range data-column="8"></span>
+                  </div>
+                  <div class="resop-content">
+                      <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
+                      <div class="trace-asm" ng-if="$storage.show_asm">
+                          <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
+                              <div ng-bind-html="asm"></div>
+                          </div>
                       </div>
                   </div>
               </div>
