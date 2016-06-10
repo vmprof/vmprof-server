@@ -57,7 +57,8 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       show_source_code: true,
     })
     $scope.live_ranges = { 8: { 0: {'background-color': 'green', 'height': '20px', 'width': '2px'}} }
-    $scope.loading = new Loading($scope)
+    $scope.loader = new Loading($scope)
+    $scope.loader.start()
     $scope.ops = []
     $scope.trace_type = 'asm'
     $scope.selected_trace = null;
@@ -93,17 +94,17 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         $scope.$broadcast('trace-init')
         $scope.$broadcast('trace-update')
       })
-      $scope.loading.stop()
+      $scope.loader.stop()
     });
 
     $scope.switch_trace = function(trace, type, asm) {
+      if (!$scope.loader.complete()) { return; }
       $scope.trace_type = type
       jitlog.trace_type = type
       //
       $scope.show_asm = asm
       //
-      if (!$scope.loading.complete()) { return; }
-      $scope.loading.start("trace")
+      $scope.loader.start("trace")
       JitLog.resetState()
       $scope.selected_trace = null
       //
@@ -117,7 +118,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         $timeout(function(){
           $scope.$broadcast('trace-update')
         })
-        $scope.loading.stop()
+        $scope.loader.stop()
       })
 
       $http.get('/api/log/stitches/' + jitlog.checksum + "/?id=" + trace.get_id(), {
@@ -126,7 +127,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         // set the new type and the subject trace
         var visual_trace = response.data
         trace_forest.display_tree($scope, trace, visual_trace)
-        $scope.loading.stop()
+        $scope.loader.stop()
       })
     }
 

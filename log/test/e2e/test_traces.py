@@ -23,6 +23,15 @@ def query1(elem, q):
 def query(elem, q):
     return elem.find_elements_by_css_selector(q)
 
+def reset_search_criteria(driver):
+    loop_checkbox = driver.find_element_by_id("filter_loop")
+    if not loop_checkbox.is_selected():
+        loop_checkbox.click() # do not show loops!
+
+    bridge_checkbox = driver.find_element_by_id("filter_bridge")
+    if bridge_checkbox.is_selected():
+        bridge_checkbox.click() # do not show bridges!
+
 def select_trace_entry(driver, wait, entry_name):
     trace_lines = driver.find_elements_by_css_selector("li.trace-entry")
     for line in trace_lines:
@@ -42,11 +51,8 @@ class TestTracesView(object):
             driver.get(_url("#/1111/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
 
-            for elem in driver.find_elements_by_css_selector('li.trace-entry span.trace-name'):
-                if 'schedule' in elem.text:
-                    break
-            else:
-                pytest.fail("could not find 'schedule' function in trace view")
+            # will blow up if not present
+            select_trace_entry(driver, wait, "schedule")
 
     def test_filter_checkboxes(self, drivers):
         for driver in drivers:
@@ -70,18 +76,20 @@ class TestTracesView(object):
 
             bridge_checkbox.click() # it is now off
             loop_checkbox = driver.find_element_by_id("filter_loop")
-            loop_checkbox.click() # do now show loops!
+            loop_checkbox.click() # do not show loops!
 
             assert len(driver.find_elements_by_css_selector('li.trace-entry')) == 0
-            loop_checkbox.click() # reset to default
+            reset_search_criteria(driver)
 
     def test_search_traces(self, drivers):
         for driver in drivers:
-            wait = ui.WebDriverWait(driver,10)
-            driver.get(_url("#/1111/traces"))
+            wait = ui.WebDriverWait(driver,20)
+            driver.get(_url("#/1v1/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
             search_input = driver.find_element_by_id("filter_text")
-            search_input.send_keys("schedule")
+            assert len(driver.find_elements_by_css_selector('li.trace-entry')) > 1
+            search_input.send_keys("funcname1")
+            loop_checkbox = driver.find_element_by_id("filter_loop")
             assert len(driver.find_elements_by_css_selector('li.trace-entry')) == 1
 
     def test_load_trace(self, drivers):
@@ -89,16 +97,14 @@ class TestTracesView(object):
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1v1/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
-            trace_lines = driver.find_elements_by_css_selector("li.trace-entry")
-            for line in trace_lines:
-                line.click()
-                wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
-                names = set()
-                for line in driver.find_elements_by_css_selector(".resops > .trace-line"):
-                    names.add(query1(line, ".resop-name").text)
-                assert len(names) == 2
-                assert 'int_add' in names
-                assert 'guard_true' in names
+            select_trace_entry(driver, wait, "funcname1")
+            query1(driver, "#switch_trace_rewritten").click()
+            names = set()
+            for line in driver.find_elements_by_css_selector(".resops > .trace-line"):
+                names.add(query1(line, ".resop-name").text)
+            assert len(names) == 2
+            assert 'int_add' in names
+            assert 'guard_true' in names
 
     def test_switch_to_opt(self, drivers):
         for driver in drivers:

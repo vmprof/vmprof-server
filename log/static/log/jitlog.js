@@ -6,10 +6,14 @@ var Loading = function($scope) {
 
 Loading.prototype.start = function(msg) {
   this._requests.push(msg)
+  this.$scope.loading = true
 }
 
 Loading.prototype.stop = function() {
   this._requests.pop()
+  if (this._requests.length == 0) {
+    this.$scope.loading = false
+  }
 }
 
 Loading.prototype.complete = function() {
