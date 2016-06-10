@@ -121,7 +121,8 @@ class StageSerializer(BaseSerializer):
         merge_points = defaultdict(list)
         # merge points is a dict mapping from index -> merge_points
         stage_dict = { 'ops': ops }
-        for op in stage.ops:
+        source_code = {}
+        for i,op in enumerate(stage.ops):
             op_stage_dict = op_serializer.to_representation(op)
             if isinstance(op, MergePoint):
                 index = len(ops)
@@ -137,14 +138,31 @@ class StageSerializer(BaseSerializer):
 class TraceSerializer(BaseSerializer):
     def to_representation(self, trace):
         stages = {}
+        source_code = {}
         dict = { 'args': trace.inputargs,
                  'stages': stages,
+                 'code': source_code
                }
 
         stage_serializer = StageSerializer()
         for markname, stage in trace.stages.items():
             stage_dict = stage_serializer.to_representation(stage)
             stages[markname] = stage_dict
+
+            merge_points = stage_dict.get('merge_points', None)
+            if merge_points:
+                for mp in merge_points.items():
+                    if 'filename' in mp and 'lineno' in mp:
+                        # both filename and line number is known, try to extract it from the uploaded data
+                        filename = mp['filename']
+                        lineno = mp['lineno']
+                        line = trace.forest.get_source_code(filename, lineno)
+                        if filename not in source_code:
+                            source_code[filename] = { lineno: line }
+                        else:
+                            lines = source_code[filename]
+                            assert lineno not in lines
+                            lineno[lineno] = line
         if trace.addrs != (-1,-1):
             dict['addr'] = (hex(trace.addrs[0]), hex(trace.addrs[1]))
         return dict

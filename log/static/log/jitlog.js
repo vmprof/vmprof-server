@@ -522,6 +522,9 @@ ResOp.prototype.to_s = function(index) {
   return format(prefix, opname, args, descr);
 }
 
+ResOp.prototype.get_source_code = function(index) {
+}
+
 ResOp.prototype.get_disassembly = function() {
   if (this._assembly) {
     return this._assembly;
