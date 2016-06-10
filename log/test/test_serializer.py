@@ -37,18 +37,27 @@ def test_to_json_meta_bridges():
     bridge1 = forest.add_trace('bridge', 1)
     bridge2 = forest.add_trace('bridge', 2)
     bridge3 = forest.add_trace('bridge', 3)
-    trunk.stitch_bridge(0, 10, 1)
-    trunk.stitch_bridge(0, 11, 2)
-    bridge1.stitch_bridge(0, 12, 3)
-    bridge2.stitch_bridge(0, 13, 3)
+    forest.descr_nmr_to_trace[10] = trunk
+    forest.descr_nmr_to_trace[11] = trunk 
+    forest.descr_nmr_to_trace[12] = bridge1
+    forest.descr_nmr_to_trace[13] = bridge2
+    #
+    trunk.set_addr_bounds(99,100)
+    bridge1.set_addr_bounds(100,101)
+    bridge2.set_addr_bounds(200,201)
+    bridge3.set_addr_bounds(300,301)
+    #
+    forest.stitch_bridge(10, 100)
+    forest.stitch_bridge(11, 200)
+    forest.stitch_bridge(12, 300)
     #
     stage = trunk.start_mark(const.MARK_TRACE_OPT)
     j = LogMetaSerializer().to_representation(FakeJitLog(forest))
     assert len(j['bridges']) == 4
     bridges = j['bridges']
-    assert bridges[0] == {'0xa': '0x1', '0xb': '0x2'}
-    assert bridges[1] == {'0xc': '0x3'}
-    assert bridges[2] == {'0xd': '0x3'}
+    assert bridges[0] == {10: 100, 11: 200}
+    assert bridges[1] == {12: 300}
+    assert bridges[2] == {}
     assert bridges[3] == {}
 
 DEFAULT_TEST_RESOPS = {
@@ -128,7 +137,8 @@ def test_serialize_visual_trace_tree(forest):
     add_instr(trunk, 'jump', None, 'i1,i1', descr=(None, 0xa))
     #
     bridge1 = forest.add_trace('bridge', 1)
-    forest.stitch_bridge(2, 1)
+    forest.addrs[100] = bridge1
+    forest.stitch_bridge(2, 100)
     _ = bridge1.start_mark(const.MARK_TRACE_ASM)
     add_instr(bridge1, 'finish', None, 'i1,i1', descr=(None, 0xb))
     #

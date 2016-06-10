@@ -3,7 +3,7 @@ import gzip
 
 from vmprof.log import constants as c
 from vmprof.binary import (encode_le_u16 as u16,
-        encode_s64 as s64, encode_u64 as u64,
+        encode_le_u32 as u32, encode_s64 as s64, encode_u64 as u64,
         encode_str, encode_le_addr as addr)
 
 test_logs = [
@@ -21,10 +21,10 @@ c.MARK_RESOP_META + u16(8) +
 
 c.MARK_START_TRACE + addr(0) + encode_str('loop') + addr(0) +
   c.MARK_TRACE_OPT + addr(0) +
-  c.MARK_INIT_MERGE_POINT + u16(1) + bytes([c.MP_FILENAME[0]]) + b"s" +
+  c.MARK_INIT_MERGE_POINT + u16(2) + bytes([c.MP_FILENAME[0]]) + b"s" + bytes([c.MP_SCOPE[0]]) + b"s" +
   c.MARK_INPUT_ARGS  + encode_str('i0,i1') +
   c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
-  c.MARK_MERGE_POINT + b"\xff" + encode_str("/home/user") +
+  c.MARK_MERGE_POINT + b"\xff" + encode_str("/home/user")  + b"\xff" + encode_str("funcname1") +
   c.MARK_RESOP_DESCR + u16(3) + encode_str('?,i2,guard_resume') + addr(0xaffe) +
   c.MARK_RESOP + u16(7) + encode_str('i2,i1') +
 
@@ -36,10 +36,10 @@ c.MARK_START_TRACE + addr(0) + encode_str('loop') + addr(0) +
 # trace with id 1, this is a loop with one bridge
 c.MARK_START_TRACE + addr(1) + encode_str('loop') + addr(0) +
   c.MARK_TRACE_ASM + addr(1) +
-  c.MARK_INIT_MERGE_POINT + u16(1) + bytes([c.MP_FILENAME[0]]) + b"s" +
+  c.MARK_INIT_MERGE_POINT + u16(2) + bytes([c.MP_FILENAME[0]]) + b"s" + bytes([c.MP_SCOPE[0]]) + b"s" +
   c.MARK_INPUT_ARGS  + encode_str('i0,i1') +
   c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
-  c.MARK_MERGE_POINT + b"\xff" + encode_str("/home/user") +
+  c.MARK_MERGE_POINT + b"\xff" + encode_str("/home/user") + b"\xff" + encode_str("func_with_bridge") +
   c.MARK_RESOP_DESCR + u16(3) + encode_str('?,i2,guard_resume') + addr(0x1234) +
   c.MARK_RESOP_DESCR + u16(7) + encode_str('i2,i1,jmpdescr') + addr(0x0011) +
   c.MARK_ASM_ADDR + addr(0x100) + addr(0x200) +
@@ -51,7 +51,20 @@ c.MARK_START_TRACE + addr(2) + encode_str('bridge') + addr(0) +
   c.MARK_ASM_ADDR + addr(0x300) + addr(0x400) +
 
 # stitch the bridge
-c.MARK_STITCH_BRIDGE + addr(0x1234) + addr(0x300)
+c.MARK_STITCH_BRIDGE + addr(0x1234) + addr(0x300) +
+
+c.MARK_START_TRACE + addr(3) + encode_str('loop') + addr(0) +
+  c.MARK_TRACE_OPT + addr(3) +
+  c.MARK_INPUT_ARGS  + encode_str('p1,i1') +
+  c.MARK_INIT_MERGE_POINT + u16(1) + bytes([c.MP_SCOPE[0]]) + b"s" +
+  c.MARK_MERGE_POINT + b"\xff" + encode_str("func_with_nop_assembly") +
+  c.MARK_TRACE_ASM + addr(3) +
+  c.MARK_INPUT_ARGS  + encode_str('p1,i1') +
+  c.MARK_RESOP + u16(6) + encode_str('p1,i1') + # label
+  c.MARK_RESOP + u16(1) + encode_str('p1,i1') +
+  c.MARK_ASM + u16(0) + u32(2) + b"\x90\x90" +
+  c.MARK_RESOP + u16(1) + encode_str('p1,p1') +
+  c.MARK_ASM + u16(0) + u32(1) + b"\x90"
 )]
 
 if __name__ == "__main__":

@@ -3,9 +3,9 @@
 </div>
 
 <div class="visible-sm-block visible-md-block visible-lg-block">
-    <div id="forest" status="{{!loading.complete()}}" class="row" trace-forest>
+    <div class="row" trace-forest>
       <!-- The svg containing the trace visualisation -->
-      <img ng-show="!loading.complete() && !noprofile" src="/static/images/loader.gif"
+      <img id="loading_img" ng-show="!loading.complete() && !noprofile" src="/static/images/loader.gif"
            width="10" height="10" style="position: absolute; margin: 10px;" />
 
       <svg id="forest_svg" xmlns="http://www.w3.org/2000/svg"
