@@ -13,6 +13,18 @@ class TestBinaryJitLogDecode(TestCase):
         bjl = BinaryJitLog.objects.get(checksum='1111')
         forest = bjl.decode_forest()
 
+    def test_parse_log_with_source_code(self):
+        bjl = BinaryJitLog.objects.get(checksum='1v1')
+        forest = bjl.decode_forest()
+        assert dict(forest.source_lines['/a.py']) == {
+            1: '    a = b + c'
+        }
+        assert dict(forest.source_lines['/b.py']) == {
+            25: '        def wait_for_me():',
+            26: '            yield 13',
+            27: '            a,b,c = call.me(1,2,3) # here is a comment',
+        }
+
     def test_get_meta_for_jitlog(self):
         response = self.client.get('/api/log/meta/1111/')
         jsondata = response.data
