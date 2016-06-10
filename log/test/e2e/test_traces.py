@@ -56,7 +56,7 @@ class TestTracesView(object):
 
     def test_filter_checkboxes(self, drivers):
         for driver in drivers:
-            wait = ui.WebDriverWait(driver,10)
+            wait = ui.WebDriverWait(driver,20)
             driver.get(_url("#/1111/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
             for elem in driver.find_elements_by_css_selector('li.trace-entry span.trace-name'):
