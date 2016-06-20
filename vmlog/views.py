@@ -14,7 +14,7 @@ from django.http.response import HttpResponseBadRequest
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-from log.models import BinaryJitLog, get_reader
+from vmlog.models import BinaryJitLog, get_reader
 from vmprofile.models import Log
 from vmprof.log.parser import _parse_jitlog
 from vmprof.log.objects import MergePoint

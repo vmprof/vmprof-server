@@ -19,7 +19,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
 
     'vmprofile',
-    'log',
+    'vmlog',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -77,7 +77,7 @@ STATICFILES_FINDERS = (
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'vmprofile', 'static'),
-    os.path.join(BASE_DIR, 'log', 'static')
+    os.path.join(BASE_DIR, 'vmlog', 'static')
 )
 
 REST_FRAMEWORK = {

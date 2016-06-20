@@ -4,7 +4,7 @@ from django.conf import settings
 
 from rest_framework import routers
 from vmprofile.views import MeView, LogViewSet, TokenViewSet
-from log.views import (BinaryJitLogFileUploadView, MetaForestViewSet, TraceViewSet,
+from vmlog.views import (BinaryJitLogFileUploadView, MetaForestViewSet, TraceViewSet,
         VisualTraceTreeViewSet)
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
