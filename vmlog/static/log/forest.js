@@ -434,7 +434,7 @@ TraceForest.prototype._tr = translate
 TraceForest.prototype.walk_visual_trace_tree = function(json, visual_nodes, yoff, traces, links) {
   if (!visual_nodes) {
     console.warn("did not find the node list!")
-    return
+    return new VisualTrace(json.root, yoff)
   }
   // iterate the trace tree and create visual objects that can later be easily
   // aligned and rendered in the SVG chart

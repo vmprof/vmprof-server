@@ -69,7 +69,7 @@ c.MARK_START_TRACE + addr(3) + encode_str('loop') + addr(0) +
 c.MARK_START_TRACE + addr(4) + encode_str('loop') + addr(0) +
   c.MARK_TRACE_OPT + addr(4) +
   c.MARK_INPUT_ARGS  + encode_str('p1,i1') +
-  c.MARK_INIT_MERGE_POINT + u16(3) + bytes([c.MP_SCOPE[0]]) + b"s" +
+  c.MARK_INIT_MERGE_POINT + u16(3) + bytes([c.MP_FILENAME[0]]) + b"s" +
                                      bytes([c.MP_SCOPE[0]]) + b"s" +
                                      bytes([c.MP_LINENO[0]]) + b"i" +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/a.py") + b"\xff" + encode_str("func_with_source_code") + b"\x00" + u64(1) +

@@ -151,18 +151,21 @@ class TraceSerializer(BaseSerializer):
 
             merge_points = stage_dict.get('merge_points', None)
             if merge_points:
-                for mp in merge_points.items():
-                    if 'filename' in mp and 'lineno' in mp:
-                        # both filename and line number is known, try to extract it from the uploaded data
-                        filename = mp['filename']
-                        lineno = mp['lineno']
-                        line = trace.forest.get_source_code(filename, lineno)
-                        if filename not in source_code:
-                            source_code[filename] = { lineno: line }
-                        else:
-                            lines = source_code[filename]
-                            assert lineno not in lines
-                            lineno[lineno] = line
+                for index, mps in merge_points.items():
+                    if index == 'first': continue
+                    for mp in mps:
+                        if 'filename' in mp and 'lineno' in mp:
+                            # both filename and line number is known, try to extract it from the uploaded data
+                            filename = mp['filename']
+                            lineno = mp['lineno']
+                            indent, line = trace.forest.get_source_line(filename, lineno)
+                            if line:
+                                if filename not in source_code:
+                                    source_code[filename] = {}
+                                lines = source_code[filename]
+                                assert lineno not in lines
+                                lines[lineno] = (indent,line)
+        #
         if trace.addrs != (-1,-1):
             dict['addr'] = (hex(trace.addrs[0]), hex(trace.addrs[1]))
         return dict
