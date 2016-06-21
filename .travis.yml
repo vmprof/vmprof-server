@@ -29,7 +29,7 @@ before_script:
   - sh -e /etc/init.d/xvfb start
   - sleep 3 # give xvfb some time to start
   # download the chrome driver
-  - wget http://chromedriver.storage.googleapis.com/2.21/chromedriver_linux64.zip
+  - wget http://chromedriver.storage.googleapis.com/2.22/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - sudo mv chromedriver /usr/bin
   # migrate the application and load debug data
