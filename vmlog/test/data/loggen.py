@@ -90,7 +90,7 @@ c.MARK_START_TRACE + addr(4) + encode_str('loop') + addr(0) +
       u16(25) + b"\x08" + encode_str("def wait_for_me():") +
       u16(26) + b"\x0c" + encode_str("yield 13") +
       u16(27) + b"\x0c" + encode_str("a,b,c = call.me(1,2,3) # here is a comment") +
-      u16(33) + b"\x0c" + encode_str("@hello there # here is a comment")
+      u16(33) + b"\x0c" + encode_str("@hello there")
 )]
 
 if __name__ == "__main__":
