@@ -3,6 +3,62 @@
 </div>
 
 <div class="visible-sm-block visible-md-block visible-lg-block">
+    <div id="help">
+        <button class="help-button" onclick="$('#help-content').toggle()">Help</button>
+        <div id="help-content" class="row">
+            <div class="col-md-6">
+              <h3> Visual Trace Tree </h3>
+              <p>This view gives an intuition what RPython's JIT compiler produces.
+              There are the following items visible.</p>
+              <dl class="inline">
+                <dt class="node"><svg id="preview-label" class="trace-elem-preview"></svg></dt>
+                <dd>Label</dd>
+                <dt class="node"><svg id="preview-jump" class="trace-elem-preview"></svg></dt>
+                <dd>Jump</dd>
+                <dt class="node"><svg id="preview-finish" class="trace-elem-preview"></svg></dt>
+                <dd>Finish</dd>
+                <dt class="node"><svg id="preview-guard" class="trace-elem-preview"></svg></dt>
+                <dd>Guard</dd>
+                <dt class="node"><svg id="preview-stitched" class="trace-elem-preview"></svg></dt>
+                <dd>Stitched guard</dd>
+              </dl>
+              <script>
+                var node = draw_node('label', d3.select('#preview-label'))
+                node.attr('transform', translate(10, 15) + ',scale(2)')
+                //
+                var node = draw_node('jump', d3.select('#preview-jump'))
+                node.attr('transform', translate(10, 15) + ',scale(2)')
+                //
+                var node = draw_node('finish', d3.select('#preview-finish'))
+                node.attr('transform', translate(10, 15) + ',scale(2)')
+                //
+                var node = draw_node('guard', d3.select('#preview-guard'))
+                node.attr('transform', translate(10, 15) + ',scale(2.3)')
+                //
+                var node = draw_node('stitched', d3.select('#preview-stitched'))
+                node.attr('transform', translate(10, 15) + ',scale(2.0)')
+              </script>
+
+              <p>Trace trees grow from top to bottom.</p>
+              <p>Hover over the tree to expand details and explore it.</p>
+              <p><strong>Entry count</strong> is an integral number counting how many times program flow entered that specific trace</p>
+            </div>
+            <div class="col-md-6">
+              <h3>JIT Compiler Stages</h3>
+              Currently the compiler spans over four different stages:
+              <ul class="inline">
+                  <li><strong>Traced</strong>: Unoptimized instructions recorded by the tracer</li>
+                  <li><strong>Optimized</strong>: The optimization stage has been passed</li>
+                  <li><strong>Rewritten</strong>: Lowering step to simplify instructions</li>
+                  <li><strong>Assembled</strong>: Rewritten instructions including machine code</li>
+              </ul>
+            </div>
+            <div class="col-md-12 text-center">
+                <br>
+                <p class="lead">For more help/suggestions please contact us on IRC (channel #pypy)</p>
+            </div>
+        </div>
+    </div>
     <div id="forest" class="row" trace-forest>
       <!-- The svg containing the trace visualisation -->
       <img id="loading_img" loading="traces" ng-show="loading && !noprofile" src="/static/images/loader.gif"
@@ -13,33 +69,6 @@
           <g id="forest_grp">
           </g>
           <text x=20 y=20 ng-show="0 && !selected_trace" id="select-trace-tree">Select a trace below to see it's tree</text>
-          <g id="legend" class="trace-popover" transform="translate(5,5)" style="visibility: hidden;">
-              <rect class="background" x=0 y=0></rect>
-              <g transform="translate(10,10)">
-                  <g>
-                       <circle class="trace-enter" r="3" />
-                       <text x="8" y="4">Label</text>
-                  </g>
-                  <g transform="translate(0,15)">
-                       <line class="guard-not-stitched" x1="-3" x2="3" y1="-3" y2="3" />
-                       <line class="guard-not-stitched" x1="3" x2="-3" y1="-3" y2="3" />
-                       <text x="8" y="4">Guard</text>
-                  </g>
-                  <g transform="translate(0,30)">
-                       <circle class="guard" r="3" />
-                       <text x="8" y="4">Guard stitched</text>
-                  </g>
-                  <g transform="translate(0,45)">
-                       <text x="0" y="4">Trace trees grow from top to bottom.</text>
-                  </g>
-                  <g transform="translate(0,60)">
-                       <text x="0" y="4">Hover over the tree to expand details.</text>
-                  </g>
-                  <g transform="translate(0,75)">
-                       <text x="0" y="4">"Entry count" is an integral number counting how many times program flow entered that specific trace</text>
-                  </g>
-              </g>
-          </g>
           <g id="trace-details" class="trace-popover" style="visibility: hidden;" transform="translate(5,5)">
               <rect class="background" x=0 y=0></rect>
               <g id="popover-trace-node" class="node" transform="translate(240,10) scale(1.5)">
@@ -55,10 +84,6 @@
                       <text x=0 y=15><tspan data-key="tgt_filename">{tgt_filename}</tspan><tspan dx="5" data-key="tgt_lineno">{tgt_lineno}</tspan></text>
                   </g>
               </g>
-          </g>
-          <g id="legend-indicator" transform="translate(-200,-200)">
-              <rect x="-5" y="-8" rx=3 ry=3 width=30 height=18 />
-              <text x=0 y=4>Help</text>
           </g>
       </svg>
     </div>
@@ -134,18 +159,6 @@
                   <li>
                       <input id="filter_loop" type="checkbox" ng-model="$storage.show_source_code" checked="true" />
                       Show source code
-                  </li>
-                  <li>
-                      <span class="opt-pipeline-help" style="margin-left: 30px;"
-                            data-toggle="tooltip"
-                            data-placement="bottom"
-                            title="RPython's JIT compiler has several stages.
-Traced: Unoptimized instructions recorded.
-Optimized: Passed the optimization stage.
-Rewritten: Lowering step to simplify instructions.
-Assembled: Rewritten instructions including machine code.">
-                          Help
-                        </span>
                   </li>
               </ul>
           </div>

@@ -276,7 +276,7 @@ draw_node = function(type, svg) {
     var svg = svg.append("svg:circle")
                  .attr("r", cw)
                  .attr("fill", "#EF351D")
-  } else if (type == 'jump' || type == 'label') {
+  } else if (type == 'jump') {
     var cw = 3;
     var svg = svg.append("svg:line")
                  .attr("x1", -cw).attr("y1", 0)
@@ -308,6 +308,7 @@ draw_node = function(type, svg) {
   }
 
   svg.attr("class", type)
+  return svg
 }
 
 TraceForest.prototype.display_tree = function($scope, trunk, visual_trace){

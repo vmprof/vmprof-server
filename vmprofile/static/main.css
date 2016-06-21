@@ -287,6 +287,55 @@ span.selected.var {
     left: 5px;
 }
 
+#help {
+    position: relative;
+    width: 100%;
+}
+
+.help-button {
+    position: absolute;
+    right: 0;
+    margin-top: 10px;
+    margin-right: 10px;
+    z-index: 10;
+}
+
+#help-content {
+    padding: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
+    position: absolute;
+    display: none;
+    background: #fafafa;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 3px solid #e8e8e8;
+    z-index: 9;
+}
+
+.trace-elem-preview {
+    display: inline;
+    width: 20px;
+    height: 20px;
+}
+
+dl.inline dt {
+    display: inline-block;
+}
+dl.inline dd {
+    display: inline-block;
+}
+
+ul.inline {
+    padding-left: 20px;
+    margin: 0;
+}
+
+ul.inline li {
+    padding: 0;
+}
+
 code.trace-source {
     background: none;
 }
