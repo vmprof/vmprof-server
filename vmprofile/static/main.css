@@ -150,10 +150,6 @@ svg rect, svg text {
     stroke-width: 1px;
 }
 
-.trace-line {
-    white-space: nowrap;
-}
-
 span.resop-name {
     color: #a71d5d;
     font-weight: italic;
@@ -267,15 +263,40 @@ span.selected.var {
 }
 
 .live-ranges {
-    float: left;
     width: 16px;
     margin: 0;
     padding: 0;
     margin-left: 5px;
+    position: absolute;
 }
 
 .resop-content {
-    display: inline-block;
+    /*display: inline-block;*/
+    position: relative;
+    left: 25px;
+}
+
+.trace-line {
+    white-space: nowrap;
+    position: relative;
+}
+
+
+.source-code {
+    position: relative;
+    left: 5px;
+}
+
+code.trace-source {
+    background: none;
+}
+
+code.trace-source > pre {
+    display: inline;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
 }
 
 .resops {

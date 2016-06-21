@@ -227,13 +227,13 @@ Trace.prototype.set_data = function(data) {
   var _this = this;
   var stages = data.stages;
   if (stages.noopt){
-    this._stages.noopt = new Stage(this._jitlog, stages.noopt)
+    this._stages.noopt = new Stage(this._jitlog, stages.noopt, data.code)
   }
   if (stages.opt){
-    this._stages.opt = new Stage(this._jitlog, stages.opt)
+    this._stages.opt = new Stage(this._jitlog, stages.opt, data.code)
   }
   if (stages.asm){
-    this._stages.asm = new Stage(this._jitlog, stages.asm)
+    this._stages.asm = new Stage(this._jitlog, stages.asm, data.code)
   }
 }
 
@@ -368,22 +368,23 @@ Trace.prototype.get_stage = function(name) {
   if (this._stages[name] !== undefined) {
     return this._stages[name]
   }
-  return new Stage(this._jitlog, {'ops': [], 'tick': -1});
+  return new Stage(this._jitlog, {'ops': [], 'tick': -1}, {});
 }
 
 var MergePoint = function(data) {
   this._data = data
 }
 
-var Stage = function(jitlog, data) {
+var Stage = function(jitlog, data, code) {
   this._jitlog = jitlog
   this._data = data
+  this._code = code
   this._tick = data.tick
   this.ops = []
   var i = 0
   for (var key in data.ops) {
     var opdata = data.ops[key]
-    var op = new ResOp(this._jitlog, opdata, i)
+    var op = new ResOp(this._jitlog, opdata, this, i)
     this.ops.push(op)
     i += 1
   }
@@ -433,11 +434,12 @@ Stage.prototype.get_first_merge_point = function() {
 
 
 
-var ResOp = function(jitlog, data, index) {
-  this._jitlog = jitlog
-  this._data = data
-  this._assembly = null
-  this.index = index
+var ResOp = function(jitlog, data, stage, index) {
+  this._jitlog = jitlog;
+  this._stage = stage;
+  this._data = data;
+  this._assembly = null;
+  this.index = index;
 }
 
 ResOp.prototype.get_descr_nmr = function() {
@@ -522,7 +524,31 @@ ResOp.prototype.to_s = function(index) {
   return format(prefix, opname, args, descr);
 }
 
-ResOp.prototype.get_source_code = function(index) {
+ResOp.prototype.source_code = function(index) {
+  // first extract the merge points for this index
+  var merge_points = this._stage._data.merge_points[index]
+  if (!merge_points) { return '' }
+  var resop = this
+  var text = []
+  var code = this._stage._code
+  merge_points.forEach(function(mp) {
+    mp.filename
+    mp.lineno
+    if (mp.filename in code) {
+      var source_lines = code[mp.filename]
+      var line = ''
+      var indent = '';
+      if (mp.lineno in source_lines) {
+        var indent_n_line = source_lines[mp.lineno]
+        indent = Array(indent_n_line[0]).join(' ')
+        line = indent_n_line[1]
+      } else {
+        line = "?"
+      }
+      text.push('<code class="trace-source">&gt;<pre>'+indent+line+'</pre></code>')
+    }
+  })
+  return text.join("<br>")
 }
 
 ResOp.prototype.get_disassembly = function() {

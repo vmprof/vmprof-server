@@ -75,20 +75,22 @@ c.MARK_START_TRACE + addr(4) + encode_str('loop') + addr(0) +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/a.py") + b"\xff" + encode_str("func_with_source_code") + b"\x00" + u64(1) +
   c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/b.py") + b"\xff" + encode_str("inlined_func1") + b"\x00" + u64(25) +
-  c.MARK_RESOP + u16(2) + encode_str('i3,i2,i1') +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/b.py") + b"\xff" + encode_str("inlined_func1") + b"\x00" + u64(26) +
-  c.MARK_RESOP + u16(1) + encode_str('?,p1,i2,i1') +
-  c.MARK_RESOP + u16(1) + encode_str('?,p1,i2,i1') +
-  c.MARK_RESOP + u16(1) + encode_str('?,p1,i2,i1') +
+  c.MARK_RESOP + u16(2) + encode_str('i3,i2,i1') +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/b.py") + b"\xff" + encode_str("inlined_func1") + b"\x00" + u64(27) +
+  c.MARK_RESOP + u16(1) + encode_str('?,p1,i2,i1') +
+  c.MARK_RESOP + u16(1) + encode_str('?,p1,i2,i1') +
+  c.MARK_MERGE_POINT + b"\xff" + encode_str("/b.py") + b"\xff" + encode_str("inlined_func1") + b"\x00" + u64(33) +
+  c.MARK_RESOP + u16(1) + encode_str('?,p1,i2,i1') +
 
   # keep this to the very end!!
   c.MARK_SOURCE_CODE + encode_str("/a.py") + u16(1) +
       u16(1) + b"\x04" + encode_str("a = b + c")  +
-  c.MARK_SOURCE_CODE + encode_str("/b.py") + u16(3) +
+  c.MARK_SOURCE_CODE + encode_str("/b.py") + u16(4) +
       u16(25) + b"\x08" + encode_str("def wait_for_me():") +
       u16(26) + b"\x0c" + encode_str("yield 13") +
-      u16(27) + b"\x0c" + encode_str("a,b,c = call.me(1,2,3) # here is a comment")
+      u16(27) + b"\x0c" + encode_str("a,b,c = call.me(1,2,3) # here is a comment") +
+      u16(33) + b"\x0c" + encode_str("@hello there # here is a comment")
 )]
 
 if __name__ == "__main__":

@@ -133,7 +133,7 @@
               <ul class="trace-type-switch" style="position: absolute; right: 0;">
                   <li>
                       <input id="filter_loop" type="checkbox" ng-model="$storage.show_source_code" checked="true" />
-                      Source
+                      Show source code
                   </li>
                   <li>
                       <span class="opt-pipeline-help" style="margin-left: 30px;"
@@ -165,7 +165,8 @@ Assembled: Rewritten instructions including machine code.">
                       --><span class="live-range" live-range data-column="8"></span>
                   </div>
                   <div class="resop-content">
-                      <div ng-bind-html="op.source_code($index+1)" class="source_code" data-index="{{$index}}"></div>
+                      <div ng-bind-html="op.source_code($index)" class="source-code"
+                           data-index="{{$index}}" ng-if="show_source_code"></div>
                       <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
                       <div class="trace-asm" ng-if="$storage.show_asm">
                           <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">

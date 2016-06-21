@@ -164,7 +164,7 @@ class TraceSerializer(BaseSerializer):
                                     source_code[filename] = {}
                                 lines = source_code[filename]
                                 assert lineno not in lines
-                                lines[lineno] = (indent,line)
+                                lines[lineno] = (indent, line)
         #
         if trace.addrs != (-1,-1):
             dict['addr'] = (hex(trace.addrs[0]), hex(trace.addrs[1]))
