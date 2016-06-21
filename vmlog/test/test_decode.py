@@ -2,7 +2,7 @@ import os
 import json
 import pytest
 
-from log.models import BinaryJitLog
+from vmlog.models import BinaryJitLog
 from django.test import TestCase
 
 @pytest.mark.django_db
