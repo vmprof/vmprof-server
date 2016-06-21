@@ -35,7 +35,6 @@ class BinaryJitLog(models.Model):
     def decode_forest(self):
         forest = FOREST_CACHE.get(self.checksum)
         if forest:
-            print("read cached forest!")
             FOREST_CACHE.set(self.checksum, forest) # refresh the cache
             return forest
         with get_reader(self.file.name) as fd:

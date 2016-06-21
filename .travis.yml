@@ -36,7 +36,7 @@ before_script:
   - python manage.py migrate
   - python vmlog/test/data/loggen.py
   - python manage.py loaddata log/test/fixtures.yaml
-  - python manage.py runserver &
+  - python manage.py runserver -v 3 &
   - sleep 3 # wait for django
 
 script:
