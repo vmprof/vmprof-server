@@ -1,10 +1,22 @@
-<img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
+<img ng-show="loading && !noprofile" class="center-block loading" src="/static/images/loader.gif" />
 
  <!-- this is used just as the the container of tooltips, so that I can style
       them selectively in main.css -->
 <div id="wide-popovers"></div>
 
-<div id="item" ng-show="!loading && visualization == 'flames'">
+<div id="item" ng-show="noprofile" class="well">
+    <h2 class="text-center">There is no profile data :(</h2>
+
+    <div class="text-center" ng-show="has_jitlog">
+        <h3>But there is a JIT log.</h3>
+        <a
+           ng-href="#/{{ log.checksum }}/traces">
+             <i class="fa fa-file-text"></i> view here
+        </a>
+    </div>
+</div>
+
+<div id="item" ng-show="!loading" ng-hide="noprofile">
 
     <ol class="breadcrumb">
         <li>
@@ -38,6 +50,10 @@
                 /
                 <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
             </span>
+
+            <span class="pull-right">
+                <a ng-href="#/{{ log.checksum }}/traces">JIT Log</a>
+            </span>
         </div>
 
         <div class="metadata" ng-if="root.cumulative_meta">
@@ -65,7 +81,7 @@
 </div>
 
 
-<div ng-show="!loading" class="panel panel-default">
+<div ng-show="!loading" class="panel panel-default" ng-hide="noprofile">
 
     <div class="btn-group" role="group" aria-label="...">
         <span data-toggle="tooltip" title="Show the list of all functions">

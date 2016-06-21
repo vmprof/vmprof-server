@@ -5,7 +5,7 @@ from rest_framework import status
 
 from django.contrib import auth
 
-from server.main import UserRegisterSerializer
+from vmprofile.views import UserRegisterSerializer
 
 
 @pytest.mark.django_db
@@ -32,9 +32,9 @@ def test_user_register_serializer_errors():
     s = UserRegisterSerializer(data=data)
     s.is_valid()
 
-    assert unicode(s.fields['username'].error_messages['blank']) \
+    assert s.fields['username'].error_messages['blank'] \
         in s.errors['username']
-    assert unicode(s.fields['password'].error_messages['required']) \
+    assert s.fields['password'].error_messages['required'] \
         in s.errors['password']
 
 

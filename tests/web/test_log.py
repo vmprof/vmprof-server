@@ -1,7 +1,7 @@
 import pytest
 
 from django.contrib import auth
-from server.models import Log
+from vmprofile.models import Log as Profile
 
 
 @pytest.mark.django_db
@@ -16,8 +16,8 @@ def test_log_get_user(client):
         password
     )
 
-    Log.objects.create(user=user, checksum="1", data="{}")
-    Log.objects.create(user=None, checksum="2", data="{}")
+    Profile.objects.create(user=user, checksum="1", data="{}")
+    Profile.objects.create(user=None, checksum="2", data="{}")
 
     response = client.get('/api/log/')
 

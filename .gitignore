@@ -52,8 +52,14 @@ coverage.xml
 # Django stuff:
 *.log
 
+*.swo
+*.swp
+
 # Sphinx documentation
 docs/_build/
 
 # PyBuilder
 target/
+uploads/
+
+sqlite3.db

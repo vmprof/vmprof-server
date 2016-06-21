@@ -1,5 +1,5 @@
-var app = angular.module(
-    'vmprof', ['ngRoute', 'ngCookies'], function($routeProvider) {
+app = angular.module(
+    'vmprof', ['ngRoute', 'ngCookies', 'ngSanitize', 'ngStorage'], function($routeProvider) {
 
         $routeProvider
             .when('/', {
@@ -30,6 +30,10 @@ var app = angular.module(
             .when('/:log', {
                 templateUrl: '/static/details.html',
                 controller: 'details'
+            })
+            .when('/:log/traces', {
+                templateUrl: '/static/log/traces.html',
+                controller: 'jit-trace-forest'
             })
             .otherwise({
                 redirectTo: '/'

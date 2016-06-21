@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
-import urllib
 import hashlib
+from urllib import request, parse
 
 from django.conf.urls import url, include
-from django.contrib.staticfiles import views as static
 from django.contrib import auth
-from django.contrib import admin
 
 from rest_framework import views
-from rest_framework import routers
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework import validators
@@ -18,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
 
-from .models import Log
+from vmprofile.models import Log
 
 
 username_max = auth.models.User._meta.get_field('username').max_length
@@ -37,9 +34,10 @@ class UserSerializer(serializers.ModelSerializer):
         default = "https://avatars0.githubusercontent.com/u/10184195?v=3&s=200"
         size = 40
 
-        gravatar_hash = hashlib.md5(obj.email.lower()).hexdigest()
+        email_bytes = obj.email.lower().encode('utf-8')
+        gravatar_hash = hashlib.md5(email_bytes).hexdigest()
         gravatar_url = "http://www.gravatar.com/avatar/%s?" % gravatar_hash
-        gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+        gravatar_url += parse.urlencode({'d': default, 's': str(size)})
 
         return gravatar_url
 
@@ -86,7 +84,7 @@ class LogViewSet(viewsets.ModelViewSet):
         return LogListSerializer
 
     def create(self, request):
-        data = json.dumps(request.data)
+        data = json.dumps(request.data).encode('utf-8')
         checksum = hashlib.md5(data).hexdigest()
         user = request.user if request.user.is_authenticated() else None
         log, _ = self.queryset.get_or_create(
@@ -180,14 +178,3 @@ class TokenViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data)
 
-
-router = routers.DefaultRouter()
-router.register(r'log', LogViewSet)
-router.register(r'token', TokenViewSet, base_name="token")
-
-urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include(router.urls)),
-    url(r'^api/user/', MeView.as_view()),
-    url(r'^$', static.serve, {'path': 'index.html', 'insecure': True}),
-]

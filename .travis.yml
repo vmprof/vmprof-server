@@ -1,22 +1,46 @@
+sudo: required
+dist: trusty
 language: python
-
-python: 2.7
+python:
+  - "3.4"
+env:
+  - DJANGO_SETTINGS_MODULE=webapp.settings.travis
 
 addons:
   postgresql: "9.3"
+  apt:
+    packages:
+      - libappindicator1
+      - fonts-liberation
 
 before_install:
   - psql -c 'create database vmprof;' -U postgres
-  
 install:
-  - pip install -r requirements/development.txt
-  - python manage.py syncdb --noinput
-  - python manage.py migrate
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
+  - ls
+  - pwd
+  - pip install -r requirements/testing.txt
+  - pip install -e git://github.com/vmprof/vmprof-python.git@$TRAVIS_BRANCH#egg=vmprof
 
+before_script:
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
+  # download the chrome driver
+  - wget http://chromedriver.storage.googleapis.com/2.22/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo mv chromedriver /usr/bin
+  # migrate the application and load debug data
+  - python manage.py migrate
+  - python vmlog/test/data/loggen.py
+  - python manage.py loaddata vmlog/test/fixtures.yaml
+  - python manage.py runserver -v 3 &
+  - sleep 3 # wait for django
 
 script:
-  - py.test tests/ -v 
-
+  - py.test . -v
 
 notifications:
   irc:

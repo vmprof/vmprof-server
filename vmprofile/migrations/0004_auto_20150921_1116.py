@@ -7,7 +7,7 @@ from django.db import models, migrations
 
 
 def forward(apps, schema_editor):
-    Log = apps.get_model("server", "Log")
+    Log = apps.get_model("vmprofile", "Log")
     for log in Log.objects.all():
         data = json.loads(log.data)
 
@@ -19,7 +19,7 @@ def forward(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('server', '0003_auto_20150921_1116'),
+        ('vmprofile', '0003_auto_20150921_1116'),
     ]
 
     operations = [

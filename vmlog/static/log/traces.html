@@ -1,0 +1,194 @@
+<div class="visible-xs-block text-center">
+    <p class="lead">Trace viewer currently not supported on mobile devices.</p>
+</div>
+
+<div class="visible-sm-block visible-md-block visible-lg-block">
+    <div id="help">
+        <button class="help-button" onclick="$('#help-content').toggle()">Help</button>
+        <div id="help-content" class="row">
+            <div class="col-md-6">
+              <h3> Visual Trace Tree </h3>
+              <p>This view gives an intuition what RPython's JIT compiler produces.
+              There are the following items visible.</p>
+              <dl class="inline">
+                <dt class="node"><svg id="preview-label" class="trace-elem-preview"></svg></dt>
+                <dd>Label</dd>
+                <dt class="node"><svg id="preview-jump" class="trace-elem-preview"></svg></dt>
+                <dd>Jump</dd>
+                <dt class="node"><svg id="preview-finish" class="trace-elem-preview"></svg></dt>
+                <dd>Finish</dd>
+                <dt class="node"><svg id="preview-guard" class="trace-elem-preview"></svg></dt>
+                <dd>Guard</dd>
+                <dt class="node"><svg id="preview-stitched" class="trace-elem-preview"></svg></dt>
+                <dd>Stitched guard</dd>
+              </dl>
+              <script>
+                var node = draw_node('label', d3.select('#preview-label'))
+                node.attr('transform', translate(10, 15) + ',scale(2)')
+                //
+                var node = draw_node('jump', d3.select('#preview-jump'))
+                node.attr('transform', translate(10, 15) + ',scale(2)')
+                //
+                var node = draw_node('finish', d3.select('#preview-finish'))
+                node.attr('transform', translate(10, 15) + ',scale(2)')
+                //
+                var node = draw_node('guard', d3.select('#preview-guard'))
+                node.attr('transform', translate(10, 15) + ',scale(2.3)')
+                //
+                var node = draw_node('stitched', d3.select('#preview-stitched'))
+                node.attr('transform', translate(10, 15) + ',scale(2.0)')
+              </script>
+
+              <p>Trace trees grow from top to bottom.</p>
+              <p>Hover over the tree to expand details and explore it.</p>
+              <p><strong>Entry count</strong> is an integral number counting how many times program flow entered that specific trace</p>
+            </div>
+            <div class="col-md-6">
+              <h3>JIT Compiler Stages</h3>
+              Currently the compiler spans over four different stages:
+              <ul class="inline">
+                  <li><strong>Traced</strong>: Unoptimized instructions recorded by the tracer</li>
+                  <li><strong>Optimized</strong>: The optimization stage has been passed</li>
+                  <li><strong>Rewritten</strong>: Lowering step to simplify instructions</li>
+                  <li><strong>Assembled</strong>: Rewritten instructions including machine code</li>
+              </ul>
+            </div>
+            <div class="col-md-12 text-center">
+                <br>
+                <p class="lead">For more help/suggestions please contact us on IRC (channel #pypy)</p>
+            </div>
+        </div>
+    </div>
+    <div id="forest" class="row" trace-forest>
+      <!-- The svg containing the trace visualisation -->
+      <img id="loading_img" loading="traces" ng-show="loading && !noprofile" src="/static/images/loader.gif"
+           width="10" height="10" style="position: absolute; margin: 10px;" />
+
+      <svg id="forest_svg" xmlns="http://www.w3.org/2000/svg"
+                           xmlns:xlink="http://www.w3.org/1999/xlink">
+          <g id="forest_grp">
+          </g>
+          <text x=20 y=20 ng-show="0 && !selected_trace" id="select-trace-tree">Select a trace below to see it's tree</text>
+          <g id="trace-details" class="trace-popover" style="visibility: hidden;" transform="translate(5,5)">
+              <rect class="background" x=0 y=0></rect>
+              <g id="popover-trace-node" class="node" transform="translate(240,10) scale(1.5)">
+              </g>
+              <g transform="translate(5,5)">
+                  <text x=0 y=10>Function: <tspan data-key="funcname">{funcname}</tspan></text>
+                  <text x=0 y=25>Entered: <tspan data-key="entrycount">{entrycount}</tspan> times</text>
+                  <text x=0 y=40>Percent: <tspan data-key="entrypercent">{entrypercent}</tspan></text>
+                  <text x=0 y=55><tspan data-key="filename">{filename}</tspan><tspan dx="5" data-key="lineno">{lineno}</tspan></text>
+
+                  <g data-if="c.node_type == 'guard-stitched'" transform="translate(0,70)">
+                      <text x=0 y=0>Stitched to <tspan data-key="tgt_funcname">{tgt_funcname}</tspan></text>
+                      <text x=0 y=15><tspan data-key="tgt_filename">{tgt_filename}</tspan><tspan dx="5" data-key="tgt_lineno">{tgt_lineno}</tspan></text>
+                  </g>
+              </g>
+          </g>
+      </svg>
+    </div>
+
+    <div class="row breathing-row" ng-if="traces">
+      <div class="col-sm-4 col-lg-4 trace-control" ng-if="jitlog">
+          <div class="breathing-row">
+              <input id="filter_text" class="form-control input-group-sm" type="text"
+                     ng-model="$storage.filter_text" value=""
+                     placeholder="Type funcname or filename" />
+          </div>
+
+          <div class="form-inline">
+              <label class="checkbox-line">
+                  <input id="filter_loop" type="checkbox" ng-model="$storage.filter_loop" checked="true" />
+                  Loops
+              </label>
+              <label class="checkbox">
+                  <input id="filter_bridge" type="checkbox" ng-model="$storage.filter_bridge" />
+                  Bridges
+              </label>
+          </div>
+
+          <ul class="trace-entries">
+              <li class="trace-entry"
+                  ng-repeat="trace in filter_traces($storage.filter_text, $storage.filter_loop, $storage.filter_bridge)"
+                  ng-class="{'active': trace == selected_trace}"
+                  ng-click="switch_trace(trace, trace_type)">
+                  <div>
+                      <span class="trace-type">{{trace.get_type()}}</span>
+                      <span class="trace-name">{{trace.get_func_name()}}</span>
+                  </div>
+                  <div class="trace-info">
+                      <span class="filename">{{trace.get_filename()}}</span>
+                      line
+                      <span class="lineno">{{trace.get_lineno()}}</span>
+                  </div>
+              </li>
+          </ul>
+      </div>
+
+      <div class="col-md-8 col-lg-8" ng-if="selected_trace" hover-vars>
+          <div class="resops-control">
+              <ul class="trace-type-switch">
+                  <li><a ng-class="{'active': trace_type == 'noopt'}"
+                         ng-click="switch_trace(selected_trace, 'noopt', false)"
+                         id="switch_trace_noopt">
+                         Traced
+                     </a>
+                  </li>
+                  <li>
+                      <a ng-class="{'active': trace_type == 'opt'}"
+                         ng-click="switch_trace(selected_trace, 'opt', false)"
+                         id="switch_trace_opt">
+                         Opt
+                     </a>
+                  </li>
+                  <li><a ng-class="{'active': trace_type == 'asm' && !show_asm}"
+                         ng-click="switch_trace(selected_trace, 'asm', false)"
+                         id="switch_trace_rewritten">
+                         Rewritten
+                     </a>
+                  </li>
+                  <li>
+                      <a ng-class="{'active': trace_type == 'asm' && show_asm}"
+                         ng-click="switch_trace(selected_trace, 'asm', true)"
+                         id="switch_trace_asm">
+                         Asm
+                     </a>
+                  </li>
+              </ul>
+              <ul class="trace-type-switch" style="position: absolute; right: 0;">
+                  <li>
+                      <input id="filter_loop" type="checkbox" ng-model="$storage.show_source_code" checked="true" />
+                      Show source code
+                  </li>
+              </ul>
+          </div>
+          <div class="resops">
+              <div class="no-trace" ng-if="selected_trace.get_stage(trace_type).ops.length == 0">
+                  <p class="lead text-center">Stage not recorded in log</p>
+              </div>
+              <div class="trace-line" ng-repeat="op in selected_trace.get_stage(trace_type).ops">
+                  <div class="live-ranges">
+                      <span class="live-range" live-range data-column="1"></span><!--
+                      --><span class="live-range" live-range data-column="2"></span><!--
+                      --><span class="live-range" live-range data-column="3"></span><!--
+                      --><span class="live-range" live-range data-column="4"></span><!--
+                      --><span class="live-range" live-range data-column="5"></span><!--
+                      --><span class="live-range" live-range data-column="6"></span><!--
+                      --><span class="live-range" live-range data-column="7"></span><!--
+                      --><span class="live-range" live-range data-column="8"></span>
+                  </div>
+                  <div class="resop-content">
+                      <div ng-bind-html="op.source_code($index)" class="source-code"
+                           data-index="{{$index}}" ng-if="$storage.show_source_code"></div>
+                      <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
+                      <div class="trace-asm" ng-if="$storage.show_asm">
+                          <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
+                              <div ng-bind-html="asm"></div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+</div>

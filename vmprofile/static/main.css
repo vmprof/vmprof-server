@@ -1,0 +1,494 @@
+nav .navbar-right a.dropdown-toggle {
+    padding: 2px 6px 2px 4px;
+}
+
+#list .display-control{
+    margin-bottom: 15px;
+}
+
+#list img.media-object{
+    width: 42px;
+    height: 42px;
+}
+
+#list .media {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding: 10px 0 10px 10px;
+}
+
+#list .media:first-child {
+    border-top: 1px solid #eee;
+}
+
+
+#list .media .times:hover {
+    cursor: pointer;
+}
+
+#list .media .media-body {
+    padding-left: 2px;
+}
+
+
+#register {
+    padding: 40px;
+    max-width: 800px;
+}
+
+#register {
+    padding: 40px;
+    max-width: 900px;
+}
+
+#register h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#register .control-label {
+    padding-right: 10px;
+}
+
+#register .help-block {
+    padding-left: 10px;
+    font-size: 13px;
+}
+
+#login {
+    padding: 40px;
+    max-width: 500px;
+}
+
+#login .logo, #register .logo {
+    width: 150px
+}
+
+#login h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#login input {
+    margin-bottom: 10px;
+}
+
+#login button {
+    margin-top: 20px;
+}
+
+img.loading {
+    position: fixed;
+    width: 60px;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#item header {
+    padding-left: 15px;
+    margin-bottom: 30px;
+}
+
+#item header .times {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+#item header .metadata {
+    font-size: 16px;
+    display: block;
+}
+
+#item header .metadata .label {
+    margin-right: 5px;
+}
+
+.paths {
+    margin-left: 10px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+svg rect, svg text {
+    cursor: pointer;
+    cursor: hand;
+}
+
+.footer {
+    padding: 20px;
+}
+
+#visualization {
+    margin-top: 5px;
+}
+
+#wide-popovers .popover {
+    max-width: none;
+}
+
+.trace {
+    font: Courier, monospace;
+    background: #f8f8f8;
+    padding: 15px;
+    border: 1px solid #e8e8e8;
+}
+
+.trace-type-ctrl {
+    padding: 5px;
+}
+
+.trace-nav-up {
+    color: black;
+}
+
+.svg-arrow {
+    fill: white;
+    stroke: white;
+    stroke-width: 1px;
+}
+
+span.resop-name {
+    color: #a71d5d;
+    font-weight: italic;
+}
+
+span.resop-descr {
+    font-size: 0.7em;
+    color: gray;
+}
+
+.trace-asm {
+    margin-left: 31px;
+    color: #969896;
+    font-size: 14px;
+}
+
+.trace-bg-active {
+    fill: #a8a8a8;
+}
+
+.instr {
+    height: 20px;
+    font-size: 15px;
+    vertical-align: middle;
+}
+
+span.var {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+span.const {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+span.selected.var {
+    color: white;
+}
+
+.live-range {
+    display: inline-block;
+    width: 2px;
+    min-height: 1px;
+    margin: 0;
+    margin-right: 1px;
+    padding: 0;
+}
+
+.trace-line-number {
+    display: inline-block;
+    width: 30px;
+    height: 20px;
+    text-align: right;
+    margin-right: 5px;
+}
+
+.asm-mnemoic {
+    color: #088A29;
+    white-space: nowrap;
+}
+
+.trace-asm-line {
+    margin-left: 35px;
+}
+
+.empty-rect {
+    fill: none;
+}
+
+#forest {
+    cursor: pointer;
+    cursor: hand;
+    background: #f8f8f8;
+    border: 1px solid #e8e8e8;
+    height: 150px;
+    margin-bottom: 10px;
+}
+
+.trace-enter {
+    fill: red;
+}
+
+.node .stitched {
+    fill: #17BF17;
+}
+
+.node line.guard {
+    stroke-width: 2px;
+    stroke: #1D5D9B;
+}
+
+.node line.jump {
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.guard-not-stitched {
+    stroke: blue;
+    stroke-width: 2px;
+}
+.guard-not-stitched-text {
+    stroke: blue;
+    font-size: 8px;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1px;
+}
+
+.live-ranges {
+    width: 16px;
+    margin: 0;
+    padding: 0;
+    margin-left: 5px;
+    position: absolute;
+}
+
+.resop-content {
+    /*display: inline-block;*/
+    position: relative;
+    left: 25px;
+}
+
+.trace-line {
+    white-space: nowrap;
+    position: relative;
+}
+
+
+.source-code {
+    position: relative;
+    left: 5px;
+}
+
+#help {
+    position: relative;
+    width: 100%;
+}
+
+.help-button {
+    position: absolute;
+    right: 0;
+    margin-top: 10px;
+    margin-right: 10px;
+    z-index: 10;
+}
+
+#help-content {
+    padding: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
+    position: absolute;
+    display: none;
+    background: #fafafa;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 3px solid #e8e8e8;
+    z-index: 9;
+}
+
+.trace-elem-preview {
+    display: inline;
+    width: 20px;
+    height: 20px;
+}
+
+dl.inline dt {
+    display: inline-block;
+}
+dl.inline dd {
+    display: inline-block;
+}
+
+ul.inline {
+    padding-left: 20px;
+    margin: 0;
+}
+
+ul.inline li {
+    padding: 0;
+}
+
+code.trace-source {
+    background: none;
+}
+
+code.trace-source > pre {
+    display: inline;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.resops {
+    overflow-y: scroll;
+    overflow-x: scroll;
+    background: #fafafa;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 1px solid #e8e8e8;
+}
+
+.trace-control {
+    padding-right: 10px;
+}
+
+ul.trace-type-switch {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: inline-block;
+}
+
+ul.trace-type-switch li {
+    display: inline-block;
+    cursor: hand;
+}
+
+.opt-pipeline-help {
+    background: black;
+    color: white;
+    padding: 3px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+}
+
+ul.trace-type-switch li a {
+    display: inline-block;
+    color: black;
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    margin-bottom: -4px;
+}
+
+span.placeholder {
+    display: inline-block;
+    width 1.5em;
+}
+
+ul.trace-type-switch li a:hover {
+    background: #fafafa;
+    text-decoration: none;
+    border: 1px solid #e8e8e8;
+}
+
+ul.trace-type-switch li a.active {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+}
+
+.resops-control {
+    height: 32px;
+    line-height: 32px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+ul.trace-entries {
+    list-style: none;
+    padding-left: 0;
+}
+
+.trace-entry {
+    padding: 5px;
+    cursor: pointer;
+    background: #fafafa;
+    margin-bottom: 2px;
+}
+
+.trace-entry.active {
+    background: #eee;
+}
+
+.trace-entry:hover {
+    background: #eee;
+}
+
+.trace-info {
+    font-size: 10px;
+    color: gray;
+}
+
+.trace-type {
+    font-size: 10px;
+    color: gray;
+}
+
+.trace-name {
+    color: #008B31;
+}
+
+.trace-descr {
+    display: inline-block;
+    width: 100%;
+    line-height: 20px;
+}
+
+.breathing-row {
+    margin-bottom: 5px;
+}
+
+.trace-popover {
+    fill
+}
+
+.trace-popover rect {
+    stroke: silver;
+    stroke-width: 1;
+    fill: white;
+}
+
+.trace-popover text {
+    font-size: 11px;
+}
+
+
+#legend-indicator > rect {
+    cursor: hand;
+    fill: black;
+    stroke: #e8e8e8;
+}
+
+#legend-indicator > text {
+    cursor: hand;
+    fill: white;
+    font: serif;
+    font-size: 11px;
+    stroke: #e8e8e8;
+}

@@ -4,7 +4,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'f$tyieh#&bd_4_&691^ok!#$l+(%y4a8j$z9je9xojr++4n(u1'
 
 DEBUG = True
-TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 
@@ -19,7 +18,8 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
 
-    'server'
+    'vmprofile',
+    'vmlog',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -32,14 +32,32 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'server.main'
-WSGI_APPLICATION = 'server.wsgi.app'
+TEMPLATES = [
+    { 'BACKEND': 'django.template.backends.django.DjangoTemplates',
+      'APP_DIRS': True,
+      'OPTIONS': {
+        'context_processors': [
+           # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
+           # list if you haven't customized them:
+           'django.contrib.auth.context_processors.auth',
+           'django.template.context_processors.debug',
+           'django.template.context_processors.i18n',
+           'django.template.context_processors.media',
+           'django.template.context_processors.static',
+           'django.template.context_processors.tz',
+           'django.contrib.messages.context_processors.messages',
+        ],
+      },
+    },
+]
+
+ROOT_URLCONF = 'webapp.urls'
+WSGI_APPLICATION = 'webapp.wsgi.app'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'vmprof',
-        'USER': 'postgres',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'sqlite3.db',
     }
 }
 
@@ -51,6 +69,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'vmprofile', 'static'),
+    os.path.join(BASE_DIR, 'vmlog', 'static')
+)
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
@@ -65,4 +93,15 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'forest-cache': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'TIMEOUT': 4*60, # 4 minutes
+        'MAX_ENTRIES': 500,
+    }
 }
