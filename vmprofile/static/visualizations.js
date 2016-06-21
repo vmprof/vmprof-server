@@ -118,8 +118,12 @@ var Visualization = {};
 
         function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
+                console.log(node.total, cutoff);
                 return;
             }
+            if (y > $element.height())
+                return;
+
             var rect = paper.rect(x, y, width, height, 5);
             var text = paper.text(x + width / 2,
                                   y + height / 2,
@@ -204,98 +208,91 @@ var Visualization = {};
                           .map(function() {return parseInt(this.attributes['y'].value);} ));
 
         paper.setSize(paper.width, depth + 27);
+
     };
 
-    Visualization.squareChart = function($element, height, node,
-                                         $scope, $location) {
-
+    Visualization.listOfFunctions = function($element, height, $scope,
+                                             $location, VM, cumulative) {
         $element.empty();
+        var stats = [];
+        for (var i in $scope.stats.allStats) {
+            stats[stats.length] = $scope.stats.allStats[i];
+        }
         var width = $element.width();
         var paper = Raphael($element[0], width, height);
+        var attr;
+        if (cumulative) {
+            attr = "total";
+        } else {
+            attr = "self";
+        }
+        stats.sort(function (a, b) {
+            return b[attr] - a[attr];
+        });
+        var y = 5;
 
-        function draw(x, y, width, height, node, scale) {
-            var scale = scale || scale;
-
-            var rect = paper.rect(x, y, width, height);
-            rect.attr({fill: '#9cf', stroke: '#888', 'stroke-width': 2});
-            rect.data('name', node.name);
-
-            rect.hover(
+        for (var i in stats) {
+            var stat = stats[i];
+            var name = parse_func_name(stat.name);
+            var percentage = (stat[attr] / $scope.stats.nodes.total);
+            var rect = paper.rect(3, y, (width-6) * percentage, 20, 5);
+            var text = paper.text(30, y + 10, name[0] + " " + (percentage * 100).toFixed(1) + "%");
+            if (y > $element.height())
+                break
+            y += 25;
+            text.attr({"text-anchor": "start"})
+            rect.attr({fill: '#5cb85c', stroke: '#888', 'stroke-width': 2});
+            /*$("<div/>").text(name[0] + " " + 
+                (stat.total / $scope.stats.nodes.total * 100).toFixed(1) + "%").addClass(
+                "function-list-item").appendTo($element);*/
+            var st = paper.set();
+            st.push(rect, text);
+            st.click(function () {
+                $location.search({
+                    func_addr: stat.addr,
+                    view: 'function-details'
+                });
+                $scope.$apply();
+            });
+            st.hover(
                 function(e) {
-                    var name = this.data('name');
-                    //$scope.$apply(function () {
-                    //  $scope.address = address;
-                    //});
-                    this.attr({'fill': 'red'});
+                    $("#visualization-data").show();
                 },
                 function(e) {
-                    this.attr({'fill': '#9cf'});
-                    //$scope.$apply(function () {
-                    //  $scope.address = null;
-                    //});
+                    $("#visualization-data").hide();
                 }
             );
+        }
+    };
 
-            //rect.click(function () {
-            //  $location.search({
-            //      id: this.data('address'),
-            //      view: 'squares'
-            //  });
-            //});
+    Visualization.functionDetails = function($element, height, addr, $scope,
+                                              $location) {
+        // get 10 most prominent functions we call from all the call sites
+        // below addr
+        var found = [];
 
-            if (node.total == node.self) {
-                var scale = 1;
-            } else {
-                var scale = 1 - (node.self / node.total);
+
+        function walk_recursive(n, flag, accum)
+        {
+            if (flag) {
+                accum = clone(accum);
+                accum[n.addr] = 'a';
+                if (found[n.addr] === undefined) {
+                    found[n.addr] = {total: 0, name:n.name};
+                }
+                found[n.addr].total += n.total;
+            } else if (n.addr == addr) {
+                flag = true;
+                accum = [];
             }
-
-            if (_.keys(node.children).length == 1) {
-                var node = node.children[Object.keys(node.children)[0]];
-                var box = rect.getBBox();
-
-                //draw(box.x, box.y, box.width, box.height, node);
-
-            } else if (_.keys(node.children).length > 1) {
-                var times = [];
-                var names = [];
-                var addresses = [];
-                var children = [];
-
-                for (var child in node.children) {
-                    var child = node.children[child];
-                    times.push(child.self);
-                    addresses.push(child.addr);
-                    names.push(child.name);
-                    children.push(child);
-                }
-
-                var xd = (width - (width * scale)) / 2;
-                var yd = (height - (height * scale)) / 2;
-
-
-                var width = width * scale;
-                var height = height * scale;
-
-                var boxes = Treemap.generate(
-                    addresses, names, times,
-                    width,
-                    height, x+xd, y+yd
-                );
-
-
-                for (var i = 0; i < boxes.length; i++) {
-                    var box = boxes[i];
-                    var x1=box.square[0],
-                        y1=box.square[1],
-                        x2=box.square[2],
-                        y2=box.square[3];
-
-                    //draw(x1, y1, x2-x1, y2-y1, children[i]);
-                }
+            for (var c in n.children) {
+                walk_recursive(n.children[c], flag, accum);
             }
         }
-        draw(0, 0, width, height, node);
-
+        walk_recursive($scope.stats.nodes, false);
+        for (var i in found) {
+            console.log(found[i].name, found[i].total);
+        }
     };
 
 })();

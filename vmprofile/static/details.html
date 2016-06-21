@@ -83,22 +83,31 @@
 
 <div ng-show="!loading" class="panel panel-default" ng-hide="noprofile">
 
-    <div ng-if="currentProfiles.length > 0" class="row">
-        <div class="btn-group" role="group" aria-label="...">
-            <button type="button" class="btn btn-default"
-                    ng-click="visualizationChange('squares')"
-                    ng-class="{active: visualization=='squares'}"}>
-                    <span class="glyphicon glyphicon-th" aria-hidden="true"></span>
-            </button>
-            <button type="button" class="btn btn-default"
-                    ng-click="visualizationChange('flames')"
-                    ng-class="{active: visualization=='flames'}"}>
-                    <span class="glyphicon glyphicon-align-center" aria-hidden="true"></span>
-            </button>
-        </div>
-        <span id="visualization-data">
+    <div class="btn-group" role="group" aria-label="...">
+        <span data-toggle="tooltip" title="Show the list of all functions">
+        <button type="button" class="btn btn-default"
+                ng-click="visualizationChange('list')"
+                ng-class="{active: visualization=='list'}"}>
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+        </button>
         </span>
-        <div id="visualization"></div>
+        <span data-toggle="tooltip" title="Show the list of all functions sorted by self">
+        <button type="button" class="btn btn-default"
+                ng-click="visualizationChange('list-2')"
+                ng-class="{active: visualization=='list-2'}"}>
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+        </button>
+        </span>
+        <span data-toggle="tooltip" title="Show execution flamegraph">
+        <button type="button" class="btn btn-default"
+                ng-click="visualizationChange('flames')"
+                ng-class="{active: visualization=='flames'}"}>
+                <span class="glyphicon glyphicon-align-center" aria-hidden="true"></span>
+        </button>
+        </span>
     </div>
+    <span id="visualization-data">
+    </span>
+    <div id="visualization"></div>
 </div>
 
