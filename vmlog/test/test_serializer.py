@@ -3,7 +3,7 @@ import struct, py, sys
 from vmprof.log.objects import (FlatOp, TraceForest, Trace,
         MergePoint, iter_ranges)
 from vmprof.log import constants as const
-from log.views import (LogMetaSerializer, TraceSerializer,
+from vmlog.views import (LogMetaSerializer, TraceSerializer,
         VisualTraceTreeSerializer)
 
 PY3 = sys.version_info[0] >= 3
