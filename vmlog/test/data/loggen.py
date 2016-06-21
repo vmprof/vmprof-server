@@ -93,9 +93,12 @@ c.MARK_START_TRACE + addr(4) + encode_str('loop') + addr(0) +
       u16(33) + b"\x0c" + encode_str("@hello there")
 )]
 
-if __name__ == "__main__":
+def main():
     path = os.path.dirname(__file__)
     for i, (version, log) in enumerate(test_logs):
         with gzip.open(os.path.join(path, "log-test-%d-%s.jlog.zip" % (i+1, version)),
                        mode="wb") as fd:
             fd.write(log)
+
+if __name__ == "__main__":
+    main()

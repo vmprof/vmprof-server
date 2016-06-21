@@ -2,13 +2,14 @@ import pytest
 from selenium import webdriver
 import selenium.webdriver as webdriver
 import selenium.webdriver.support.ui as ui
+from django.test import TestCase
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def drivers(request):
     drivers = [webdriver.Chrome()]
     for b in drivers:
         request.addfinalizer(b.quit)
-    return drivers
+    request.cls.drivers = drivers
 
 def _url(path):
     host = "http://localhost:8000"
@@ -44,9 +45,13 @@ def select_trace_entry(driver, wait, entry_name):
     else:
         pytest.fail("could not select %s in log" % entry_name)
 
-class TestTracesView(object):
-    def test_display_schedule(self, drivers):
-        for driver in drivers:
+@pytest.mark.django_db
+@pytest.mark.usefixtures("drivers")
+class TestTracesView(TestCase):
+    fixtures = ['vmlog/test/fixtures.yaml']
+
+    def test_display_schedule(self):
+        for driver in self.drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1111/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
@@ -54,8 +59,8 @@ class TestTracesView(object):
             # will blow up if not present
             select_trace_entry(driver, wait, "schedule")
 
-    def test_filter_checkboxes(self, drivers):
-        for driver in drivers:
+    def test_filter_checkboxes(self):
+        for driver in self.drivers:
             wait = ui.WebDriverWait(driver,20)
             driver.get(_url("#/1111/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
@@ -81,8 +86,8 @@ class TestTracesView(object):
             assert len(driver.find_elements_by_css_selector('li.trace-entry')) == 0
             reset_search_criteria(driver)
 
-    def test_search_traces(self, drivers):
-        for driver in drivers:
+    def test_search_traces(self):
+        for driver in self.drivers:
             wait = ui.WebDriverWait(driver,20)
             driver.get(_url("#/1v1/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
@@ -92,8 +97,8 @@ class TestTracesView(object):
             loop_checkbox = driver.find_element_by_id("filter_loop")
             assert len(driver.find_elements_by_css_selector('li.trace-entry')) == 1
 
-    def test_load_trace(self, drivers):
-        for driver in drivers:
+    def test_load_trace(self):
+        for driver in self.drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1v1/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
@@ -106,8 +111,8 @@ class TestTracesView(object):
             assert 'int_add' in names
             assert 'guard_true' in names
 
-    def test_switch_to_opt(self, drivers):
-        for driver in drivers:
+    def test_switch_to_opt(self):
+        for driver in self.drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1v1/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
@@ -121,8 +126,8 @@ class TestTracesView(object):
             assert 'int_add' in names
             assert 'guard_true' in names
 
-    def test_display_asm(self, drivers):
-        for driver in drivers:
+    def test_display_asm(self):
+        for driver in self.drivers:
             wait = ui.WebDriverWait(driver,10)
             driver.get(_url("#/1v1/traces"))
             wait.until(lambda d: not query1(d, '#loading_img').is_displayed())
