@@ -166,7 +166,7 @@ Assembled: Rewritten instructions including machine code.">
                   </div>
                   <div class="resop-content">
                       <div ng-bind-html="op.source_code($index)" class="source-code"
-                           data-index="{{$index}}" ng-if="show_source_code"></div>
+                           data-index="{{$index}}" ng-if="$storage.show_source_code"></div>
                       <div ng-bind-html="op.to_s($index+1)" class="instr" data-index="{{$index}}"></div>
                       <div class="trace-asm" ng-if="$storage.show_asm">
                           <div class="trace-asm-line" ng-repeat="asm in op.get_disassembly() track by $index">
