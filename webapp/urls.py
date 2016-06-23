@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^api/jitlog/(?P<profile>[0-9a-z]+)/$', BinaryJitLogFileUploadView.as_view()),
 ]
 
-if settings.DEBUG:
-    urlpatterns += [url(r'^$', static.serve, {'path': 'index.html', 'insecure': True})]
+#if settings.DEBUG:
+# this should be changed in the long run, but it is fine for now.
+urlpatterns += [url(r'^$', static.serve, {'path': 'index.html', 'insecure': True})]
