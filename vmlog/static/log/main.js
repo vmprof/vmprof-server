@@ -53,14 +53,14 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $scope.$storage = $localStorage.$default({
       filter_loop: true,
       filter_bridge: false,
-      show_asm: true,
+      show_asm: false,
+      trace_type: 'opt',
       show_source_code: true,
     })
     $scope.live_ranges = { 8: { 0: {'background-color': 'green', 'height': '20px', 'width': '2px'}} }
     $scope.loader = new Loading($scope)
     $scope.loader.start()
     $scope.ops = []
-    $scope.trace_type = 'asm'
     $scope.selected_trace = null;
     var lh = $scope.$storage.last_trace_hash
     if (lh !== $scope.$storage.last_trace_hash) {
@@ -79,14 +79,13 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       //$scope.meta = response.data
 
       //$scope.log = response.data;
-      jitlog.trace_type = $scope.trace_type
       $scope.traces = jitlog.filter_traces("", true, false)
 
       var last_id = $scope.$storage.last_trace_id
       var trace = jitlog.get_trace_by_id(last_id)
       if (last_id && trace) {
         $timeout(function(){
-          $scope.switch_trace(trace, $scope.trace_type)
+          $scope.switch_trace(trace, $scope.$storage.trace_type, $scope.$storage.show_asm)
         })
       }
 
@@ -99,8 +98,8 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
 
     $scope.switch_trace = function(trace, type, asm) {
       if (!$scope.loader.complete()) { return; }
-      $scope.trace_type = type
-      jitlog.trace_type = type
+      $scope.$storage.show_asm = asm
+      $scope.$storage.trace_type = type
       //
       $scope.show_asm = asm
       //

@@ -443,7 +443,6 @@ TraceForest.prototype.walk_visual_trace_tree = function(json, visual_nodes, yoff
   var vtrace = new VisualTrace(json.root, yoff)
   traces.push(vtrace)
   var labels = {}
-  var label_counter = 1
   var last = null
   var node = null
   var i = 0;
