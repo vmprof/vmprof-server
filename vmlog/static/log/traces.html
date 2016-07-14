@@ -111,7 +111,7 @@
               <li class="trace-entry"
                   ng-repeat="trace in filter_traces($storage.filter_text, $storage.filter_loop, $storage.filter_bridge)"
                   ng-class="{'active': trace == selected_trace}"
-                  ng-click="switch_trace(trace, trace_type)">
+                  ng-click="switch_trace(trace, $storage.trace_type, $storage.show_asm)">
                   <div>
                       <span class="trace-type">{{trace.get_type()}}</span>
                       <span class="trace-name">{{trace.get_func_name()}}</span>
@@ -125,30 +125,30 @@
           </ul>
       </div>
 
-      <div class="col-md-8 col-lg-8" ng-if="selected_trace" hover-vars>
+      <div class="col-sm-8 col-md-8 col-lg-8" ng-if="selected_trace" hover-vars>
           <div class="resops-control">
               <ul class="trace-type-switch">
-                  <li><a ng-class="{'active': trace_type == 'noopt'}"
+                  <li><a ng-class="{'active': $storage.trace_type == 'noopt'}"
                          ng-click="switch_trace(selected_trace, 'noopt', false)"
                          id="switch_trace_noopt">
                          Traced
                      </a>
                   </li>
                   <li>
-                      <a ng-class="{'active': trace_type == 'opt'}"
+                      <a ng-class="{'active': $storage.trace_type == 'opt'}"
                          ng-click="switch_trace(selected_trace, 'opt', false)"
                          id="switch_trace_opt">
                          Opt
                      </a>
                   </li>
-                  <li><a ng-class="{'active': trace_type == 'asm' && !show_asm}"
+                  <li><a ng-class="{'active': $storage.trace_type == 'asm' && !show_asm}"
                          ng-click="switch_trace(selected_trace, 'asm', false)"
                          id="switch_trace_rewritten">
                          Rewritten
                      </a>
                   </li>
                   <li>
-                      <a ng-class="{'active': trace_type == 'asm' && show_asm}"
+                      <a ng-class="{'active': $storage.trace_type == 'asm' && show_asm}"
                          ng-click="switch_trace(selected_trace, 'asm', true)"
                          id="switch_trace_asm">
                          Asm
@@ -163,10 +163,10 @@
               </ul>
           </div>
           <div class="resops">
-              <div class="no-trace" ng-if="selected_trace.get_stage(trace_type).ops.length == 0">
+              <div class="no-trace" ng-if="selected_trace.get_stage($storage.trace_type).ops.length == 0">
                   <p class="lead text-center">Stage not recorded in log</p>
               </div>
-              <div class="trace-line" ng-repeat="op in selected_trace.get_stage(trace_type).ops">
+              <div class="trace-line" ng-repeat="op in selected_trace.get_stage($storage.trace_type).ops">
                   <div class="live-ranges">
                       <span class="live-range" live-range data-column="1"></span><!--
                       --><span class="live-range" live-range data-column="2"></span><!--

@@ -3,3 +3,4 @@
 pytest==2.9.1
 pytest-django==2.9.1
 selenium>=2.35.2
+-e git://github.com/vmprof/vmprof-python.git#egg=vmprof
