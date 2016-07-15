@@ -1,7 +1,7 @@
 import pytest
 import struct, py, sys
 from vmprof.log.objects import (FlatOp, TraceForest, Trace,
-        MergePoint, iter_ranges)
+        MergePoint, iter_ranges, PointInTrace)
 from vmprof.log import constants as const
 from vmlog.views import (LogMetaSerializer, TraceSerializer,
         VisualTraceTreeSerializer)
@@ -27,7 +27,7 @@ def test_to_json_meta_info():
     assert json == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
-                               'type': 'loop', 'counter': 42 } },
+                  'type': 'loop', 'counter_points': { 'enter': 42 } } },
             }
 
 def test_to_json_meta_bridges():
@@ -37,10 +37,10 @@ def test_to_json_meta_bridges():
     bridge1 = forest.add_trace('bridge', 1)
     bridge2 = forest.add_trace('bridge', 2)
     bridge3 = forest.add_trace('bridge', 3)
-    forest.descr_nmr_to_trace[10] = trunk
-    forest.descr_nmr_to_trace[11] = trunk 
-    forest.descr_nmr_to_trace[12] = bridge1
-    forest.descr_nmr_to_trace[13] = bridge2
+    forest.descr_nmr_to_point_in_trace[10] = PointInTrace(trunk, None)
+    forest.descr_nmr_to_point_in_trace[11] = PointInTrace(trunk, None)
+    forest.descr_nmr_to_point_in_trace[12] = PointInTrace(bridge1, None)
+    forest.descr_nmr_to_point_in_trace[13] = PointInTrace(bridge2, None)
     #
     trunk.set_addr_bounds(99,100)
     bridge1.set_addr_bounds(100,101)

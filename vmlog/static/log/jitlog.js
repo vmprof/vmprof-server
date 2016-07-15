@@ -165,7 +165,11 @@ JitLog.prototype.set_meta = function(meta) {
   for (var key in this._id_to_traces) {
     var trace = this._id_to_traces[key]
     trace.link();
-    trace.entry_percent = (trace.get_enter_count() / total_entries) * 100.0
+    var p = (trace.get_enter_count() / total_entries) * 100.0
+    if (p > 100) {
+      console.error("total {0} entries {1} -> {2}%".format(total_entry, trace.get_enter_count(), p))
+    }
+    trace.entry_percent = p
   }
 }
 
@@ -219,6 +223,7 @@ Trace = function(jitlog, id, meta) {
   this.lineno = meta.lineno
   this.type = meta.type
   this._parent = meta.parent
+  this.counter_points = meta.counter_points
   this._bridges = []
   this._stages = {}
 }
@@ -244,7 +249,7 @@ Trace.prototype.get_enter_percent = function() {
     return this.entry_percent
 }
 Trace.prototype.get_enter_count = function() {
-  return this.counter
+  return this.counter_points['enter'] || 0
 }
 
 Trace.prototype.get_id = function() {

@@ -209,7 +209,7 @@ TraceForest.prototype.mouse_enter_trace = function(){
   var values = {
     funcname: trace.get_func_name(),
     entrycount: numeral(trace.get_enter_count()).format('0,0 a'),
-    entrypercent: numeral(trace.get_enter_percent()).format('0.00%'),
+    entrypercent: numeral(trace.get_enter_percent()).format('0.00') + '%',
     filename: trace.get_filename(),
     lineno: trace.get_lineno(),
   }
