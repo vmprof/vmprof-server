@@ -7,6 +7,7 @@ from vmlog.test.e2e.test_traces import (query1, query,
         reset_search_criteria, select_trace_entry, _url)
 
 class TestTracesView(object):
+    pass
     #def test_(self, drivers):
     #    for driver in drivers:
     #        wait = ui.WebDriverWait(driver,10)
