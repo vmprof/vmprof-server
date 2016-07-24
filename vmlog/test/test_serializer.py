@@ -1,8 +1,8 @@
 import pytest
 import struct, py, sys
-from vmprof.log.objects import (FlatOp, TraceForest, Trace,
+from jitlog.objects import (FlatOp, TraceForest, Trace,
         MergePoint, iter_ranges, PointInTrace)
-from vmprof.log import constants as const
+from jitlog import constants as const
 from vmlog.views import (LogMetaSerializer, TraceSerializer,
         VisualTraceTreeSerializer)
 

@@ -6,7 +6,7 @@ import tempfile
 import base64
 import os
 from collections import defaultdict
-from vmprof.log import constants as const
+from jitlog import constants as const
 
 from django.conf.urls import url, include
 from django.contrib import auth
@@ -16,8 +16,8 @@ from django.shortcuts import get_object_or_404
 
 from vmlog.models import BinaryJitLog, get_reader
 from vmprofile.models import Log
-from vmprof.log.parser import _parse_jitlog
-from vmprof.log.objects import MergePoint
+from jitlog.parser import _parse_jitlog
+from jitlog.objects import MergePoint
 
 from rest_framework import views
 from rest_framework.response import Response

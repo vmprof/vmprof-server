@@ -4,7 +4,7 @@ import bz2
 import lzma
 import gzip
 
-from vmprof.log.parser import _parse_jitlog
+from jitlog.parser import _parse_jitlog
 
 from django.db import models
 from django.conf import settings
