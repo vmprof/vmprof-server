@@ -1,7 +1,6 @@
 import hashlib
 import io
 import bz2
-import lzma
 import gzip
 
 from jitlog.parser import _parse_jitlog
@@ -18,9 +17,7 @@ def get_reader(filename):
         return gzip.GzipFile(filename)
     elif filename.endswith(".bz2"):
         return bz2.BZ2File(filename, "rb", 2048)
-    elif filename.endswith(".xz"):
-        return lzma.LZMAFile(filename)
-    raise NotImplementedError("only bz2 and xz are supported!")
+    raise NotImplementedError("use gzip/bz2 for compression!")
 
 FOREST_CACHE = caches['forest-cache']
 
