@@ -1,7 +1,7 @@
 import os
 import gzip
 
-from vmprof.log import constants as c
+from jitlog import constants as c
 from vmprof.binary import (encode_le_u16 as u16,
         encode_le_u32 as u32, encode_s64 as s64, encode_u64 as u64,
         encode_str, encode_le_addr as addr)
