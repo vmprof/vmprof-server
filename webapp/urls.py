@@ -21,7 +21,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(router.urls)),
     url(r'^api/user/', MeView.as_view()),
-    url(r'^api/jitlog/(?P<profile>[0-9a-z]+)/$', BinaryJitLogFileUploadView.as_view()),
+    url(r'^api/jitlog/(?P<profile>[0-9a-z]*)/$', BinaryJitLogFileUploadView.as_view()),
 ]
 
 #if settings.DEBUG:

@@ -47,7 +47,10 @@ class BinaryJitLogFileUploadView(views.APIView):
 
         user = request.user if request.user.is_authenticated() else None
 
-        profile_obj = Log.objects.get(checksum=profile)
+        if profile.strip() == "":
+            profile_obj = None
+        else:
+            profile_obj = Log.objects.get(checksum=profile)
         log, _ = BinaryJitLog.objects.get_or_create(file=file_obj, checksum=checksum,
                                                     user=user, profile=profile_obj)
 
