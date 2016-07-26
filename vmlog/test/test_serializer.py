@@ -18,7 +18,7 @@ class FakeJitLog(object):
 def test_to_json_meta_info():
     forest = TraceForest(1)
     forest.resops = { 15: 'divide' }
-    trace = forest.add_trace('loop', 0)
+    trace = forest.add_trace('loop', 0, 0)
     trace.counter = 42
     stage = trace.start_mark(const.MARK_TRACE_OPT)
     stage.append_op(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
@@ -33,10 +33,10 @@ def test_to_json_meta_info():
 def test_to_json_meta_bridges():
     forest = TraceForest(1)
     forest.resops = { 15: 'guard_true' }
-    trunk = forest.add_trace('loop', 0)
-    bridge1 = forest.add_trace('bridge', 1)
-    bridge2 = forest.add_trace('bridge', 2)
-    bridge3 = forest.add_trace('bridge', 3)
+    trunk = forest.add_trace('loop', 0, 0)
+    bridge1 = forest.add_trace('bridge', 1, 0)
+    bridge2 = forest.add_trace('bridge', 2, 0)
+    bridge3 = forest.add_trace('bridge', 3, 0)
     forest.descr_nmr_to_point_in_trace[10] = PointInTrace(trunk, None)
     forest.descr_nmr_to_point_in_trace[11] = PointInTrace(trunk, None)
     forest.descr_nmr_to_point_in_trace[12] = PointInTrace(bridge1, None)
@@ -93,7 +93,7 @@ def add_instr(trace, opname, result, args, descr=None):
     trace.add_instr(op)
 
 def test_serialize_trace(forest):
-    trunk = forest.add_trace('loop', 0)
+    trunk = forest.add_trace('loop', 0, 0)
     _ = trunk.start_mark(const.MARK_TRACE_OPT)
     add_instr(trunk, 'load', 'i1', 'p0,i0', descr=('descr', 0x1))
     add_instr(trunk, 'int_add', 'i2', 'i1,i1')
@@ -107,7 +107,7 @@ def test_serialize_trace(forest):
     }
 
 def test_serialize_debug_merge_point(forest):
-    trunk = forest.add_trace('loop', 0)
+    trunk = forest.add_trace('loop', 0, 0)
     _ = trunk.start_mark(const.MARK_TRACE_OPT)
     trunk.add_instr(MergePoint({ 0x1: '/x.py',
                                  0x2: 2,
@@ -129,14 +129,14 @@ def test_serialize_debug_merge_point(forest):
            }
 
 def test_serialize_visual_trace_tree(forest):
-    trunk = forest.add_trace('loop', 0)
+    trunk = forest.add_trace('loop', 0, 0)
     _ = trunk.start_mark(const.MARK_TRACE_ASM)
     add_instr(trunk, 'label', None, 'i1,i1', descr=(None, 0xa))
     add_instr(trunk, 'int_add', 'i2', 'i1,i1')
     add_instr(trunk, 'guard_true', 'i2', None, descr=('guarddescr', 0x2))
     add_instr(trunk, 'jump', None, 'i1,i1', descr=(None, 0xa))
     #
-    bridge1 = forest.add_trace('bridge', 1)
+    bridge1 = forest.add_trace('bridge', 1, 0)
     forest.addrs[100] = bridge1
     forest.stitch_bridge(2, 100)
     _ = bridge1.start_mark(const.MARK_TRACE_ASM)

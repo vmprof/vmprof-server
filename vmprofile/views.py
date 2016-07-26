@@ -64,7 +64,9 @@ class LogSerializer(serializers.ModelSerializer):
 
     def get_jitlog_checksum(self, obj):
         if obj.jitlog:
-            return obj.jitlog.first().checksum
+            model = obj.jitlog.first()
+            if model:
+                return model.checksum
         return None
 
     def get_data(self, obj):
