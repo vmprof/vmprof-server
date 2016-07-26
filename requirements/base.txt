@@ -3,3 +3,5 @@ djangorestframework==3.2.3
 django_redis==4.4.2
 PyYAML==3.11
 six==1.10
+django_compressor
+csscompressor

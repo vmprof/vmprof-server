@@ -14,34 +14,35 @@ ENV_UWSGI = "virtualenv/bin/uwsgi"
 
 
 def deploy():
+    print("do not use this script anymore, it will fail")
 
-    target = "/tmp/%s.tar.gz" % uuid.uuid4()
-    run("wget %s -O %s" % (TARBALL, target))
+    #target = "/tmp/%s.tar.gz" % uuid.uuid4()
+    #run("wget %s -O %s" % (TARBALL, target))
 
-    run("mkdir -p %s" % PATH)
+    #run("mkdir -p %s" % PATH)
 
-    with cd(PATH):
+    #with cd(PATH):
 
-        with warn_only():
-            if files.exists("uwsgi.pid"):
-                run("%s --stop uwsgi.pid" % ENV_UWSGI)
+    #    with warn_only():
+    #        if files.exists("uwsgi.pid"):
+    #            run("%s --stop uwsgi.pid" % ENV_UWSGI)
 
-        run("rm vmprof -rf ")
-        run("mkdir vmprof")
+    #    run("rm vmprof -rf ")
+    #    run("mkdir vmprof")
 
-        run("tar -xf %s -C vmprof --strip-components=1" % target)
+    #    run("tar -xf %s -C vmprof --strip-components=1" % target)
 
-        run("rm %s" % target)
+    #    run("rm %s" % target)
 
-        if not files.exists("virtualenv"):
-            run("virtualenv virtualenv")
+    #    if not files.exists("virtualenv"):
+    #        run("virtualenv virtualenv")
 
-        run("%s install -r vmprof/requirements/production.txt" % ENV_PIP)
+    #    run("%s install -r vmprof/requirements/production.txt" % ENV_PIP)
 
-        run("mkdir -p vmprof/static")
+    #    run("mkdir -p vmprof/static")
 
-        with shell_env(DJANGO_SETTINGS_MODULE='settings.production'):
-            run("%s vmprof/manage.py collectstatic -c --noinput" % ENV_PYTHON)
-            run("%s vmprof/manage.py migrate" % ENV_PYTHON)
+    #    with shell_env(DJANGO_SETTINGS_MODULE='settings.production'):
+    #        run("%s vmprof/manage.py collectstatic -c --noinput" % ENV_PYTHON)
+    #        run("%s vmprof/manage.py migrate" % ENV_PYTHON)
 
-        run("%s --ini vmprof/uwsgi.ini" % ENV_UWSGI)
+    #    run("%s --ini vmprof/uwsgi.ini" % ENV_UWSGI)

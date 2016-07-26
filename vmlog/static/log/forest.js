@@ -225,9 +225,14 @@ TraceForest.prototype.mouse_leave_trace = function(){
 TraceForest.prototype.mouse_enter_node = function() {
   var jthis = jQuery(this)
   scale(jthis, 2)
-  var trace = jitlog.get_trace_by_id(parseInt(jthis.data('trace-id')))
+  var tid = jthis.data('trace-id')
+  var trace = jitlog.get_trace_by_id(parseInt(tid))
   var stage = trace.get_stage('asm')
-  var op = stage.get_operation_by_index(parseInt(jthis.data('op-index')))
+  var opidx = jthis.data('op-index')
+  var op = stage.get_operation_by_index(parseInt(opidx))
+  if (!op) {
+    console.error("stage asm of trace 0x{0} at index {1}".format(tid, opidx))
+  }
   var values = {
     node_type: jthis.data('op-type'),
   }

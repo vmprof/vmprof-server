@@ -8,6 +8,7 @@ from vmlog.views import (BinaryJitLogFileUploadView, MetaForestViewSet, TraceVie
         VisualTraceTreeViewSet)
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
+from webapp.views import index
 
 router = routers.DefaultRouter()
 router.register(r'log', LogViewSet)
@@ -22,8 +23,8 @@ urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^api/user/', MeView.as_view()),
     url(r'^api/jitlog/(?P<profile>[0-9a-z]*)/$', BinaryJitLogFileUploadView.as_view()),
+    url(r'^$', index)
 ]
 
-#if settings.DEBUG:
-# this should be changed in the long run, but it is fine for now.
-urlpatterns += [url(r'^$', static.serve, {'path': 'index.html', 'insecure': True})]
+if settings.DEBUG:
+    urlpatterns += [url(r'^$', static.serve, {'path': 'index.html', 'insecure': True})]
