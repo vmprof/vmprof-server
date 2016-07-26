@@ -3,12 +3,12 @@ import gzip
 
 from jitlog import constants as c
 from vmprof.binary import (encode_le_u16 as u16,
-        encode_le_u32 as u32, encode_s64 as s64, encode_u64 as u64,
-        encode_str, encode_le_addr as addr)
+        encode_le_u32 as u32, encode_le_u64 as u64,
+        encode_str, encode_le_u64 as addr) # the whole file will generate a 64 bit log
 
 test_logs = [
 ('v1',
-c.MARK_JITLOG_HEADER + b"\x01\x00" +
+c.MARK_JITLOG_HEADER + b"\x01\x00" + b"\x00" +
 c.MARK_RESOP_META + u16(8) +
   u16(0) + encode_str('load') +
   u16(1) + encode_str('store') +
