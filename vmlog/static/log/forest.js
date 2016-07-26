@@ -467,7 +467,9 @@ TraceForest.prototype.walk_visual_trace_tree = function(json, visual_nodes, yoff
     last = node;
     vtrace.nodes.push(node)
     if (type == 'g' && target !== 0) {
-      var bridge = this.walk_visual_trace_tree(json, json.stitches['0x'+target.toString(16)], yoff + order, traces, links);
+      var root = '0x' + target.toString(16)
+      var j = { 'root': root, 'stitches': json.stitches }
+      var bridge = this.walk_visual_trace_tree(j, j.stitches[root], yoff + order, traces, links);
       bridge.class += ' stitched'
       var target = bridge.nodes[0]
       if (target) {

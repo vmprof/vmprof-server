@@ -55,7 +55,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       filter_bridge: false,
       show_asm: false,
       trace_type: 'opt',
-      show_source_code: true,
+      show_source_code: false,
     })
     $scope.live_ranges = { 8: { 0: {'background-color': 'green', 'height': '20px', 'width': '2px'}} }
     $scope.loader = new Loading($scope)

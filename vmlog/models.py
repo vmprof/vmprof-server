@@ -27,7 +27,8 @@ class BinaryJitLog(models.Model):
     file = models.FileField(upload_to='uploads/%Y/%m/%d')
     # relations
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
-    profile = models.ForeignKey(Profile, null=True, blank=False)
+    profile = models.ForeignKey(Profile, related_name='jitlog',
+                                null=True, blank=False)
 
     def decode_forest(self):
         forest = FOREST_CACHE.get(self.checksum)

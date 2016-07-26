@@ -57,9 +57,15 @@ class UserRegisterSerializer(serializers.Serializer):
 
 class LogSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
+    jitlog_checksum = serializers.SerializerMethodField()
 
     class Meta:
         model = Log
+
+    def get_jitlog_checksum(self, obj):
+        if obj.jitlog:
+            return obj.jitlog.first().checksum
+        return None
 
     def get_data(self, obj):
         return json.loads(obj.data)

@@ -167,7 +167,6 @@ class TraceSerializer(BaseSerializer):
                                 if filename not in source_code:
                                     source_code[filename] = {}
                                 lines = source_code[filename]
-                                assert lineno not in lines
                                 lines[lineno] = (indent, line)
         #
         if trace.addrs != (-1,-1):

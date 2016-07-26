@@ -10,7 +10,7 @@
     <div class="text-center" ng-show="has_jitlog">
         <h3>But there is a JIT log.</h3>
         <a
-           ng-href="#/{{ log.checksum }}/traces">
+           ng-href="#/{{ log.jitlog_checksum }}/traces">
              <i class="fa fa-file-text"></i> view here
         </a>
     </div>
@@ -52,7 +52,7 @@
             </span>
 
             <span class="pull-right">
-                <a ng-href="#/{{ log.checksum }}/traces">JIT Log</a>
+                <a ng-href="#/{{ log.jitlog_checksum }}/traces">JIT Log</a>
             </span>
         </div>
 
