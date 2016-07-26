@@ -118,7 +118,6 @@ var Visualization = {};
 
         function draw(x, y, width, height, node, path) {
             if (node.total < cutoff) {
-                console.log(node.total, cutoff);
                 return;
             }
             if (y > $element.height())
@@ -290,9 +289,6 @@ var Visualization = {};
             }
         }
         walk_recursive($scope.stats.nodes, false);
-        for (var i in found) {
-            console.log(found[i].name, found[i].total);
-        }
     };
 
 })();
