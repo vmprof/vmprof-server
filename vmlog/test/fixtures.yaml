@@ -10,3 +10,9 @@
     created: !!timestamp '2016-05-20 11:07:21.149913+00:00'
     file: 'vmlog/test/data/log-richards.zip'
     user: null
+- model: vmlog.binaryjitlog
+  pk: ppc64lev1 
+  fields:
+    created: !!timestamp '2016-07-25 12:12:12.0+00:00'
+    file: 'vmlog/test/data/log-test-2-ppc64le-v1.jlog.zip'
+    user: null

@@ -8,7 +8,7 @@ from vmprof.binary import (encode_le_u16 as u16,
 
 test_logs = [
 ('v1',
-c.MARK_JITLOG_HEADER + b"\x01\x00" + b"\x00" +
+c.MARK_JITLOG_HEADER + b"\x01\x00" + b"\x00" + encode_str("x86_64") +
 c.MARK_RESOP_META + u16(8) +
   u16(0) + encode_str('load') +
   u16(1) + encode_str('store') +
@@ -91,7 +91,31 @@ c.MARK_START_TRACE + addr(4) + encode_str('loop') + addr(0) +
       u16(26) + b"\x0c" + encode_str("yield 13") +
       u16(27) + b"\x0c" + encode_str("a,b,c = call.me(1,2,3) # here is a comment") +
       u16(33) + b"\x0c" + encode_str("@hello there")
-)]
+),
+
+# a simple trace
+('ppc64le-v1',
+c.MARK_JITLOG_HEADER + b"\x01\x00" + b"\x00" + encode_str("ppc64le") +
+c.MARK_RESOP_META + u16(2) +
+  u16(0) + encode_str('load') +
+  u16(1) + encode_str('store') +
+
+c.MARK_START_TRACE + addr(0) + encode_str('loop') + addr(0) +
+  c.MARK_TRACE_OPT + addr(0) +
+  c.MARK_INIT_MERGE_POINT + u16(2) + bytes([c.MP_FILENAME[0]]) + b"s" + bytes([c.MP_SCOPE[0]]) + b"s" +
+  c.MARK_RESOP + u16(0) + encode_str('i2,p0,i1') +
+  c.MARK_MERGE_POINT + b"\xff" + encode_str("/test.py")  + b"\xff" + encode_str("ppcloop") +
+
+  c.MARK_TRACE_ASM + addr(0) +
+  c.MARK_INIT_MERGE_POINT + u16(2) + bytes([c.MP_FILENAME[0]]) + b"s" + bytes([c.MP_SCOPE[0]]) + b"s" +
+  c.MARK_INPUT_ARGS  + encode_str('p0,i1') +
+  c.MARK_RESOP + u16(0) + encode_str('i2,p0,i1') +
+  c.MARK_ASM + u16(0) + u32(4) + b"\x10\x00\x26\xe9" +
+  c.MARK_MERGE_POINT + b"\xff" + encode_str("/test.py")  + b"\xff" + encode_str("funcname1") +
+  c.MARK_RESOP + u16(1) + encode_str('p1,i1,i2') +
+  c.MARK_ASM + u16(0) + u32(4) + b"\x10\x00\x26\xf9"
+)
+]
 
 def main():
     path = os.path.dirname(__file__)

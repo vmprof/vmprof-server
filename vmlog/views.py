@@ -82,11 +82,12 @@ class LogMetaSerializer(BaseSerializer):
                 descr_nmr = bridge.get_stitched_descr_number()
                 target_addr = bridge.addrs[0]
                 bridgemap[descr_nmr] = target_addr
-
         return {
             'resops': forest.resops,
             'traces': traces,
-            'bridges': bridges
+            'bridges': bridges,
+            'word_size': forest.word_size,
+            'machine': forest.machine
         }
 
 class MetaForestViewSet(viewsets.ModelViewSet):

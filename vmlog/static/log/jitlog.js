@@ -20,7 +20,7 @@ Loading.prototype.complete = function() {
   return this._requests.length === 0
 }
 
-var JitLog = function (data) {
+var JitLog = function () {
   this._id_to_traces = {};
   this._addr_to_trace = {}
   this._descrnmr_to_trace = {}
@@ -147,6 +147,8 @@ JitLog.hoverVars = function($scope) {
 
 JitLog.prototype.set_meta = function(meta) {
   this._resops = meta.resops
+  this.machine = meta.machine
+  this.word_size = meta.word_size
   var total_entries = 0
   var traces = meta.traces
   for (var key in traces) {
@@ -556,7 +558,34 @@ ResOp.prototype.source_code = function(index) {
   return text.join("<br>")
 }
 
-ResOp.prototype.get_disassembly = function() {
+var get_capstone_arch_descr = function(jl) {
+  var machine = jl.machine || ''
+  var word_size = jl.word_size || 8
+  var mode = 0
+  if (word_size == 4) {
+    mode |= capstone.MODE_32
+  } else {
+    mode |= capstone.MODE_64
+  }
+  if (machine.startsWith("x86")) {
+    return { 'mode': mode, 'arch': capstone.ARCH_X86 }
+  } else if (machine.startsWith("ppc")) {
+    if (machine.endsWith("le")) {
+      mode |= capstone.MODE_LITTLE_ENDIAN
+    } else if (machine.endsWith("be")) {
+      mode |= capstone.MODE_BIG_ENDIAN
+    }
+    return { 'mode': mode, 'arch': capstone.ARCH_PPC }
+  } else if (machine.startsWith("s390x")) {
+    mode |= capstone.MODE_BIG_ENDIAN
+    return { 'mode': mode, 'arch': capstone.ARCH_SYSZ }
+  } else if (machine.startsWith("arm")) {
+    return { 'mode': mode, 'arch': capstone.ARCH_ARM }
+  }
+  return null
+}
+
+ResOp.prototype.get_disassembly = function(jl) {
   if (this._assembly) {
     return this._assembly;
   }
@@ -580,7 +609,12 @@ ResOp.prototype.get_disassembly = function() {
     return text.replace(regex, '<span class="reg" data-varid="r$1">r$1</span>')
   }
 
-  var cs = new capstone.Cs(capstone.ARCH_X86, capstone.MODE_64);
+  var arch_descr = get_capstone_arch_descr(jl)
+  if (arch_descr === null) {
+    return ''
+  }
+
+  var cs = new capstone.Cs(arch_descr.arch, arch_descr.mode);
   var instructions = cs.disasm(buffer, offset);
   instructions.forEach(function (instr) {
     array.push('<span class="asm-mnemoic">' + 
