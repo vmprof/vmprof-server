@@ -16,7 +16,7 @@ class FakeJitLog(object):
         return self.forest
 
 def test_to_json_meta_info():
-    forest = TraceForest(1)
+    forest = TraceForest(1, False, 'x86')
     forest.resops = { 15: 'divide' }
     trace = forest.add_trace('loop', 0, 0)
     trace.counter = 42
@@ -28,6 +28,8 @@ def test_to_json_meta_info():
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
                   'type': 'loop', 'counter_points': { 'enter': 42 } } },
+              'word_size': 8,
+              'machine': 'x86'
             }
 
 def test_to_json_meta_bridges():

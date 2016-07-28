@@ -10,7 +10,7 @@ class TestBinaryJitLogDecode(TestCase):
     fixtures = ['vmlog/test/fixtures.yaml']
 
     def test_parse(self):
-        bjl = BinaryJitLog.objects.get(checksum='1111')
+        bjl = BinaryJitLog.objects.get(checksum='richards')
         forest = bjl.decode_forest()
 
     def test_parse_log_with_source_code(self):
@@ -27,12 +27,13 @@ class TestBinaryJitLogDecode(TestCase):
         }
 
     def test_get_meta_for_jitlog(self):
-        response = self.client.get('/api/log/meta/1111/')
+        response = self.client.get('/api/log/meta/richards/')
         jsondata = response.data
         traces = jsondata['traces']
-        assert len(jsondata) == 3
         assert 'resops' in jsondata and 'traces' in jsondata
         assert 'bridges' in jsondata
+        assert 'machine' in jsondata
+        assert 'word_size' in jsondata
         assert len(jsondata['resops']) > 0
         assert len(traces) > 20
         # this is the jitlog for richards. there must be the scope 'schedule'

@@ -5,10 +5,10 @@
     file: 'vmlog/test/data/log-test-1-v1.jlog.zip'
     user: null
 - model: vmlog.binaryjitlog
-  pk: 1111
+  pk: richards
   fields:
     created: !!timestamp '2016-05-20 11:07:21.149913+00:00'
-    file: 'vmlog/test/data/log-richards.zip'
+    file: 'vmlog/test/data/log-test-richards-v1.jlog.zip'
     user: null
 - model: vmlog.binaryjitlog
   pk: ppc64lev1 
