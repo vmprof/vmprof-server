@@ -199,7 +199,7 @@ TraceForest.prototype.mouse_click_trace = function(){
   var jthis = jQuery(this)
   var trace = jitlog.get_trace_by_id(jthis.data('trace-id'))
   var $scope = trace_forest.$scope
-  $scope.switch_trace(trace, $scope.trace_type)
+  $scope.switch_trace(trace, $scope.$storage.trace_type)
 }
 
 TraceForest.prototype.mouse_enter_trace = function(){
@@ -346,7 +346,7 @@ TraceForest.prototype.display_tree = function($scope, trunk, visual_trace){
   if (par) {
     this.up_layer.on("click", function(){
                       var trace = jitlog.get_trace_by_id(parseInt(par,16))
-                      $scope.switch_trace(trace, trace.type)
+                      $scope.switch_trace(trace,  $scope.$storage.trace_type)
                     })
     this.up_layer.append("svg:circle")
             .attr("r", 8)
