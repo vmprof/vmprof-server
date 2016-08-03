@@ -1,35 +1,26 @@
-# Vmprof
+# VMProf
 
-
-Virtual Machine profiler (so far restricted to pypy and cpython)
-
+A Virtual Machine profiling platform. Currently restricted to PyPy and CPython. The service is hosted at http://www.vmprof.com
 
 ## Development
 
-This setup is available on both Linux and Windows.
-	
-	pip install -r requirements\development.txt
-	python manage.py syncdb --noinput
-	python manage.py runserver
+Setting up development can be done using the following commands:
+
+	$ virtualenv -p /usr/bin/python3 vmprof3
+	$ source vmprof3/bin/activate
+	# setup django service
+	(vmprof3) $ cd ../vmprof-server
+	(vmprof3) $ pip install -r requirements/development.txt
+	(vmprof3) $ python manage.py migrate
+	(vmprof3) $ python manage.py runserver -v 3
+	# install vmprof for development (only needed if you want to co develop vmprof-python)
+	(vmprof3) $ git clone git@github.com:vmprof/vmprof-python.git ../
+	(vmprof3) $ cd ../vmprof-python
+	(vmprof3) $ python setup.py develop
+
+Please also consult our section for development at https://vmprof.readthedocs.org.
 
 ## Test
 
 You should run the tests before committing with this command:
-    py.test tests/
-
-## Deployment
-
-	apt-get install gcc python-dev postgresql-9.X postgresql-server-dev-9.X
-
-    pip install -r requirements/development.txt
-	
-    python manage.py syncdb --noinput
-    python manage.py migrate
-	python manage.py runserver
-
-	edit /etc/postgresql/9.X/main/pg_hba.conf
-	local all postgres trust
-	createdb -U postgres vmprof
-
-	#use this to deploy to your own server
-    fab deploy -H vmprof.com -u {USER}
+    py.test .
