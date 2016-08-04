@@ -566,7 +566,7 @@ ResOp.prototype.source_code = function(index) {
       var indent = '';
       if (mp.lineno in source_lines) {
         var indent_n_line = source_lines[mp.lineno]
-        indent = Array(indent_n_line[0]).join(' ')
+        indent = Array(indent_n_line[0]+1).join(' ')
         line = indent_n_line[1]
       } else {
         line = "?"
@@ -587,7 +587,13 @@ ResOp.prototype.byte_codes = function(index) {
   var text = []
   var code = this._stage._code
   merge_points.forEach(function(mp) {
-    text.push('<code class="trace-bytecode">' + mp.opcode + '</code>')
+    var source_lines = code[mp.filename]
+    var indent = '';
+    if (mp.lineno in source_lines) {
+      var indent_n_line = source_lines[mp.lineno]
+      indent = Array(indent_n_line[0]+1).join(' ')
+    }
+    text.push('<code class="trace-bytecode">&gt;<pre>'+indent+mp.opcode+'</pre></code>')
   })
   return text.join("<br>")
 }

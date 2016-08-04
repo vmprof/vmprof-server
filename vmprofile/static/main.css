@@ -282,11 +282,6 @@ span.selected.var {
 }
 
 
-.source-code {
-    position: relative;
-    left: 5px;
-}
-
 #help {
     position: relative;
     width: 100%;
@@ -336,7 +331,14 @@ ul.inline li {
     padding: 0;
 }
 
+.source-code {
+    position: relative;
+    left: 5px;
+}
+
 code.trace-source {
+    padding-left: 0;
+    margin-left: 35px;
     background: none;
 }
 
@@ -344,6 +346,27 @@ code.trace-source > pre {
     display: inline;
     background: none;
     border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.byte-code {
+    position: relative;
+    left: 5px;
+}
+
+code.trace-bytecode {
+    background: none;
+    padding: 0;
+    margin: 0;
+    margin-left: 35px;
+    color: #4682B4;
+}
+code.trace-bytecode > pre {
+    border: 0;
+    display: inline;
+    background: none;
+    color: inherit;
     padding: 0;
     margin: 0;
 }
