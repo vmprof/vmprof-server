@@ -533,15 +533,34 @@ ResOp.prototype.to_s = function(index) {
 
 ResOp.prototype.source_code = function(index) {
   // first extract the merge points for this index
-  var merge_points = this._stage._data.merge_points[index]
+  var data = this._stage._data
+  var merge_points = data.merge_points[index]
   if (!merge_points) { return '' }
+
+  // try to find the previous merge point
+  var prev_merge_points
+  for (prev_index = index - 1; prev_index >= 0; prev_index -= 1) {
+    prev_merge_points = data.merge_points[prev_index]
+    if (prev_merge_points) {
+      break
+    }
+  }
   var resop = this
   var text = []
   var code = this._stage._code
+  var last_filename
+  var last_lineno
+  var last_scope
+  if (prev_merge_points) {
+    last_filename = prev_merge_points[prev_merge_points.length - 1].filename
+    last_lineno = prev_merge_points[prev_merge_points.length - 1].lineno
+  }
   merge_points.forEach(function(mp) {
-    mp.filename
-    mp.lineno
-    if (mp.filename in code) {
+    var same_line = (last_filename == mp.filename) && (last_lineno == mp.lineno)
+    // only print the source line if it is different than the source line of
+    // the previous merge point. Often, it is the same source line, since there
+    // are many opcodes on the same line.
+    if (!same_line && mp.filename in code) {
       var source_lines = code[mp.filename]
       var line = ''
       var indent = '';
@@ -553,6 +572,8 @@ ResOp.prototype.source_code = function(index) {
         line = "?"
       }
       text.push('<code class="trace-source">&gt;<pre>'+indent+line+'</pre></code>')
+      last_filename = mp.filename
+      last_lineno = mp.lineno
     }
   })
   return text.join("<br>")

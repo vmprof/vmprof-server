@@ -83,6 +83,62 @@ c.MARK_START_TRACE + addr(4) + encode_str('loop') + addr(0) +
   c.MARK_MERGE_POINT + b"\xff" + encode_str("/b.py") + b"\xff" + encode_str("inlined_func1") + b"\x00" + u64(33) +
   c.MARK_RESOP + u16(1) + encode_str('?,p1,i2,i1') +
 
+# loop duplicated source code lines in merge point
+c.MARK_START_TRACE + addr(5) + encode_str('loop') + addr(0) +
+  c.MARK_TRACE_OPT + addr(5) +
+  c.MARK_INPUT_ARGS  + encode_str('p1,i1') +
+  c.MARK_INIT_MERGE_POINT + u16(4) + bytes([c.MP_FILENAME[0]]) + b"s" +
+                                     bytes([c.MP_SCOPE[0]]) + b"s" +
+                                     bytes([c.MP_LINENO[0]]) + b"i" +
+                                     bytes([c.MP_OPCODE[0]]) + b"s" +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/a.py") +
+      b"\xff" + encode_str("func_opcode_and_dup_merge_points") +
+      b"\x00" + u64(1) +
+      b"\xff" + encode_str("LOAD_FAST") +
+  c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/a.py") +
+      b"\xff" + encode_str("funcx") +
+      b"\x00" + u64(1) +
+      b"\xff" + encode_str("LOAD_FAST") +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/a.py") +
+      b"\xff" + encode_str("funcx") +
+      b"\x00" + u64(1) +
+      b"\xff" + encode_str("LOAD_FAST") +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/a.py") +
+      b"\xff" + encode_str("funcx") +
+      b"\x00" + u64(1) +
+      b"\xff" + encode_str("INT_ADD") +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/a.py") +
+      b"\xff" + encode_str("funcx") +
+      b"\x00" + u64(1) +
+      b"\xff" + encode_str("STORE_FAST") +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/b.py") +
+      b"\xff" + encode_str("funcy") +
+      b"\x00" + u64(25) +
+      b"\xff" + encode_str("LOAD_FAST") +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/b.py") +
+      b"\xff" + encode_str("funcy") +
+      b"\x00" + u64(26) +
+      b"\xff" + encode_str("YIELD") +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/b.py") +
+      b"\xff" + encode_str("funcy") +
+      b"\x00" + u64(26) +
+      b"\xff" + encode_str("YIELD2") +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/b.py") +
+      b"\xff" + encode_str("funcy") +
+      b"\x00" + u64(27) +
+      b"\xff" + encode_str("CALL") +
+  c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') +
+
   # keep this to the very end!!
   c.MARK_SOURCE_CODE + encode_str("/a.py") + u16(1) +
       u16(1) + b"\x04" + encode_str("a = b + c")  +
