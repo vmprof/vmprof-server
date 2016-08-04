@@ -1,5 +1,7 @@
 # VMProf
 
+[![Build Status](https://travis-ci.org/vmprof/vmprof-server.svg?branch=master)](https://travis-ci.org/vmprof/vmprof-server)
+
 A Virtual Machine profiling platform. Currently restricted to PyPy and CPython. The service is hosted at http://www.vmprof.com
 
 ## Development
@@ -22,5 +24,7 @@ Please also consult our section for development at https://vmprof.readthedocs.or
 
 ## Test
 
-You should run the tests before committing with this command:
-    py.test .
+For new feature requests open a new branch or fork the repository. We use continous integration
+provided by travis. Before you commit run tests using py.test:
+
+	py.test .
