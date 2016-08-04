@@ -579,6 +579,20 @@ ResOp.prototype.source_code = function(index) {
   return text.join("<br>")
 }
 
+ResOp.prototype.byte_codes = function(index) {
+  // first extract the merge points for this index
+  var data = this._stage._data
+  var merge_points = data.merge_points[index]
+  var resop = this
+  var text = []
+  var code = this._stage._code
+  merge_points.forEach(function(mp) {
+    text.push('<code class="trace-bytecode">' + mp.opcode + '</code>')
+  })
+  return text.join("<br>")
+}
+
+
 var get_capstone_arch_descr = function(jl) {
   var machine = jl.machine || ''
   var word_size = jl.word_size || 8
