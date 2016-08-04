@@ -556,9 +556,7 @@ ResOp.prototype.source_code = function(index) {
     last_lineno = prev_merge_points[prev_merge_points.length - 1].lineno
   }
   merge_points.forEach(function(mp) {
-    mp.filename
-    mp.lineno
-    same_line = (last_filename == mp.filename) && (last_lineno == mp.lineno)
+    var same_line = (last_filename == mp.filename) && (last_lineno == mp.lineno)
     // only print the source line if it is different than the source line of
     // the previous merge point. Often, it is the same source line, since there
     // are many opcodes on the same line.
