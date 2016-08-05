@@ -504,6 +504,7 @@ ResOp.prototype.to_s = function(index) {
     if (variable.startsWith("i") ||
         variable.startsWith("r") ||
         variable.startsWith("p") ||
+        variable.startsWith("v") ||
         variable.startsWith("f")) {
       var type = 'var';
     }

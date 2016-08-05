@@ -2,7 +2,7 @@ import os
 import gzip
 
 from jitlog import constants as c
-from vmprof.binary import (encode_le_u16 as u16,
+from vmshare.binary import (encode_le_u16 as u16,
         encode_le_u32 as u32, encode_le_u64 as u64,
         encode_str, encode_le_u64 as addr) # the whole file will generate a 64 bit log
 
