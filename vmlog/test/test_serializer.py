@@ -18,7 +18,7 @@ class FakeJitLog(object):
 def test_to_json_meta_info():
     forest = TraceForest(1, False, 'x86')
     forest.resops = { 15: 'divide' }
-    trace = forest.add_trace('loop', 0, 0)
+    trace = forest.add_trace('loop', 0, 0, 'john')
     trace.counter = 42
     stage = trace.start_mark(const.MARK_TRACE_OPT)
     stage.append_op(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
@@ -27,7 +27,7 @@ def test_to_json_meta_info():
     assert json == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
-                  'type': 'loop', 'counter_points': { 'enter': 42 } } },
+                  'type': 'loop', 'counter_points': { 0: 42 }, 'jd_name': 'john' } },
               'word_size': 8,
               'machine': 'x86'
             }

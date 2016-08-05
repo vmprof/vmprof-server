@@ -228,19 +228,20 @@ Trace = function(jitlog, id, meta) {
   this.counter_points = meta.counter_points
   this._bridges = []
   this._stages = {}
+  this.jd_name = meta.jd_name
 }
 
 Trace.prototype.set_data = function(data) {
   var _this = this;
   var stages = data.stages;
   if (stages.noopt){
-    this._stages.noopt = new Stage(this._jitlog, stages.noopt, data.code)
+    this._stages.noopt = new Stage(this, stages.noopt, data.code)
   }
   if (stages.opt){
-    this._stages.opt = new Stage(this._jitlog, stages.opt, data.code)
+    this._stages.opt = new Stage(this, stages.opt, data.code)
   }
   if (stages.asm){
-    this._stages.asm = new Stage(this._jitlog, stages.asm, data.code)
+    this._stages.asm = new Stage(this, stages.asm, data.code)
   }
 }
 
@@ -251,7 +252,7 @@ Trace.prototype.get_enter_percent = function() {
     return this.entry_percent
 }
 Trace.prototype.get_enter_count = function() {
-  return this.counter_points['enter'] || 0
+  return this.counter_points[0] || 0
 }
 
 Trace.prototype.get_id = function() {
@@ -375,15 +376,16 @@ Trace.prototype.get_stage = function(name) {
   if (this._stages[name] !== undefined) {
     return this._stages[name]
   }
-  return new Stage(this._jitlog, {'ops': [], 'tick': -1}, {});
+  return new Stage(this, {'ops': [], 'tick': -1}, {});
 }
 
 var MergePoint = function(data) {
   this._data = data
 }
 
-var Stage = function(jitlog, data, code) {
-  this._jitlog = jitlog
+var Stage = function(trace, data, code) {
+  this._trace = trace
+  this._jitlog = trace._jitlog
   this._data = data
   this._code = code
   this._tick = data.tick
@@ -493,8 +495,10 @@ ResOp.prototype.get_stitch_id = function() {
 }
 
 ResOp.prototype.to_s = function(index) {
+  var humanindex = index
+  index = index - 1
   var prefix = ''
-  prefix += '<span class="trace-line-number">'+index+':</span> '
+  prefix += '<span class="trace-line-number">'+humanindex+':</span> '
   var fvar = function(variable) {
     var type = 'const';
     if (variable.startsWith("i") ||
@@ -512,7 +516,7 @@ ResOp.prototype.to_s = function(index) {
   var opname = this._jitlog._resops[opnum]
   var args = this._data.args || []
   var descr = this._data.descr
-  var format = function(prefix, opname, args, descr) {
+  var format = function(prefix, opname, args, descr, suffix) {
     var arg_str = ''
     for (var i = 0; i < args.length; i++) {
       arg_str += fvar(args[i]);
@@ -526,9 +530,18 @@ ResOp.prototype.to_s = function(index) {
       descr = '';
     }
     return prefix + '<span class="resop-name">' +
-           opname + '</span>(' + arg_str + ')' + descr
+           opname + '</span>(' + arg_str + ')' + descr + suffix
   }
-  return format(prefix, opname, args, descr);
+  var suffix = '';
+  if (opname === "increment_debug_counter") {
+    var trace = this._stage._trace
+    var count = trace.counter_points[index]
+    if (count) {
+      var count = 
+      suffix += ' <span class="resop-run-count">passed '+numeral(count).format('0.0 a')+' times</span>'
+    }
+  }
+  return format(prefix, opname, args, descr, suffix);
 }
 
 ResOp.prototype.source_code = function(index) {
@@ -586,6 +599,10 @@ ResOp.prototype.byte_codes = function(index) {
   var resop = this
   var text = []
   var code = this._stage._code
+  if (!merge_points) {
+    // is the case for jit drivers such as the ones in micro numpy (do not have byte codes)
+    return '';
+  }
   merge_points.forEach(function(mp) {
     var source_lines = code[mp.filename]
     var indent = '';

@@ -115,6 +115,7 @@
                   <div>
                       <span class="trace-type">{{trace.get_type()}}</span>
                       <span class="trace-name">{{trace.get_func_name()}}</span>
+                      <span class="trace-jd-name" ng-if="trace.jd_name">{{trace.jd_name}}</span>
                   </div>
                   <div class="trace-info">
                       <span class="filename">{{trace.get_filename()}}</span>

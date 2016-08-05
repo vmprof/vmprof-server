@@ -67,6 +67,8 @@ class LogMetaSerializer(BaseSerializer):
             counter_points = trace.get_counter_points()
             mp_meta = { 'scope': 'unknown', 'lineno': -1, 'filename': '',
                         'type': trace.type, 'counter_points': counter_points }
+            if trace.jd_name:
+                mp_meta['jd_name'] = trace.jd_name
             traces[id] = mp_meta
             if mp:
                 mp_meta['scope'] = mp.get_scope()

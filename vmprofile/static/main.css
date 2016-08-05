@@ -160,6 +160,11 @@ span.resop-descr {
     color: gray;
 }
 
+span.resop-run-count {
+    font-size: 0.7em;
+    color: skyblue;
+}
+
 .trace-asm {
     margin-left: 31px;
     color: #969896;
@@ -168,6 +173,16 @@ span.resop-descr {
 
 .trace-bg-active {
     fill: #a8a8a8;
+}
+
+.trace-jd-name {
+    position: absolute;
+    right: 0;
+    color: #50cB81;
+}
+
+.trace-entry > div {
+    position: relative;
 }
 
 .instr {
