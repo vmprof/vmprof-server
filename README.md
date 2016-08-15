@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/vmprof/vmprof-server.svg?branch=master)](https://travis-ci.org/vmprof/vmprof-server)
 
-A Virtual Machine profiling platform. Currently restricted to PyPy and CPython. The service is hosted at http://www.vmprof.com
+A Virtual Machine profiling platform. Currently restricted to PyPy and CPython. The service is hosted at http://vmprof.com
 
 ## Development
 
