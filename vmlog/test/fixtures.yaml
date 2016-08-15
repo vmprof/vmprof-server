@@ -16,3 +16,9 @@
     created: !!timestamp '2016-07-25 12:12:12.0+00:00'
     file: 'vmlog/test/data/log-test-2-ppc64le-v1.jlog.zip'
     user: null
+- model: vmlog.binaryjitlog
+  pk: sorting-v2
+  fields:
+    created: !!timestamp '2016-08-15 12:12:12.0+00:00'
+    file: 'vmlog/test/data/log-test-3-sorting-v2.jlog.zip'
+    user: null
