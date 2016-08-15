@@ -179,17 +179,6 @@ c.MARK_RESOP_META + u16(3) +
   u16(0) + encode_str('load') +
   u16(1) + encode_str('store') +
   u16(2) + encode_str('int_add') +
-c.MARK_START_TRACE + addr(1) + encode_str('loop') + addr(0) + encode_str('maindriver') +
-  c.MARK_TRACE_OPT + addr(1) +
-  c.MARK_INPUT_ARGS  + encode_str('p1,i1') +
-  c.MARK_INIT_MERGE_POINT + u16(3) + bytes([c.MP_FILENAME[0]]) + b"s" +
-                                     bytes([c.MP_SCOPE[0]]) + b"s" +
-                                     bytes([c.MP_LINENO[0]]) + b"i" +
-  c.MARK_MERGE_POINT +
-      b"\xff" + encode_str("/a.py") +
-      b"\xff" + encode_str("a order 3") +
-      b"\x00" + u64(1) +
-  c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') + encode_str('f1,f2') +
 
 c.MARK_START_TRACE + addr(2) + encode_str('loop') + addr(0) + encode_str('driver b') +
   c.MARK_TRACE_OPT + addr(2) +
@@ -199,7 +188,19 @@ c.MARK_START_TRACE + addr(2) + encode_str('loop') + addr(0) + encode_str('driver
                                      bytes([c.MP_LINENO[0]]) + b"i" +
   c.MARK_MERGE_POINT +
       b"\xff" + encode_str("/a.py") +
-      b"\xff" + encode_str("b order 2") +
+      b"\xff" + encode_str("b order 3") +
+      b"\x00" + u64(1) +
+  c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') + encode_str('f1,f2') +
+
+c.MARK_START_TRACE + addr(1) + encode_str('loop') + addr(0) + encode_str('maindriver') +
+  c.MARK_TRACE_OPT + addr(1) +
+  c.MARK_INPUT_ARGS  + encode_str('p1,i1') +
+  c.MARK_INIT_MERGE_POINT + u16(3) + bytes([c.MP_FILENAME[0]]) + b"s" +
+                                     bytes([c.MP_SCOPE[0]]) + b"s" +
+                                     bytes([c.MP_LINENO[0]]) + b"i" +
+  c.MARK_MERGE_POINT +
+      b"\xff" + encode_str("/a.py") +
+      b"\xff" + encode_str("a order 2") +
       b"\x00" + u64(1) +
   c.MARK_RESOP + u16(2) + encode_str('i2,i1,i1') + encode_str('f1,f2') +
 

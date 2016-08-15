@@ -88,7 +88,7 @@
       </svg>
     </div>
 
-    <div class="row breathing-row" ng-if="traces">
+    <div class="row breathing-row" ng-if="jitlog">
       <div class="col-sm-4 col-lg-4 trace-control" ng-if="jitlog">
           <div class="breathing-row">
               <input id="filter_text" class="form-control input-group-sm" type="text"
@@ -97,6 +97,7 @@
           </div>
 
           <div class="form-inline">
+              <span style="display: inline-block; min-width: 60px;">Show:</span>
               <label class="checkbox-line">
                   <input id="filter_loop" type="checkbox" ng-model="$storage.filter_loop" checked="true" />
                   Loops
@@ -105,17 +106,35 @@
                   <input id="filter_bridge" type="checkbox" ng-model="$storage.filter_bridge" />
                   Bridges
               </label>
+
+              <br>
+              <span style="display: inline-block; min-width: 60px;">Sort by:</span>
+              <label class="radio">
+                  <input id="sort_count" name="sort_traces" type="radio" ng-model="$storage.sort_traces" value="count"/>
+                  <span>Count</span>
+              </label>
+              <label class="radio">
+                  <input id="sort_name" name="sort_traces" type="radio" ng-model="$storage.sort_traces" value="name" />
+                  <span>Name</span>
+              </label>
+              <label class="radio">
+                  <input id="sort_recording" name="sort_traces" type="radio" ng-model="$storage.sort_traces" value="recording" />
+                  <span>Recording</span>
+              </label>
           </div>
 
           <ul class="trace-entries">
               <li class="trace-entry"
-                  ng-repeat="trace in filter_traces($storage.filter_text, $storage.filter_loop, $storage.filter_bridge)"
+                  ng-repeat="trace in filter_and_sort_traces($storage.filter_text, $storage.filter_loop, $storage.filter_bridge, $storage.sort_traces)"
                   ng-class="{'active': trace == selected_trace}"
                   ng-click="switch_trace(trace, $storage.trace_type, $storage.show_asm)">
                   <div>
                       <span class="trace-type">{{trace.get_type()}}</span>
                       <span class="trace-name">{{trace.get_func_name()}}</span>
                       <span class="trace-jd-name" ng-if="trace.jd_name">{{trace.jd_name}}</span>
+                  </div>
+                  <div class="trace-info">
+                      entered {{numeral(trace.counter_points[0]).format('0')}} times
                   </div>
                   <div class="trace-info">
                       <span class="filename">{{trace.get_filename()}}</span>

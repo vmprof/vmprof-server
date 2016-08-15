@@ -77,6 +77,7 @@ class LogMetaSerializer(BaseSerializer):
                 mp_meta['filename'] = filename
             if trace.parent:
                 mp_meta['parent'] = hex(trace.parent.unique_id)
+            mp_meta['stamp'] = trace.stamp
             # serialize all trace connections
             bridgemap = {}
             bridges[id] = bridgemap

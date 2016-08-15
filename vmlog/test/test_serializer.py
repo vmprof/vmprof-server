@@ -27,7 +27,8 @@ def test_to_json_meta_info():
     assert json == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
-                  'type': 'loop', 'counter_points': { 0: 42 }, 'jd_name': 'john' } },
+                  'type': 'loop', 'counter_points': { 0: 42 }, 'jd_name': 'john',
+                  'stamp': 0 } },
               'word_size': 8,
               'machine': 'x86'
             }

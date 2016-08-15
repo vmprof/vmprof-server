@@ -57,12 +57,14 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       trace_type: 'opt',
       show_source_code: true,
       show_byte_code: false,
+      sort_traces: 'count',
     })
     $scope.live_ranges = { 8: { 0: {'background-color': 'green', 'height': '20px', 'width': '2px'}} }
     $scope.loader = new Loading($scope)
     $scope.loader.start()
     $scope.ops = []
     $scope.selected_trace = null;
+    $scope.numeral = numeral
     var lh = $scope.$storage.last_trace_hash
     if (lh !== $scope.$storage.last_trace_hash) {
       $scope.$storage.last_trace_id = null
@@ -77,10 +79,6 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         cache: true
     }).then(function(response) {
       jitlog.set_meta(response.data)
-      //$scope.meta = response.data
-
-      //$scope.log = response.data;
-      $scope.traces = jitlog.filter_traces("", true, false)
 
       var last_id = $scope.$storage.last_trace_id
       var trace = jitlog.get_trace_by_id(last_id)
@@ -131,7 +129,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       })
     }
 
-    $scope.filter_traces = function(text, loops, bridges) {
+    $scope.filter_and_sort_traces = function(text, loops, bridges, ordering) {
       if (!text){ text = ""; }
       //
       var type = "none"
@@ -139,6 +137,6 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       else if (loops) { var type = "loop" }
       else if (bridges) { var type = "bridge" }
       //
-      return jitlog.filter_traces(text, type)
+      return jitlog.filter_and_sort_traces(text, type, ordering)
     }
 });

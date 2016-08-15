@@ -135,7 +135,7 @@ TraceForest.prototype.update_slide = function(mx,my) {
 
 TraceForest.prototype.setup_once = function(id){
   var _this = this;
-  this._jitlog.filter_traces("", "both").forEach(function(trace) {
+  this._jitlog.filter_and_sort_traces("", "both", "recording").forEach(function(trace) {
     if (trace.is_trunk()) {
       // only add traces that are trunks, bridges will
       // be visited/visible by walking trunk traces

@@ -175,7 +175,7 @@ JitLog.prototype.set_meta = function(meta) {
   }
 }
 
-JitLog.prototype.filter_traces = function(text, type) {
+JitLog.prototype.filter_and_sort_traces = function(text, type, ordering) {
   // filter all traces according to the following criteria:
   // check if the type matches
   // if any enclosed name (of the debug merge points) matches
@@ -210,6 +210,18 @@ JitLog.prototype.filter_traces = function(text, type) {
     }
   })
 
+  list.sort(function(a,b){
+    if (ordering === 'count') {
+      return b.counter_points[0] - a.counter_points[0]
+    } else if (ordering === 'name') {
+      var aname = a.get_func_name()
+      var bname = b.get_func_name()
+      return aname.localeCompare(bname)
+    } else {
+      return a.recording_stamp - b.recording_stamp
+    }
+  })
+
   return list
 }
 
@@ -229,6 +241,7 @@ Trace = function(jitlog, id, meta) {
   this._bridges = []
   this._stages = {}
   this.jd_name = meta.jd_name
+  this.recording_stamp = meta.stamp
 }
 
 Trace.prototype.set_data = function(data) {
@@ -606,6 +619,9 @@ ResOp.prototype.byte_codes = function(index) {
   }
   merge_points.forEach(function(mp) {
     var source_lines = code[mp.filename]
+    if (!source_lines) {
+      return
+    }
     var indent = '';
     if (mp.lineno in source_lines) {
       var indent_n_line = source_lines[mp.lineno]
