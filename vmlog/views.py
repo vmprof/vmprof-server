@@ -12,6 +12,7 @@ from django.conf.urls import url, include
 from django.contrib import auth
 from django.http.response import HttpResponseBadRequest
 from django.http import Http404
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
 from vmlog.models import BinaryJitLog, get_reader
@@ -93,10 +94,23 @@ class LogMetaSerializer(BaseSerializer):
             'machine': forest.machine
         }
 
-class MetaForestViewSet(viewsets.ModelViewSet):
+class JsonExceptionHandlerMixin(object):
+    def handle_exception(self, exc):
+        if isinstance(exc, Http404):
+            code = 404
+        else:
+            code = 500
+        msg = 'internal server error'
+        if hasattr(exc, 'args') and len(exc.args) > 0:
+            msg = exc.args[0]
+
+        return JsonResponse({'code': code, 'message': msg}, status=code)
+
+class MetaForestViewSet(JsonExceptionHandlerMixin, viewsets.ModelViewSet):
     queryset = BinaryJitLog.objects.all()
     serializer_class = LogMetaSerializer
     permission_classes = (permissions.AllowAny,)
+
 
 def get_forest_for(jlog):
     return jlog.decode_forest()
@@ -178,14 +192,14 @@ class TraceSerializer(BaseSerializer):
         return dict
 
 
-class TraceViewSet(viewsets.ModelViewSet):
+class TraceViewSet(JsonExceptionHandlerMixin, viewsets.ModelViewSet):
     queryset = BinaryJitLog.objects.all()
     permission_classes = (permissions.AllowAny,)
     serializer_class = TraceSerializer
 
     def get_object(self):
         if 'id' not in self.request.GET:
-            raise Http404("mandatory id GET parameter missing")
+            raise Http404("mandatory GET parameter 'id' missing")
         id = int(self.request.GET['id'])
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, **self.kwargs)
@@ -193,7 +207,7 @@ class TraceViewSet(viewsets.ModelViewSet):
         forest = get_forest_for(obj)
         trace = forest.get_trace_by_id(id)
         if not trace:
-            raise Http404("trace with id %d does not exist on forest %s" % (id, obj.checksum))
+            raise Http404("trace with id %d does not exist in forest %s" % (id, obj.checksum))
         return trace
 
 

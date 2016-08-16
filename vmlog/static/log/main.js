@@ -76,9 +76,19 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $scope.jitlog = jitlog
     $scope.gotmeta = false
 
-    $http.get('/api/log/meta/' + $routeParams.log + '/', {
-        cache: true
-    }).then(function(response) {
+    var http_request_errored = function(response, url){
+      var http = response.status + ' ' + response.statusText + '.'
+        $scope.error = {
+          message: response.data.message,
+          url: url,
+          http: http,
+        }
+        $scope.loader.stop()
+    }
+
+    var url = '/api/log/meta/' + $routeParams.log + '/'
+    $http.get(url, { cache: true }).then(function(response) {
+      // success callback
       jitlog.set_meta(response.data)
 
       $scope.gotmeta = true
@@ -95,6 +105,9 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         $scope.$broadcast('trace-update')
       })
       $scope.loader.stop()
+    }, function(response){
+      // error callback
+      http_request_errored(response, url)
     });
 
     $scope.switch_trace = function(trace, type, asm) {
@@ -109,25 +122,29 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       $scope.selected_trace = null
       //
       $scope.$storage.last_trace_id = trace.get_id()
-      $http.get('/api/log/trace/' + jitlog.checksum + "/?id=" + trace.get_id(), {
-          cache: true
-      }).then(function(response) {
+      var url = '/api/log/trace/' + jitlog.checksum + "/?id=" + trace.get_id()
+      $http.get(url, { cache: true }).then(function(response) {
+        // success callback
         // set the new type and the subject trace
         trace.set_data(response.data)
         $scope.selected_trace = trace
         $timeout(function(){
           $scope.$broadcast('trace-update')
         })
-        $scope.loader.stop()
+      }, function(response) {
+        // error callback
+        http_request_errored(response, url)
       })
 
-      $http.get('/api/log/stitches/' + jitlog.checksum + "/?id=" + trace.get_id(), {
-          cache: true
-      }).then(function(response) {
+      var url = '/api/log/stitches/' + jitlog.checksum + "/?id=" + trace.get_id()
+      $http.get(url, { cache: true }).then(function(response) {
         // set the new type and the subject trace
         var visual_trace = response.data
         trace_forest.display_tree($scope, trace, visual_trace)
         $scope.loader.stop()
+      }, function(response) {
+        // error callback
+        http_request_errored(response, url)
       })
     }
 

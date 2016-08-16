@@ -1,7 +1,15 @@
-<div id="loading_img" loading="traces" ng-show="loading && !noprofile">
-    <img loading="traces" src="/static/images/loader.gif"
-         width="40" height="40"/><br>
-         Loading
+
+<div id="error" ng-show="error" class="alert alert-danger" role="alert">
+    <i class="glyphicon glyphicon-exclamation-sign"></i> Oh no!
+    Error: <strong>{{error.message}}</strong><br>
+    Http: {{error.http}} URL: <strong>{{error.url}}</strong>
+</div>
+
+<div id="loading_img" ng-class loading="traces" ng-show="loading && !noprofile">
+    <span ng-show="loading && !noprofile">
+        <img loading="traces" src="/static/images/loader.gif" width="40" height="40"/><br>
+        Loading
+    </span>
 </div>
 
 <div class="visible-xs-block text-center">
