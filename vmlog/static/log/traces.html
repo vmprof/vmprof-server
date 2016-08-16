@@ -1,3 +1,9 @@
+<div id="loading_img" loading="traces" ng-show="loading && !noprofile">
+    <img loading="traces" src="/static/images/loader.gif"
+         width="40" height="40"/><br>
+         Loading
+</div>
+
 <div class="visible-xs-block text-center">
     <p class="lead">Trace viewer currently not supported on mobile devices.</p>
 </div>
@@ -61,9 +67,6 @@
     </div>
     <div id="forest" class="row" trace-forest>
       <!-- The svg containing the trace visualisation -->
-      <img id="loading_img" loading="traces" ng-show="loading && !noprofile" src="/static/images/loader.gif"
-           width="10" height="10" style="position: absolute; margin: 10px;" />
-
       <svg id="forest_svg" xmlns="http://www.w3.org/2000/svg"
                            xmlns:xlink="http://www.w3.org/1999/xlink">
           <g id="forest_grp">
@@ -88,7 +91,7 @@
       </svg>
     </div>
 
-    <div class="row breathing-row" ng-if="jitlog">
+    <div class="row breathing-row" ng-if="gotmeta">
       <div class="col-sm-4 col-lg-4 trace-control" ng-if="jitlog">
           <div class="breathing-row">
               <input id="filter_text" class="form-control input-group-sm" type="text"

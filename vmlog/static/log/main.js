@@ -74,12 +74,14 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     jitlog = new JitLog();
     jitlog.checksum = $routeParams.log
     $scope.jitlog = jitlog
+    $scope.gotmeta = false
 
     $http.get('/api/log/meta/' + $routeParams.log + '/', {
         cache: true
     }).then(function(response) {
       jitlog.set_meta(response.data)
 
+      $scope.gotmeta = true
       var last_id = $scope.$storage.last_trace_id
       var trace = jitlog.get_trace_by_id(last_id)
       if (last_id && trace) {
