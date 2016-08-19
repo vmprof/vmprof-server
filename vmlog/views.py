@@ -68,6 +68,8 @@ class LogMetaSerializer(BaseSerializer):
             counter_points = trace.get_counter_points()
             mp_meta = { 'scope': 'unknown', 'lineno': -1, 'filename': '',
                         'type': trace.type, 'counter_points': counter_points }
+            if trace.is_assembled():
+                mp_meta['addr'] = trace.get_addrs()
             if trace.jd_name:
                 mp_meta['jd_name'] = trace.jd_name
             traces[id] = mp_meta

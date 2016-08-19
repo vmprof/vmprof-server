@@ -149,6 +149,7 @@ JitLog.prototype.set_meta = function(meta) {
   this._resops = meta.resops
   this.machine = meta.machine
   this.word_size = meta.word_size
+  this._bridges = meta.bridges
   var total_entries = 0
   var traces = meta.traces
   for (var key in traces) {
@@ -172,6 +173,15 @@ JitLog.prototype.set_meta = function(meta) {
       console.error("total {0} entries {1} -> {2}%".format(total_entry, trace.get_enter_count(), p))
     }
     trace.entry_percent = p
+  }
+  for (var key in this._bridges) {
+    var bridge = this.get_trace_by_id(key)
+    var value = this._bridges[key]
+    for (var descr_nmr in value) {
+      var addr = value[descr_nmr]
+      var trace = this.get_trace_by_addr(addr)
+      this._descrnmr_to_trace[descr_nmr] = trace
+    }
   }
 }
 
@@ -229,6 +239,10 @@ JitLog.prototype.get_trace_by_id = function(id) {
   return this._id_to_traces[id]
 }
 
+JitLog.prototype.get_trace_by_addr = function(addr) {
+  return this._addr_to_trace[addr]
+}
+
 Trace = function(jitlog, id, meta) {
   this._jitlog = jitlog
   this.id = id
@@ -238,7 +252,6 @@ Trace = function(jitlog, id, meta) {
   this.type = meta.type
   this._parent = meta.parent
   this.counter_points = meta.counter_points
-  this._bridges = []
   this._stages = {}
   this.jd_name = meta.jd_name
   this.recording_stamp = meta.stamp
@@ -272,37 +285,12 @@ Trace.prototype.get_id = function() {
   return this.id
 }
 
-Trace.prototype.bridge_count = function(fn) {
-  return this._bridges.length;
-}
-Trace.prototype.walk_bridges = function(fn) {
-  var _this = this;
-  this._bridges.forEach(function(bridge){
-    var trace = _this._jitlog._addr_to_trace[bridge.target]
-    fn.call(_this, trace);
-  })
-}
-
-Trace.prototype.walk_trace_tree = function(fn) {
-  fn.call(this, this);
-  var _this = this
-  this._bridges.forEach(function(bridge){
-    var trace = _this._jitlog._addr_to_trace[bridge.target]
-    fn.call(trace, trace);
-    trace.walk_trace_tree(fn)
-  })
-}
-
 Trace.prototype.link = function() {
   var _this = this;
-  this._bridges.forEach(function(bridge){
-    var trace = _this._jitlog._addr_to_trace[bridge.target]
-    _this._jitlog._descrnmr_to_trace[bridge.descr_number] = trace
-    bridge.target_obj = trace;
-  })
   this.forEachOp(function(op){
-    if (op.get_descr_nmr()) {
-      _this._jitlog._descrnmr_to_op[op.get_descr_nmr()] = op
+    var descr_nmr = op.get_descr_nmr()
+    if (descr_nmr) {
+      _this._jitlog._descrnmr_to_op[descr_nmr] = op
     }
     return true
   })
@@ -314,18 +302,6 @@ Trace.prototype.get_parent = function() {
 
 Trace.prototype.is_trunk = function() {
   return this.get_type() === 'loop'
-}
-
-Trace.prototype.branch_count = function() {
-  if (this._branch_count !== undefined) {
-    return this._branch_count
-  }
-  var count = 1;
-  this.walk_bridges(function(bridge){
-    count += bridge.branch_count()
-  })
-  this._branch_count = count;
-  return count
 }
 
 Trace.prototype.ends_with_jump = function() {
@@ -499,12 +475,16 @@ ResOp.prototype.has_stitched_trace = function() {
 }
 
 ResOp.prototype.get_stitched_trace = function() {
-  var stitched = this._jitlog._descrnmr_to_trace[this._data.descr_number]
+  var stitched = this._jitlog._descrnmr_to_trace[parseInt(this._data.descr_number,16)]
   return stitched
 }
 
 ResOp.prototype.get_stitch_id = function() {
   return this._data.descr_number
+}
+
+ResOp.prototype.has_descr = function() {
+  return this._data.descr_number !== undefined
 }
 
 ResOp.prototype.to_s = function(index) {
@@ -553,6 +533,15 @@ ResOp.prototype.to_s = function(index) {
     if (count) {
       var count = 
       suffix += ' <span class="resop-run-count">passed '+numeral(count).format('0.0 a')+' times</span>'
+    }
+  }
+  if (this.has_descr()) {
+    var trace = this.get_stitched_trace()
+    if (trace) {
+      var id = trace.id
+      var name = 'switch to trace';
+      var link = ' <a ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">'+name+'</a>'
+      suffix = link + ' ' + suffix
     }
   }
   return format(prefix, opname, args, descr, suffix);

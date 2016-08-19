@@ -76,6 +76,12 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $scope.jitlog = jitlog
     $scope.gotmeta = false
 
+    var error = function(message) {
+        $scope.error = {
+          'message': message,
+        }
+    }
+
     var http_request_errored = function(response, url){
       var http = response.status + ' ' + response.statusText + '.'
         $scope.error = {
@@ -111,6 +117,14 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     });
 
     $scope.switch_trace = function(trace, type, asm) {
+      if (typeof(trace) == "string"){
+        var id = trace
+        trace = $scope.jitlog.get_trace_by_id(trace)
+        if (!trace) {
+          error("could not switch to trace with "+id)
+          return
+        }
+      }
       if (!$scope.loader.complete()) { return; }
       $scope.$storage.show_asm = asm
       $scope.$storage.trace_type = type
