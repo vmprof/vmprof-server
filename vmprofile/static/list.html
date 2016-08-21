@@ -11,7 +11,7 @@
 
   <div class="row">
     <div class="col-md-12">
-      <img ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
+      <img id="loading_img" ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
 
       <div ng-show="!loading" class="list-group" ng-init="ago=true">
 
@@ -29,7 +29,7 @@
             </h4>
 
             <div class="times" >
-	      {{ log.vm }} / 
+              <span class="vm-name">{{ log.vm }}</span> / 
               <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
               <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
             </div>
