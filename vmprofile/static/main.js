@@ -268,6 +268,7 @@ function display_log($scope, $routeParams, $timeout, $location)
 {
     var stats = $scope.stats;
     $scope.visualization = $routeParams.view || 'flames';
+    console.log("display");
 
     $timeout(function () {
         $('[data-toggle=tooltip]').tooltip();

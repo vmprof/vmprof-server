@@ -17,15 +17,14 @@ FunctionData.prototype.update = function(node) {
 
 function walk_recursive(allStats, n, accum)
 {
-    if (accum[n.addr]) {
-        return;
-    }
-    accum = clone(accum);
-    accum[n.addr] = "a";
     if (allStats[n.addr] == undefined) {
         allStats[n.addr] = new FunctionData(n);
     }
-    allStats[n.addr].update(n);
+    if (!accum[n.addr]) {
+        allStats[n.addr].update(n);
+        accum = clone(accum);
+        accum[n.addr] = "a";
+    }
     for (var i in n.children) {
         walk_recursive(allStats, n.children[i], accum);
     }
@@ -36,13 +35,6 @@ function walk_tree(n)
     for (var i in n.children) {
         walk_tree(n.children[i]);
     }
-}
-
-function run_walk()
-{
-    d0 = new Date();
-    walk_recursive([], global_stats.nodes, []);
-    d1 = new Date();
 }
 
 Stats.prototype.makeTree = function(t) {
@@ -259,7 +251,6 @@ Stats.prototype.process = function(functions, parent, total, path_so_far, paths)
 			self: func.self / total * 100
 		});
 	}
-
 	top.sort(function(a, b) {
 		return b.times - a.times;
 	});
