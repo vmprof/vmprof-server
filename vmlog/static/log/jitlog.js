@@ -91,7 +91,6 @@ JitLog.hoverVars = function($scope) {
       if (integer < min_index) { min_index = integer; }
       if (integer > max_index) { max_index = integer; }
     })
-    console.log("found min,max index: %d,%d", min_index, max_index);
     var broadcast_key = 'live-range-' + column;
     $scope.$broadcast(broadcast_key, min_index, max_index, color)
   }
@@ -181,6 +180,8 @@ JitLog.prototype.set_meta = function(meta) {
       var addr = value[descr_nmr]
       var trace = this.get_trace_by_addr(addr)
       this._descrnmr_to_trace[descr_nmr] = trace
+      var op = this._descrnmr_to_op[descr_nmr]
+      trace._failing_guard = op
     }
   }
 }
@@ -199,17 +200,6 @@ JitLog.prototype.filter_and_sort_traces = function(text, type, ordering) {
     if (text === "") {
       list.push(trace)
     } else {
-      //var merge_point = trace.get_stage('opt').get_first_merge_point()
-      //if (!merge_point) {
-      //  return
-      //}
-      //var scope = merge_point._data['scope']
-      //var filename = merge_point._data['filename']
-      //if (scope && scope.indexOf(text) !== -1) {
-      //  list.push(trace)
-      //} else if (filename && filename.indexOf(text) !== -1) {
-      //  list.push(trace)
-      //}
       var scope = trace.get_func_name()
       var filename = trace.get_filename()
       if (scope && scope.indexOf(text) !== -1) {
@@ -255,6 +245,7 @@ Trace = function(jitlog, id, meta) {
   this._stages = {}
   this.jd_name = meta.jd_name
   this.recording_stamp = meta.stamp
+  this._failing_guard = null
 }
 
 Trace.prototype.set_data = function(data) {
@@ -283,6 +274,49 @@ Trace.prototype.get_enter_count = function() {
 
 Trace.prototype.get_id = function() {
   return this.id
+}
+
+Trace.prototype.is_bridge = function() {
+  return this.type === 'bridge'
+}
+
+Trace.prototype.trace_top_info_html = function(trace) {
+  var info = []
+  info.push('Driver name: "' + this.jd_name + '"')
+  info.push('Scope/Function: "' + this.scope + '"')
+  info.push(null)
+  info.push('Filename: ' + this.filename)
+  info.push('Lineno: ' + this.lineno)
+  info.push(null)
+  if (this.is_bridge()) {
+    var parent_id = parseInt(this.get_parent(), 16)
+    var par = this._jitlog.get_trace_by_id(parent_id)
+    var parent_str = '&uarr; back to parent trace';
+    info.splice(0, 0, 'This trace is a bridge.')
+    info.push('Parent:')
+    info.push('<a ng-click="switch_trace(\''+parent_id+'\', $storage.trace_type, $storage.show_asm)">'+parent_str+'</a>')
+    info.push('Driver name: "' + par.jd_name + '"')
+    info.push('Scope/Function: "' + par.jd_name + '"')
+    var op = this._failing_guard
+    if (op) {
+      info.push(null)
+      info.push("Guard that failed: " + op.format_resop(-1))
+    }
+
+  } else {
+    info.splice(0, 0, 'This trace is a loop.')
+  }
+  var str = '';
+  for (var i = 0; i < info.length; i++) {
+    var elem = info[i]
+    if (elem) {
+      str += '<span>'+elem+'</span> '
+    } else {
+      // elem is null, insert <br>
+      str += '<br>'
+    }
+  }
+  return str
 }
 
 Trace.prototype.link = function() {
@@ -335,9 +369,17 @@ var gen_first_mp_info = function(name, default_value) {
   return f
 }
 
-Trace.prototype.get_func_name = function(){return this.scope;} // gen_first_mp_info('scope', 'implement get_location in jitdriver')
-Trace.prototype.get_filename = function(){return this.filename;} //gen_first_mp_info('filename', '-')
-Trace.prototype.get_lineno = function(){return this.lineno;} //gen_first_mp_info('lineno', '0')
+Trace.prototype.get_func_name = function(){
+  return this.scope;
+}
+
+Trace.prototype.get_filename = function(){
+  return this.filename;
+}
+
+Trace.prototype.get_lineno = function(){
+  return this.lineno;
+}
 
 Trace.prototype.get_memory_addr = function() {
   return this._data.addr[0]
@@ -487,10 +529,25 @@ ResOp.prototype.has_descr = function() {
   return this._data.descr_number !== undefined
 }
 
-ResOp.prototype.format_resop = function(prefix, opname, args, descr, suffix) {
+ResOp.prototype.format_resop = function(prefix, suffix, html) {
+  if ('rs' in this._data && this._data.res !== '?') {
+    if (html) {
+       prefix += this.format_var(this._data.res) + ' = '
+    } else {
+       prefix += this._data.res + ' = '
+    }
+  }
+  var opnum = this._data.num
+  var opname = this._jitlog._resops[opnum]
+  var args = this._data.args || []
+  var descr = this._data.descr
   var arg_str = ''
   for (var i = 0; i < args.length; i++) {
-    arg_str += this.format_var(args[i]);
+    if (html) {
+      arg_str += this.format_var(args[i]);
+    } else {
+      arg_str += args[i];
+    }
     if (i+1 < args.length) {
       arg_str += ', ';
     }
@@ -498,11 +555,10 @@ ResOp.prototype.format_resop = function(prefix, opname, args, descr, suffix) {
   if (descr) {
     var descr_str = descr.replace("<","").replace(">","")
     descr = (' <span class="resop-descr">' + descr_str + "</span>");
-    if (this.has_descr()) {
+    if (this.has_descr() && html) {
       var trace = this.get_stitched_trace()
       if (trace) {
         var id = trace.id
-        var name = 'switch to trace';
         descr = ' <a class="resop-descr" ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">&rarr; '+descr_str+'</a>'
       }
     }
@@ -525,19 +581,18 @@ ResOp.prototype.format_var = function(variable) {
   return '<span class="'+type+' varid-' + variable + '">' + variable + '</span>'
 }
 
-ResOp.prototype.to_s = function(index) {
+ResOp.prototype.to_s = function() {
+  var prefix = ''
+  return this.format_resop(prefix, '', false);
+}
+
+ResOp.prototype.to_html = function(index) {
   var humanindex = index
   index = index - 1
   var prefix = ''
   prefix += '<span class="trace-line-number">'+humanindex+':</span> '
-  if ('res' in this._data && this._data.res !== '?') {
-    prefix += this.format_var(this._data.res) + ' = '
-  }
   var opnum = this._data.num
   var opname = this._jitlog._resops[opnum]
-  var args = this._data.args || []
-  var descr = this._data.descr
-  var _this = this
   var suffix = '';
   if (opname === "increment_debug_counter") {
     var trace = this._stage._trace
@@ -547,7 +602,7 @@ ResOp.prototype.to_s = function(index) {
       suffix += ' <span class="resop-run-count">passed '+numeral(count).format('0.0 a')+' times</span>'
     }
   }
-  return this.format_resop(prefix, opname, args, descr, suffix);
+  return this.format_resop(prefix, suffix, true);
 }
 
 ResOp.prototype.source_code = function(index) {

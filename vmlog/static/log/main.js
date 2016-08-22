@@ -75,7 +75,6 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $scope.live_ranges = { 8: { 0: {'background-color': 'green', 'height': '20px', 'width': '2px'}} }
     $scope.loader = new Loading($scope)
     $scope.loader.start()
-    $scope.ops = []
     $scope.selected_trace = null;
     $scope.numeral = numeral
     var lh = $scope.$storage.last_trace_hash

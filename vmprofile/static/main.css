@@ -295,6 +295,16 @@ span.selected.var {
     left: 25px;
 }
 
+.navigate-up {
+    margin-left: 35px;
+    margin-right: 35px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    background: white;
+    border: 1px solid silver;
+    padding: 10px;
+}
+
 .trace-line {
     white-space: nowrap;
     position: relative;
