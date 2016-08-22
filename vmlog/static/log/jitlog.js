@@ -487,45 +487,57 @@ ResOp.prototype.has_descr = function() {
   return this._data.descr_number !== undefined
 }
 
+ResOp.prototype.format_resop = function(prefix, opname, args, descr, suffix) {
+  var arg_str = ''
+  for (var i = 0; i < args.length; i++) {
+    arg_str += this.format_var(args[i]);
+    if (i+1 < args.length) {
+      arg_str += ', ';
+    }
+  }
+  if (descr) {
+    var descr_str = descr.replace("<","").replace(">","")
+    descr = (' <span class="resop-descr">' + descr_str + "</span>");
+    if (this.has_descr()) {
+      var trace = this.get_stitched_trace()
+      if (trace) {
+        var id = trace.id
+        var name = 'switch to trace';
+        descr = ' <a class="resop-descr" ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">&rarr; '+descr_str+'</a>'
+      }
+    }
+  } else {
+    descr = '';
+  }
+  return prefix + '<span class="resop-name">' +
+         opname + '</span>(' + arg_str + ')' + descr + suffix
+}
+
+ResOp.prototype.format_var = function(variable) {
+  var type = 'const';
+  if (variable.startsWith("i") ||
+      variable.startsWith("r") ||
+      variable.startsWith("p") ||
+      variable.startsWith("v") ||
+      variable.startsWith("f")) {
+    var type = 'var';
+  }
+  return '<span class="'+type+' varid-' + variable + '">' + variable + '</span>'
+}
+
 ResOp.prototype.to_s = function(index) {
   var humanindex = index
   index = index - 1
   var prefix = ''
   prefix += '<span class="trace-line-number">'+humanindex+':</span> '
-  var fvar = function(variable) {
-    var type = 'const';
-    if (variable.startsWith("i") ||
-        variable.startsWith("r") ||
-        variable.startsWith("p") ||
-        variable.startsWith("v") ||
-        variable.startsWith("f")) {
-      var type = 'var';
-    }
-    return '<span class="'+type+' varid-' + variable + '">' + variable + '</span>'
-  }
   if ('res' in this._data && this._data.res !== '?') {
-    prefix += fvar(this._data.res) + ' = '
+    prefix += this.format_var(this._data.res) + ' = '
   }
   var opnum = this._data.num
   var opname = this._jitlog._resops[opnum]
   var args = this._data.args || []
   var descr = this._data.descr
-  var format = function(prefix, opname, args, descr, suffix) {
-    var arg_str = ''
-    for (var i = 0; i < args.length; i++) {
-      arg_str += fvar(args[i]);
-      if (i+1 < args.length) {
-        arg_str += ', ';
-      }
-    }
-    if (descr) {
-      descr = ' <span class="resop-descr">' + descr.replace("<","").replace(">","") + "</span>";
-    } else {
-      descr = '';
-    }
-    return prefix + '<span class="resop-name">' +
-           opname + '</span>(' + arg_str + ')' + descr + suffix
-  }
+  var _this = this
   var suffix = '';
   if (opname === "increment_debug_counter") {
     var trace = this._stage._trace
@@ -535,16 +547,7 @@ ResOp.prototype.to_s = function(index) {
       suffix += ' <span class="resop-run-count">passed '+numeral(count).format('0.0 a')+' times</span>'
     }
   }
-  if (this.has_descr()) {
-    var trace = this.get_stitched_trace()
-    if (trace) {
-      var id = trace.id
-      var name = 'switch to trace';
-      var link = ' <a ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">'+name+'</a>'
-      suffix = link + ' ' + suffix
-    }
-  }
-  return format(prefix, opname, args, descr, suffix);
+  return this.format_resop(prefix, opname, args, descr, suffix);
 }
 
 ResOp.prototype.source_code = function(index) {

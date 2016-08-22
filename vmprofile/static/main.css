@@ -160,6 +160,10 @@ span.resop-descr {
     color: gray;
 }
 
+a.resop-descr {
+    font-size: 0.7em;
+}
+
 span.resop-run-count {
     font-size: 0.7em;
     color: skyblue;

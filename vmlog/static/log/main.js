@@ -47,6 +47,19 @@ app.directive('liveRange', function(){
   }
 });
 
+app.directive('compile', ['$compile', function ($compile) {
+  return function(scope, element, attrs) {
+    scope.$watch(
+      function(scope) {
+        return scope.$eval(attrs.compile);
+      },
+      function(value) {
+        element.html(value);
+        $compile(element.contents())(scope);
+      }
+   )};
+}]);
+
 app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeout,
                                     $location, $localStorage) {
     // variable defaults
