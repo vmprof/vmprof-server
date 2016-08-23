@@ -105,7 +105,6 @@ class JsonExceptionHandlerMixin(object):
         msg = 'internal server error'
         if hasattr(exc, 'args') and len(exc.args) > 0:
             msg = exc.args[0]
-
         return JsonResponse({'code': code, 'message': msg}, status=code)
 
 class MetaForestViewSet(JsonExceptionHandlerMixin, viewsets.ModelViewSet):
@@ -188,6 +187,11 @@ class TraceSerializer(BaseSerializer):
                                     source_code[filename] = {}
                                 lines = source_code[filename]
                                 lines[lineno] = (indent, line)
+        if trace.is_bridge():
+            op = trace.get_failing_guard()
+            if op:
+                op_serializer = OperationSerializer()
+                dict['failing_guard'] = op_serializer.to_representation(op)
         #
         if trace.addrs != (-1,-1):
             dict['addr'] = (hex(trace.addrs[0]), hex(trace.addrs[1]))

@@ -166,13 +166,13 @@ JitLog.prototype.set_meta = function(meta) {
   }
   for (var key in this._id_to_traces) {
     var trace = this._id_to_traces[key]
-    trace.link();
     var p = (trace.get_enter_count() / total_entries) * 100.0
     if (p > 100) {
       console.error("total {0} entries {1} -> {2}%".format(total_entry, trace.get_enter_count(), p))
     }
     trace.entry_percent = p
   }
+
   for (var key in this._bridges) {
     var bridge = this.get_trace_by_id(key)
     var value = this._bridges[key]
@@ -180,8 +180,6 @@ JitLog.prototype.set_meta = function(meta) {
       var addr = value[descr_nmr]
       var trace = this.get_trace_by_addr(addr)
       this._descrnmr_to_trace[descr_nmr] = trace
-      var op = this._descrnmr_to_op[descr_nmr]
-      trace._failing_guard = op
     }
   }
 }
@@ -249,7 +247,6 @@ Trace = function(jitlog, id, meta) {
 }
 
 Trace.prototype.set_data = function(data) {
-  var _this = this;
   var stages = data.stages;
   if (stages.noopt){
     this._stages.noopt = new Stage(this, stages.noopt, data.code)
@@ -260,6 +257,8 @@ Trace.prototype.set_data = function(data) {
   if (stages.asm){
     this._stages.asm = new Stage(this, stages.asm, data.code)
   }
+  this._failing_guard = new ResOp(this._jitlog, data.failing_guard, this, 0)
+  this.link()
 }
 
 Trace.prototype.get_enter_percent = function() {
@@ -292,19 +291,18 @@ Trace.prototype.trace_top_info_html = function(trace) {
     var parent_id = parseInt(this.get_parent(), 16)
     var par = this._jitlog.get_trace_by_id(parent_id)
     var parent_str = '&uarr; back to parent trace';
-    info.splice(0, 0, 'This trace is a bridge.')
+    info.splice(0, 0, 'This trace is a <strong>bridge</strong>.')
     info.push('Parent:')
     info.push('<a ng-click="switch_trace(\''+parent_id+'\', $storage.trace_type, $storage.show_asm)">'+parent_str+'</a>')
     info.push('Driver name: "' + par.jd_name + '"')
-    info.push('Scope/Function: "' + par.jd_name + '"')
+    info.push('Scope/Function: "' + par.scope + '"')
     var op = this._failing_guard
     if (op) {
       info.push(null)
-      info.push("Guard that failed: " + op.format_resop(-1))
+      info.push("Guard that failed: " + op.format_resop('','',false))
     }
-
   } else {
-    info.splice(0, 0, 'This trace is a loop.')
+    info.splice(0, 0, 'This trace is a <strong>loop</strong>.')
   }
   var str = '';
   for (var i = 0; i < info.length; i++) {
@@ -323,7 +321,7 @@ Trace.prototype.link = function() {
   var _this = this;
   this.forEachOp(function(op){
     var descr_nmr = op.get_descr_nmr()
-    if (descr_nmr) {
+    if (descr_nmr && descr_nmr !== "-0x1") {
       _this._jitlog._descrnmr_to_op[descr_nmr] = op
     }
     return true
