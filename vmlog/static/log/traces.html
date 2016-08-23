@@ -199,7 +199,7 @@
                   </li>
               </ul>
           </div>
-          <div class="resops">
+          <div class="resops" data-trace-id="{{selected_trace.id}}">
               <div class="no-trace" ng-if="selected_trace.get_stage($storage.trace_type).ops.length == 0">
                   <p class="lead text-center">Stage not recorded in log</p>
               </div>

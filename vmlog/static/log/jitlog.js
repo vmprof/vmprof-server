@@ -299,7 +299,7 @@ Trace.prototype.trace_top_info_html = function(trace) {
     var op = this._failing_guard
     if (op) {
       info.push(null)
-      info.push("Guard that failed: " + op.format_resop('','',false))
+      info.push("Guard that failed: <span class=\"parent-failed-guard\">" + op.format_resop('','',false)) + "</span>"
     }
   } else {
     info.splice(0, 0, 'This trace is a <strong>loop</strong>.')
