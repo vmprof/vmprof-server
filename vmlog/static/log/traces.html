@@ -144,7 +144,7 @@
                   <div>
                       <span class="trace-type">{{trace.get_type()}}</span>
                       <span class="trace-name">{{trace.get_func_name()}}</span>
-                      <span class="trace-jd-name" ng-if="trace.jd_name">{{trace.jd_name}}</span>
+                      <span class="trace-jd-name">{{trace.get_driver_name()}}</span>
                   </div>
                   <div class="trace-info">
                       entered {{numeral(trace.counter_points[0]).format('0')}} times

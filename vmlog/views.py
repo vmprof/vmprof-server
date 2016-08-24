@@ -57,12 +57,18 @@ class BinaryJitLogFileUploadView(views.APIView):
 
         return Response(log.checksum)
 
+class BadRequest(Exception):
+    pass
 
 class LogMetaSerializer(BaseSerializer):
     def to_representation(self, jlog):
         forest = jlog.decode_forest()
+        if forest.exc:
+            raise BadRequest(str(forest.exc))
         traces = {}
         bridges = {}
+        labels = defaultdict(list)
+        jumps = defaultdict(list)
         for id, trace in forest.traces.items():
             mp = trace.get_first_merge_point()
             counter_points = trace.get_counter_points()
@@ -70,8 +76,7 @@ class LogMetaSerializer(BaseSerializer):
                         'type': trace.type, 'counter_points': counter_points }
             if trace.is_assembled():
                 mp_meta['addr'] = trace.get_addrs()
-            if trace.jd_name:
-                mp_meta['jd_name'] = trace.jd_name
+            mp_meta['jd_name'] = trace.jd_name
             traces[id] = mp_meta
             if mp:
                 mp_meta['scope'] = mp.get_scope()
@@ -88,18 +93,28 @@ class LogMetaSerializer(BaseSerializer):
                 descr_nmr = bridge.get_stitched_descr_number()
                 target_addr = bridge.addrs[0]
                 bridgemap[descr_nmr] = target_addr
+        for descr_number, pointintrace in forest.labels.items():
+            op = pointintrace.get_operation()
+            labels[descr_number].append([pointintrace.trace.get_id(), op.getindex()])
+        for descr_number, pointintrace in forest.jumps.items():
+            op = pointintrace.get_operation()
+            jumps[descr_number].append([pointintrace.trace.get_id(), op.getindex()])
         return {
             'resops': forest.resops,
             'traces': traces,
             'bridges': bridges,
             'word_size': forest.word_size,
-            'machine': forest.machine
+            'machine': forest.machine,
+            'labels': labels,
+            'jumps': jumps,
         }
 
 class JsonExceptionHandlerMixin(object):
     def handle_exception(self, exc):
         if isinstance(exc, Http404):
             code = 404
+        elif isinstance(exc, BadRequest):
+            code = 400
         else:
             code = 500
         msg = 'internal server error'

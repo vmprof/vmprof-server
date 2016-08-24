@@ -242,6 +242,9 @@ Trace = function(jitlog, id, meta) {
   this.counter_points = meta.counter_points
   this._stages = {}
   this.jd_name = meta.jd_name
+  if (this.jd_name !== '') {
+    console.log("trace jdname with id")
+  }
   this.recording_stamp = meta.stamp
   this._failing_guard = null
 }
@@ -279,7 +282,7 @@ Trace.prototype.is_bridge = function() {
   return this.type === 'bridge'
 }
 
-Trace.prototype.trace_top_info_html = function(trace) {
+Trace.prototype.trace_top_info_html = function() {
   var info = []
   info.push('Driver name: "' + this.jd_name + '"')
   info.push('Scope/Function: "' + this.scope + '"')
@@ -369,6 +372,10 @@ var gen_first_mp_info = function(name, default_value) {
 
 Trace.prototype.get_func_name = function(){
   return this.scope;
+}
+
+Trace.prototype.get_driver_name = function(){
+  return this.jd_name
 }
 
 Trace.prototype.get_filename = function(){
@@ -554,7 +561,16 @@ ResOp.prototype.format_resop = function(prefix, suffix, html) {
     var descr_str = descr.replace("<","").replace(">","")
     descr = (' <span class="resop-descr">' + descr_str + "</span>");
     if (this.has_descr() && html) {
-      var trace = this.get_stitched_trace()
+      var trace = undefined
+      var jl = this._jitlog
+      if (opname == 'label') {
+        trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
+      } else if (opname == 'jump') {
+        trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
+      } else {
+        // guard
+        var trace = this.get_stitched_trace()
+      }
       if (trace) {
         var id = trace.id
         descr = ' <a class="resop-descr" ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">&rarr; '+descr_str+'</a>'
