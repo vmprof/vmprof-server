@@ -24,6 +24,8 @@ def test_to_json_meta_info():
     stage.append_op(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
     json = LogMetaSerializer().to_representation(FakeJitLog(forest))
     del json['bridges'] # do not care for this test
+    del json['labels']
+    del json['jumps']
     assert json == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
