@@ -66,7 +66,7 @@ class LogMetaSerializer(BaseSerializer):
         if forest.exc:
             raise BadRequest(str(forest.exc))
         traces = {}
-        bridges = {}
+        links = {}
         labels = defaultdict(list)
         jumps = defaultdict(list)
         for id, trace in forest.traces.items():
@@ -87,12 +87,12 @@ class LogMetaSerializer(BaseSerializer):
                 mp_meta['parent'] = hex(trace.parent.unique_id)
             mp_meta['stamp'] = trace.stamp
             # serialize all trace connections
-            bridgemap = {}
-            bridges[id] = bridgemap
-            for bridge in trace.bridges:
-                descr_nmr = bridge.get_stitched_descr_number()
-                target_addr = bridge.addrs[0]
-                bridgemap[descr_nmr] = target_addr
+            links[id] = idxtoid = {}
+            for link in trace.links_up:
+                origop = link.origin.op
+                target = link.target.trace
+                # save op.index -> trace_id
+                idxtoid[origop.getindex()] = target.get_id()
         for descr_number, pointintrace in forest.labels.items():
             op = pointintrace.get_operation()
             labels[descr_number].append([pointintrace.trace.get_id(), op.getindex()])
@@ -102,7 +102,7 @@ class LogMetaSerializer(BaseSerializer):
         return {
             'resops': forest.resops,
             'traces': traces,
-            'bridges': bridges,
+            'links': links,
             'word_size': forest.word_size,
             'machine': forest.machine,
             'labels': labels,

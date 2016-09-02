@@ -142,7 +142,7 @@
                   ng-class="{'active': trace == selected_trace}"
                   ng-click="switch_trace(trace, $storage.trace_type, $storage.show_asm)">
                   <div>
-                      <span class="trace-type">{{trace.get_type()}}</span>
+                      <span class="trace-type">{{trace.get_type()}} {{trace.get_id()}}</span>
                       <span class="trace-name">{{trace.get_func_name()}}</span>
                       <span class="trace-jd-name">{{trace.get_driver_name()}}</span>
                   </div>

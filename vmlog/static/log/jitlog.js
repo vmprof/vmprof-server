@@ -23,7 +23,6 @@ Loading.prototype.complete = function() {
 var JitLog = function () {
   this._id_to_traces = {};
   this._addr_to_trace = {}
-  this._descrnmr_to_trace = {}
   this._descrnmr_to_op = {}
   this._trace_list = []
   this._resops = {}
@@ -148,7 +147,6 @@ JitLog.prototype.set_meta = function(meta) {
   this._resops = meta.resops
   this.machine = meta.machine
   this.word_size = meta.word_size
-  this._bridges = meta.bridges
   var total_entries = 0
   var traces = meta.traces
   for (var key in traces) {
@@ -173,13 +171,16 @@ JitLog.prototype.set_meta = function(meta) {
     trace.entry_percent = p
   }
 
-  for (var key in this._bridges) {
-    var bridge = this.get_trace_by_id(key)
-    var value = this._bridges[key]
-    for (var descr_nmr in value) {
-      var addr = value[descr_nmr]
-      var trace = this.get_trace_by_addr(addr)
-      this._descrnmr_to_trace[descr_nmr] = trace
+  var links = meta.links
+  for (var subject_id in links) {
+    // the source trace
+    var strace = this.get_trace_by_id(subject_id)
+    var idxtoid = links[subject_id]
+    for (var idx in idxtoid) {
+      var trace_id = idxtoid[idx]
+      // target trace
+      var ttrace = this.get_trace_by_id(trace_id)
+      strace.link_op_to("asm", idx, ttrace)
     }
   }
 }
@@ -242,9 +243,6 @@ Trace = function(jitlog, id, meta) {
   this.counter_points = meta.counter_points
   this._stages = {}
   this.jd_name = meta.jd_name
-  if (this.jd_name !== '') {
-    console.log("trace jdname with id")
-  }
   this.recording_stamp = meta.stamp
   this._failing_guard = null
 }
@@ -518,12 +516,14 @@ ResOp.prototype.is_guard = function() {
 }
 
 ResOp.prototype.has_stitched_trace = function() {
-  return this.get_descr_nmr() && this.get_descr_nmr() in this._jitlog._descrnmr_to_trace
+  return this.stitched_target != undefined
+  //return this.get_descr_nmr() && this.get_descr_nmr() in this._jitlog._descrnmr_to_trace
 }
 
 ResOp.prototype.get_stitched_trace = function() {
-  var stitched = this._jitlog._descrnmr_to_trace[parseInt(this._data.descr_number,16)]
-  return stitched
+  return this.stiched_target
+  //var stitched = this._jitlog._descrnmr_to_trace[parseInt(this._data.descr_number,16)]
+  //return stitched
 }
 
 ResOp.prototype.get_stitch_id = function() {
@@ -564,12 +564,13 @@ ResOp.prototype.format_resop = function(prefix, suffix, html) {
       var trace = undefined
       var jl = this._jitlog
       if (opname == 'label') {
-        trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
+        console.warn("label?")
+        //trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
       } else if (opname == 'jump') {
-        trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
+        console.warn("jump?")
+        //trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
       } else {
-        // guard
-        var trace = this.get_stitched_trace()
+        trace = this.get_stitched_trace()
       }
       if (trace) {
         var id = trace.id
