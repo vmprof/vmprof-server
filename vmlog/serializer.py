@@ -1,4 +1,6 @@
 from collections import defaultdict
+from jitlog.objects import MergePoint
+from jitlog import constants as const
 
 class BaseSerializer(object):
     pass

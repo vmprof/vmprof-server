@@ -46,9 +46,15 @@ CACHE = {}
 
 BASE = "([a-zA-Z0-9/.\-]+) ([a-zA-Z0-9]+)"
 GENERIC_REQ = re.compile('[^ ]+ '+BASE)
+
 META_REQUEST = re.compile('meta '+BASE)
-TRACE_REQUEST = re.compile('trace '+BASE+' (\d+)')
 META_SERIALIZER = serializer.LogMetaSerializer()
+
+TRACE_REQUEST = re.compile('trace '+BASE+' (\d+)')
+TRACE_SERIALIZER = serializer.TraceSerializer()
+
+STITCH_REQUEST = re.compile('stitch '+BASE+' (\d+)')
+STITCH_SERIALIZER = serializer.VisualTraceTreeSerializer()
 
 class CacheProtocol(LineReceiver):
     def __init__(self):
@@ -92,9 +98,14 @@ class CacheProtocol(LineReceiver):
             match = TRACE_REQUEST.match(data) 
             if match:
                 uid = int(match.group(3))
-                forest = self.load(filename, checksum)
                 trace = forest.get_trace_by_id(uid)
                 jsondata = TRACE_SERIALIZER.to_representation(trace)
+        elif data.startswith("stitch"):
+            match = STITCH_REQUEST.match(data) 
+            if match:
+                uid = int(match.group(3))
+                trace = forest.get_trace_by_id(uid)
+                jsondata = STITCH_SERIALIZER.to_representation(trace)
         #
         json_secs = time.time() - start
 

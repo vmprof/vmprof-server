@@ -25,5 +25,18 @@ class TestCache(unittest.TestCase):
         result = self.send('meta vmlog/test/data/log-test-1-v1.jlog.zip 1v1')
         assert result != ''
         result = json.loads(result)
-        assert result != {}
-        import pdb; pdb.set_trace()
+        assert result['traces'] != {}
+        assert len(result['traces']) > 0
+
+    def test_trace_request(self):
+        result = self.send('trace vmlog/test/data/log-test-1-v1.jlog.zip 1v1 0')
+        assert result != ''
+        result = json.loads(result)
+        assert result['stages'] != {}
+
+    def test_stitch_request(self):
+        result = self.send('stitch vmlog/test/data/log-test-1-v1.jlog.zip 1v1 0')
+        assert result != ''
+        result = json.loads(result)
+        assert result['root'] != ''
+        assert len(result['stitches']) != {}
