@@ -563,3 +563,10 @@ ul.trace-entries {
   border-radius: 10px;
 }
 
+.measures {
+    display: inline-block;
+    font-size: 10px;
+    color: gray;
+    float: right;
+    margin-top: 5px;
+}

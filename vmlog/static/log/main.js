@@ -108,6 +108,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     $http.get(url, { cache: true }).then(function(response) {
       // success callback
       jitlog.set_meta(response.data)
+      jitlog.add_measures('get meta', response.data)
 
       $scope.gotmeta = true
       var last_id = $scope.$storage.last_trace_id
@@ -152,6 +153,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       $http.get(url, { cache: true }).then(function(response) {
         // success callback
         // set the new type and the subject trace
+        jitlog.add_measures('get trace', response.data)
         trace.set_data(response.data)
         $scope.selected_trace = trace
         $timeout(function(){
@@ -165,6 +167,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       var url = '/api/log/stitches/' + jitlog.checksum + "/?id=" + trace.get_id()
       $http.get(url, { cache: true }).then(function(response) {
         // set the new type and the subject trace
+        jitlog.add_measures('get stitches', response.data)
         var visual_trace = response.data
         trace_forest.display_tree($scope, trace, visual_trace)
         $scope.loader.stop()

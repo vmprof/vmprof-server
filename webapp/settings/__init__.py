@@ -102,6 +102,8 @@ REST_FRAMEWORK = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'TIMEOUT': 4*60, # 4 minutes
+        'MAX_ENTRIES': 500,
     },
     'forest-cache': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',

@@ -26,6 +26,8 @@ var JitLog = function () {
   this._descrnmr_to_op = {}
   this._trace_list = []
   this._resops = {}
+  this._timings = {}
+  this.measures = []
 }
 
 JitLog.colorPalette = [
@@ -143,6 +145,17 @@ JitLog.hoverVars = function($scope) {
   jQuery('.var').click(enable_or_disable);
 }
 
+JitLog.prototype.add_measures = function(action, data) {
+  var last = {}
+  for (m in data.measures) {
+    last[m] = data.measures[m]
+  }
+  if (!('action' in last)) {
+    last['action'] = action
+  }
+  this.measures.push(last)
+}
+
 JitLog.prototype.set_meta = function(meta) {
   this._resops = meta.resops
   this.machine = meta.machine
@@ -180,7 +193,7 @@ JitLog.prototype.set_meta = function(meta) {
       var trace_id = idxtoid[idx]
       // target trace
       var ttrace = this.get_trace_by_id(trace_id)
-      strace.link_op_to("asm", idx, ttrace)
+      strace.link_op_to(parseInt(idx), ttrace)
     }
   }
 }
@@ -245,18 +258,24 @@ Trace = function(jitlog, id, meta) {
   this.jd_name = meta.jd_name
   this.recording_stamp = meta.stamp
   this._failing_guard = null
+  this._opidx_to_trace = {}
+}
+
+Trace.prototype.link_op_to = function(index, target) {
+  // it is assumed that the index comes from an op in the "asm" stage
+  this._opidx_to_trace[index] = target
 }
 
 Trace.prototype.set_data = function(data) {
   var stages = data.stages;
   if (stages.noopt){
-    this._stages.noopt = new Stage(this, stages.noopt, data.code)
+    this._stages.noopt = new Stage("noopt", this, stages.noopt, data.code)
   }
   if (stages.opt){
-    this._stages.opt = new Stage(this, stages.opt, data.code)
+    this._stages.opt = new Stage("opt", this, stages.opt, data.code)
   }
   if (stages.asm){
-    this._stages.asm = new Stage(this, stages.asm, data.code)
+    this._stages.asm = new Stage("asm", this, stages.asm, data.code)
   }
   this._failing_guard = new ResOp(this._jitlog, data.failing_guard, this, 0)
   this.link()
@@ -290,17 +309,21 @@ Trace.prototype.trace_top_info_html = function() {
   info.push(null)
   if (this.is_bridge()) {
     var parent_id = parseInt(this.get_parent(), 16)
-    var par = this._jitlog.get_trace_by_id(parent_id)
-    var parent_str = '&uarr; back to parent trace';
-    info.splice(0, 0, 'This trace is a <strong>bridge</strong>.')
-    info.push('Parent:')
-    info.push('<a ng-click="switch_trace(\''+parent_id+'\', $storage.trace_type, $storage.show_asm)">'+parent_str+'</a>')
-    info.push('Driver name: "' + par.jd_name + '"')
-    info.push('Scope/Function: "' + par.scope + '"')
-    var op = this._failing_guard
-    if (op) {
-      info.push(null)
-      info.push("Guard that failed: <span class=\"parent-failed-guard\">" + op.format_resop('','',false)) + "</span>"
+    if (parent_id) {
+      var par = this._jitlog.get_trace_by_id(parent_id)
+      var parent_str = '&uarr; back to parent trace';
+      info.splice(0, 0, 'This trace is a <strong>bridge</strong>.')
+      info.push('Parent:')
+      info.push('<a ng-click="switch_trace(\''+parent_id+'\', $storage.trace_type, $storage.show_asm)">'+parent_str+'</a>')
+      info.push('Driver name: "' + par.jd_name + '"')
+      info.push('Scope/Function: "' + par.scope + '"')
+      var op = this._failing_guard
+      if (op) {
+        info.push(null)
+        info.push("Guard that failed: <span class=\"parent-failed-guard\">" + op.format_resop('','',false)) + "</span>"
+      }
+    } else {
+      info.push("no known parent id")
     }
   } else {
     info.splice(0, 0, 'This trace is a <strong>loop</strong>.')
@@ -410,14 +433,15 @@ Trace.prototype.get_stage = function(name) {
   if (this._stages[name] !== undefined) {
     return this._stages[name]
   }
-  return new Stage(this, {'ops': [], 'tick': -1}, {});
+  return new Stage(name, this, {'ops': [], 'tick': -1}, {});
 }
 
 var MergePoint = function(data) {
   this._data = data
 }
 
-var Stage = function(trace, data, code) {
+var Stage = function(name, trace, data, code) {
+  this._name = name
   this._trace = trace
   this._jitlog = trace._jitlog
   this._data = data
@@ -483,6 +507,8 @@ var ResOp = function(jitlog, data, stage, index) {
   this._data = data;
   this._assembly = null;
   this.index = index;
+  this._link_updated = false
+  this._link = undefined
 }
 
 ResOp.prototype.get_descr_nmr = function() {
@@ -516,12 +542,23 @@ ResOp.prototype.is_guard = function() {
 }
 
 ResOp.prototype.has_stitched_trace = function() {
-  return this.stitched_target != undefined
   //return this.get_descr_nmr() && this.get_descr_nmr() in this._jitlog._descrnmr_to_trace
+  this.update_link()
+  return this._link != undefined
+}
+
+ResOp.prototype.update_link = function() {
+  if (this._link_updated === false) {
+    var mytrace = this._stage._trace
+    // the target trace
+    this._link = mytrace._opidx_to_trace[self.index]
+    this._link_updated = true
+  }
 }
 
 ResOp.prototype.get_stitched_trace = function() {
-  return this.stiched_target
+  this.update_link()
+  return this._link
   //var stitched = this._jitlog._descrnmr_to_trace[parseInt(this._data.descr_number,16)]
   //return stitched
 }
@@ -560,7 +597,7 @@ ResOp.prototype.format_resop = function(prefix, suffix, html) {
   if (descr) {
     var descr_str = descr.replace("<","").replace(">","")
     descr = (' <span class="resop-descr">' + descr_str + "</span>");
-    if (this.has_descr() && html) {
+    if (this.has_descr() && html && this._stage.name === "asm") {
       var trace = undefined
       var jl = this._jitlog
       if (opname == 'label') {

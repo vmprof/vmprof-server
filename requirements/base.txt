@@ -5,3 +5,4 @@ PyYAML==3.11
 six==1.10
 django_compressor
 csscompressor
+twisted
