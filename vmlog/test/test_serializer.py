@@ -8,13 +8,6 @@ from vmlog.views import (LogMetaSerializer, TraceSerializer,
 
 PY3 = sys.version_info[0] >= 3
 
-class FakeJitLog(object):
-    def __init__(self, forest):
-        self.forest = forest
-
-    def decode_forest(self):
-        return self.forest
-
 def test_to_json_meta_info():
     forest = TraceForest(1, False, 'x86')
     forest.resops = { 15: 'divide' }
@@ -22,8 +15,7 @@ def test_to_json_meta_info():
     trace.counter = 42
     stage = trace.start_mark(const.MARK_TRACE_OPT)
     stage.append_op(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
-    json = LogMetaSerializer().to_representation(FakeJitLog(forest))
-    del json['bridges'] # do not care for this test
+    json = LogMetaSerializer().to_representation(forest)
     del json['labels']
     del json['jumps']
     assert json == \
@@ -32,17 +24,20 @@ def test_to_json_meta_info():
                   'type': 'loop', 'counter_points': { 0: 42 }, 'jd_name': 'john',
                   'stamp': 0 } },
               'word_size': 8,
-              'machine': 'x86'
+              'machine': 'x86',
+              'links': {0: {}},
             }
 
-def test_to_json_meta_bridges():
+def test_to_json_meta_links():
     forest = TraceForest(1)
     forest.resops = { 15: 'guard_true' }
     trunk = forest.add_trace('loop', 0, 0)
     bridge1 = forest.add_trace('bridge', 1, 0)
     bridge2 = forest.add_trace('bridge', 2, 0)
     bridge3 = forest.add_trace('bridge', 3, 0)
-    forest.descr_nmr_to_point_in_trace[10] = PointInTrace(trunk, None)
+    op = FlatOp(0,'',[],None,0,0)
+    op.index = 42
+    forest.descr_nmr_to_point_in_trace[10] = PointInTrace(trunk, op)
     forest.descr_nmr_to_point_in_trace[11] = PointInTrace(trunk, None)
     forest.descr_nmr_to_point_in_trace[12] = PointInTrace(bridge1, None)
     forest.descr_nmr_to_point_in_trace[13] = PointInTrace(bridge2, None)
@@ -57,13 +52,13 @@ def test_to_json_meta_bridges():
     forest.stitch_bridge(12, 300)
     #
     stage = trunk.start_mark(const.MARK_TRACE_OPT)
-    j = LogMetaSerializer().to_representation(FakeJitLog(forest))
-    assert len(j['bridges']) == 4
-    bridges = j['bridges']
-    assert bridges[0] == {10: 100, 11: 200}
-    assert bridges[1] == {12: 300}
-    assert bridges[2] == {}
-    assert bridges[3] == {}
+    j = LogMetaSerializer().to_representation(forest)
+    assert len(j['links']) == 4
+    links = j['links']
+    assert links[0] == {42: 1, 0: 2}
+    assert links[1] == {0: 3}
+    assert links[2] == {}
+    assert links[3] == {}
 
 DEFAULT_TEST_RESOPS = {
     # do NOT edit this numbers

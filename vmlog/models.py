@@ -21,6 +21,13 @@ class BinaryJitLog(models.Model):
     profile = models.ForeignKey(Profile, related_name='jitlog',
                                 null=True, blank=False)
 
+    def decode_forest(self):
+        # ultra slow, especially when run on cpython 3.5
+        # see forestcache.cache for a faster impl. using pypy.
+        # it caches the results as well (not using pickle)
+        with get_reader(self.file.name) as fd:
+            forest = _parse_jitlog(fd)
+            return forest
 
 @admin.register(BinaryJitLog)
 class BinaryJitLogAdmin(admin.ModelAdmin):

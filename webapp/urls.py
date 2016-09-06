@@ -24,8 +24,8 @@ urlpatterns = [
     url(r'^api/user/', MeView.as_view()),
     url(r'^api/jitlog/(?P<profile>[0-9a-z]*)/$', BinaryJitLogFileUploadView.as_view()),
     url(r'^api/log/meta/(?P<profile>[0-9a-z]*)/$', meta),
-    url(r'^api/log/meta/trace/(?P<profile>[0-9a-z]*)/$', trace),
-    url(r'^api/log/meta/stitches/(?P<profile>[0-9a-z]*)/$', stitches),
+    url(r'^api/log/trace/(?P<profile>[0-9a-z]*)/$', trace),
+    url(r'^api/log/stitches/(?P<profile>[0-9a-z]*)/$', stitches),
     url(r'^$', index)
 ]
 

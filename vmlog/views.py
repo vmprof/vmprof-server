@@ -9,16 +9,17 @@ import os
 from collections import defaultdict
 from jitlog import constants as const
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf.urls import url, include
 from django.contrib import auth
 from django.http.response import HttpResponseBadRequest
 from django.http import Http404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 
 from vmlog.models import BinaryJitLog, get_reader
 from vmlog.serializer import (VisualTraceTreeSerializer, LogMetaSerializer,
-        TraceSerializer)
+        TraceSerializer, BadRequest)
 from vmprofile.models import Log
 from jitlog.parser import _parse_jitlog
 from jitlog.objects import MergePoint
@@ -74,27 +75,7 @@ class JsonExceptionHandlerMixin(object):
             msg = exc.args[0]
         return JsonResponse({'code': code, 'message': msg}, status=code)
 
-#    def get_object(self):
-#        if 'id' not in self.request.GET:
-#            raise Http404("mandatory GET parameter 'id' missing")
-#        id = int(self.request.GET['id'])
-#        queryset = self.get_queryset()
-#        obj = get_object_or_404(queryset, **self.kwargs)
-#        self.check_object_permissions(self.request, obj)
-#        trace = forest.get_trace_by_id(id)
-#        if not trace:
-#            raise Http404("trace with id %d does not exist in forest %s" % (id, obj.checksum))
-#        return trace
-
-#class MetaForestViewSet(JsonExceptionHandlerMixin, viewsets.ModelViewSet):
-#    queryset = BinaryJitLog.objects.all()
-#    serializer_class = LogMetaSerializer
-#    permission_classes = (permissions.AllowAny,)
-#
-#class VisualTraceTreeViewSet(TraceViewSet):
-#    serializer_class = VisualTraceTreeSerializer
-
-def json_serialize(serializer, cmd, kwargs):
+def json_serialize(serializer, cmd, **kwargs):
     filename = "cache.socket"
     if os.path.exists(filename):
         client = socket.socket( socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -103,50 +84,57 @@ def json_serialize(serializer, cmd, kwargs):
         json = client.recv()
         return json
     else:
-        serializer = clazz()
-        forest.parser_classes
+        # should never be hit in production!!
+        from twisted.test import proto_helpers
+        from forestcache.cache import CacheProtocol
+        prot = CacheProtocol()
+        prot.transport = proto_helpers.StringTransport()
+        command = cmd.format(**kwargs)
+        prot.lineReceived(command.encode('utf-8'))
+        return prot.transport.value().decode('utf-8')
+
+
+def _load_jitlog_model(request, checksum):
+    try:
+        objs = BinaryJitLog.objects.filter(checksum=checksum)
+        if len(objs) != 1:
+            raise BadRequest("checksum has several jit logs")
+        # authentication? we do not implement that yet?
+        return objs[0]
+    except ObjectDoesNotExist:
+        raise Http404
+
+    raise BadRequest
+
 
 def meta(request, profile):
-    try:
-        jl = BinaryJitLog.objects.filter(checksum=profile)
-    except BinaryJitLog.ObjectDoesNotExist:
-        raise Http404
+    jl = _load_jitlog_model(request, profile)
 
-    serializer = LogMetaSerializer()
-    content = json_serialize(serializer, "meta {filename} {profile}",
+    content = json_serialize(LogMetaSerializer(), "meta {filename} {profile}",
                              filename=jl.file.path, profile=profile)
-    return JsonResponse(content)
+    # can't use JsonResponse, must be a dict. not string (safe=False would be another option)
+    return HttpResponse(content, content_type="application/json")
 
 def trace(request, profile):
-    try:
-        jl = BinaryJitLog.objects.filter(checksum=profile)
-    except BinaryJitLog.ObjectDoesNotExist:
-        raise Http404
+    jl = _load_jitlog_model(request, profile)
 
-#        if 'id' not in self.request.GET:
-#            raise Http404("mandatory GET parameter 'id' missing")
-#        id = int(self.request.GET['id'])
-#        queryset = self.get_queryset()
-#        obj = get_object_or_404(queryset, **self.kwargs)
-#        self.check_object_permissions(self.request, obj)
-#        trace = forest.get_trace_by_id(id)
-#        if not trace:
-#            raise Http404("trace with id %d does not exist in forest %s" % (id, obj.checksum))
-#        return trace
-    serializer = LogMetaSerializer()
-    content = json_serialize(serializer, "trace {filename} {profile}",
-                             filename=jl.file.path, profile=profile)
-    return JsonResponse(content)
+    if 'id' not in request.GET:
+        raise Http404("mandatory GET parameter 'id' missing")
+    uid = int(request.GET['id'])
+    content = json_serialize(TraceSerializer(), "trace {filename} {profile} {uid}",
+                             filename=jl.file.path, profile=profile, uid=uid)
+    # can't use JsonResponse, must be a dict. not string (safe=False would be another option)
+    return HttpResponse(content, content_type="application/json")
 
 def stitches(request, profile):
-    try:
-        jl = BinaryJitLog.objects.filter(checksum=profile)
-    except BinaryJitLog.ObjectDoesNotExist:
-        raise Http404
+    jl = _load_jitlog_model(request, profile)
 
-    serializer = LogMetaSerializer()
-    content = json_serialize(serializer, "stitches {filename} {profile}",
-                             filename=jl.file.path, profile=profile)
-    return JsonResponse(content)
+    if 'id' not in request.GET:
+        raise Http404("mandatory GET parameter 'id' missing")
+    uid = int(request.GET['id'])
+    content = json_serialize(VisualTraceTreeSerializer(), "stitch {filename} {profile} {uid}",
+                             filename=jl.file.path, profile=profile, uid=uid)
+    # can't use JsonResponse, must be a dict. not string (safe=False would be another option)
+    return HttpResponse(content, content_type="application/json")
 
 

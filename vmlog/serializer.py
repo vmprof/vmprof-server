@@ -34,11 +34,14 @@ class LogMetaSerializer(BaseSerializer):
             mp_meta['stamp'] = trace.stamp
             # serialize all trace connections
             links[id] = idxtoid = {}
-            for link in trace.links_up:
+            for link in trace.links:
                 origop = link.origin.op
                 target = link.target.trace
                 # save op.index -> trace_id
-                idxtoid[origop.getindex()] = target.get_id()
+                if origop is None:
+                    idxtoid[0] = target.get_id()
+                else:
+                    idxtoid[origop.getindex()] = target.get_id()
         #for descr_number, pointintrace in forest.labels.items():
         #    op = pointintrace.get_operation()
         #    labels[descr_number].append([pointintrace.trace.get_id(), op.getindex()])

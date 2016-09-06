@@ -28,10 +28,9 @@ class TestBinaryJitLogDecode(TestCase):
 
     def test_get_meta_for_jitlog(self):
         response = self.client.get('/api/log/meta/richards/')
-        jsondata = response.data
+        jsondata = response.json()
         traces = jsondata['traces']
         assert 'resops' in jsondata and 'traces' in jsondata
-        assert 'bridges' in jsondata
         assert 'machine' in jsondata
         assert 'word_size' in jsondata
         assert len(jsondata['resops']) > 0
@@ -50,12 +49,14 @@ class TestBinaryJitLogDecode(TestCase):
     def test_get_trace_as_json(self):
         response = self.client.get('/api/log/trace/1v1/?id=0')
         assert response.status_code == 200
-        assert response.data != {}
+        assert response.json() != {}
 
     def test_get_visual_trace(self):
         response = self.client.get('/api/log/stitches/1v1/?id=1')
         assert response.status_code == 200
-        assert response.data == {
+        j = response.json()
+        del j['measures']
+        assert j == {
             'root': '0x1',
             'stitches': {
                 '0x1': ['g,1,0x1234,0x2', 'j,2,0x11'],
