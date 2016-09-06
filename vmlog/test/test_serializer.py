@@ -100,7 +100,7 @@ def test_serialize_trace(forest):
     add_instr(trunk, 'guard_true', 'i2', None, descr=('guarddescr', 0x2))
     t = TraceSerializer().to_representation(trunk)
     assert t['stages'].get('opt', None) == {
-        'merge_points': {},
+        'merge_points': [],
         'ops': [{ 'num': 17, 'args': 'p0,i0', 'res': 'i1', 'descr':'descr', 'descr_number': '0x1' },
                 { 'num': 16, 'args': 'i1,i1', 'res': 'i2' },
                 { 'num': 15, 'descr':'guarddescr', 'res': 'i2', 'descr_number': '0x2' }]
@@ -116,7 +116,7 @@ def test_serialize_debug_merge_point(forest):
                                  0x10: 'LOAD_FAST'}))
     dict = TraceSerializer().to_representation(trunk)
     stage = dict['stages']['opt']
-    assert len(stage['merge_points']) == 2 # plus the 'first' key
+    assert len(stage['merge_points']) == 1
     merge_points = stage['merge_points']
     assert 0 in merge_points.keys()
     assert merge_points['first'] == 0
