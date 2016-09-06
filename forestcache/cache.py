@@ -1,11 +1,12 @@
 import re
 import sys
+import gc
 import gzip
 import bz2
 import time
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from twisted.python.log import startLogging
 from twisted.python.filepath import FilePath
@@ -25,24 +26,69 @@ def get_reader(filename):
     raise NotImplementedError("use gzip/bz2 for compression!")
 
 class Cache(object):
-    def __init__(self):
+
+    def __init__(self, maxsize, seconds=10*60):
         self.cache = {}
+        self.decay_delta = timedelta(seconds=seconds)
+        self.maxsize = maxsize
+        self._proc_status = '/proc/%d/status' % os.getpid()
+        self._scale = {'kB': 1024.0, 'mB': 1024.0*1024.0,
+                       'KB': 1024.0, 'MB': 1024.0*1024.0}
+
+    def memory_usage(self, key='VmSize:'):
+         # get pseudo file  /proc/<pid>/status
+        try:
+            t = open(self._proc_status)
+            v = t.read()
+            t.close()
+        except:
+            return 0.0  # non-Linux?
+         # get VmKey line e.g. 'VmRSS:  9999  kB\n ...'
+        i = v.index(key)
+        v = v[i:].split(None, 3)  # whitespace
+        if len(v) < 3:
+            return 0.0  # invalid format?
+         # convert Vm value to bytes
+        return float(v[1]) * self._scale[v[2]]
 
     def put(self, key, obj):
+        current = self.memory_usage()
+        if current > self.maxsize:
+            self.decay(force=True)
+            current = self.memory_usage()
+            if current > self.maxsize:
+                log.msg("cannot add forest to the cache, it should not consume more memory")
+                return # well, we cannot add this to the cache!
+        else:
+            self.decay()
         self.cache[key] = (datetime.now(), obj)
 
     def get(self, key):
         return self.cache.get(key, (None, None))[1]
 
-    def decay(self):
+    def decay(self, force=False):
+        decayed = 0
+        ordered = sorted(self.cache.items(), key=lambda v: v[1][0], reverse=True)
+        if force:
+            # force mode, will remove the N oldest items as long as
+            # the memory threshold is not crossed
+            j = len(self.cache)-1
+            while self.memory_usage() > self.maxsize and j >= 0:
+                checksum, subject = ordered[j]
+                del self.cache[checksum]
+                decayed += 1
+                j -= 1
+            gc.collect()
+            return decayed
+
         keys = []
         # uff, we can do better. I'm sure!
-        for key, (t, obj) in self.cache.items():
-            if t + timedelta(minutes=10) < datetime.now():
-                keys.append(key)
+        for key, (t, obj) in ordered:
+            if t + self.decay_delta < datetime.now():
+                del self.cache[key]
+                decayed += 1
 
-        for key in keys:
-            del self.cache[key]
+        return decayed
 
 CACHE = {}
 
@@ -58,7 +104,7 @@ TRACE_SERIALIZER = serializer.TraceSerializer()
 STITCH_REQUEST = re.compile('stitch '+BASE+' (\d+)')
 STITCH_SERIALIZER = serializer.VisualTraceTreeSerializer()
 
-CACHE = Cache()
+CACHE = Cache(4 * 1024 * 1024 * 1024) # 4 GB
 
 class CacheProtocol(LineReceiver):
     def __init__(self):
@@ -127,7 +173,6 @@ class CacheProtocol(LineReceiver):
         if forest:
             log.msg("cached forest (checksum %s)" % (checksum,))
             return forest
-        self.cache.decay()
         fobj = get_reader(filename)
         forest = parser._parse_jitlog(fobj)
         self.cache.put(checksum, forest)
