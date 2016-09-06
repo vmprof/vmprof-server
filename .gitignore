@@ -55,6 +55,10 @@ coverage.xml
 *.swo
 *.swp
 
+# Twisted
+*.pid
+*.lock
+
 # Sphinx documentation
 docs/_build/
 

@@ -15,6 +15,8 @@ from twisted.internet import reactor
 from jitlog import parser
 from vmlog import serializer
 
+from twisted.python import log
+
 def get_reader(filename):
     if filename.endswith(".zip"):
         return gzip.GzipFile(filename)
@@ -56,12 +58,14 @@ TRACE_SERIALIZER = serializer.TraceSerializer()
 STITCH_REQUEST = re.compile('stitch '+BASE+' (\d+)')
 STITCH_SERIALIZER = serializer.VisualTraceTreeSerializer()
 
+CACHE = Cache()
+
 class CacheProtocol(LineReceiver):
     def __init__(self):
-        self.cache = Cache()
+        self.cache = CACHE
 
     def connectionMade(self):
-        pass
+        log.msg("new connection opened")
 
     def lineReceived(self, bytesline):
         data = bytesline.decode('utf-8')
@@ -112,18 +116,23 @@ class CacheProtocol(LineReceiver):
         if jsondata:
             measures['json'] = '%.3fms' % (json_secs * 1000.0)
             jsondata['measures'] = measures
+            log.msg("sent data, closing connection")
             self.sendLine(json.dumps(jsondata).encode('utf-8'))
-
+        else:
+            log.msg("no data sent, closing connection")
         self.transport.loseConnection()
 
     def load(self, filename, checksum):
         forest = self.cache.get(checksum)
         if forest:
+            log.msg("cached forest (checksum %s)" % (checksum,))
             return forest
         self.cache.decay()
         fobj = get_reader(filename)
         forest = parser._parse_jitlog(fobj)
         self.cache.put(checksum, forest)
+        assert self.cache.get(checksum) is not None
+        log.msg("parsed jitlog in file %s (checksum %s)" % (filename, checksum))
         return forest
 
     def connectionLost(self, reason):

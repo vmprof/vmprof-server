@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-import json
-import urllib
 import hashlib
-import tempfile
-import base64
 import time
 import os
+import socket
 from collections import defaultdict
-from jitlog import constants as const
+from io import BytesIO
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf.urls import url, include
@@ -23,6 +20,7 @@ from vmlog.serializer import (VisualTraceTreeSerializer, LogMetaSerializer,
 from vmprofile.models import Log
 from jitlog.parser import _parse_jitlog
 from jitlog.objects import MergePoint
+from jitlog import constants as const
 
 
 from rest_framework import views
@@ -75,23 +73,27 @@ class JsonExceptionHandlerMixin(object):
             msg = exc.args[0]
         return JsonResponse({'code': code, 'message': msg}, status=code)
 
-def json_serialize(serializer, cmd, **kwargs):
+def json_serialize(response, cmd, **kwargs):
     filename = "cache.socket"
+    command = cmd.format(**kwargs) + '\r\n'
     if os.path.exists(filename):
-        client = socket.socket( socket.AF_UNIX, socket.SOCK_DGRAM)
+        client = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM)
         client.connect(filename)
-        client.send(command)
-        json = client.recv()
-        return json
+        client.send(command.encode('utf-8'))
+        content = []
+        while True:
+            data = client.recv(4096)
+            if data == b"":
+                break
+            response.write(data)
     else:
         # should never be hit in production!!
         from twisted.test import proto_helpers
         from forestcache.cache import CacheProtocol
         prot = CacheProtocol()
         prot.transport = proto_helpers.StringTransport()
-        command = cmd.format(**kwargs)
         prot.lineReceived(command.encode('utf-8'))
-        return prot.transport.value().decode('utf-8')
+        response.write(prot.transport.value().decode('utf-8'))
 
 
 def _load_jitlog_model(request, checksum):
@@ -106,14 +108,16 @@ def _load_jitlog_model(request, checksum):
 
     raise BadRequest
 
+def json_response(content):
+    return HttpResponse(content, content_type="application/json")
 
 def meta(request, profile):
     jl = _load_jitlog_model(request, profile)
 
-    content = json_serialize(LogMetaSerializer(), "meta {filename} {profile}",
+    response = HttpResponse(content_type="application/json")
+    json_serialize(response, "meta {filename} {profile}",
                              filename=jl.file.path, profile=profile)
-    # can't use JsonResponse, must be a dict. not string (safe=False would be another option)
-    return HttpResponse(content, content_type="application/json")
+    return response
 
 def trace(request, profile):
     jl = _load_jitlog_model(request, profile)
@@ -121,10 +125,10 @@ def trace(request, profile):
     if 'id' not in request.GET:
         raise Http404("mandatory GET parameter 'id' missing")
     uid = int(request.GET['id'])
-    content = json_serialize(TraceSerializer(), "trace {filename} {profile} {uid}",
+    response = HttpResponse(content_type="application/json")
+    json_serialize(response, "trace {filename} {profile} {uid}",
                              filename=jl.file.path, profile=profile, uid=uid)
-    # can't use JsonResponse, must be a dict. not string (safe=False would be another option)
-    return HttpResponse(content, content_type="application/json")
+    return response
 
 def stitches(request, profile):
     jl = _load_jitlog_model(request, profile)
@@ -132,9 +136,9 @@ def stitches(request, profile):
     if 'id' not in request.GET:
         raise Http404("mandatory GET parameter 'id' missing")
     uid = int(request.GET['id'])
-    content = json_serialize(VisualTraceTreeSerializer(), "stitch {filename} {profile} {uid}",
+    response = HttpResponse(content_type="application/json")
+    json_serialize(response, "stitch {filename} {profile} {uid}",
                              filename=jl.file.path, profile=profile, uid=uid)
-    # can't use JsonResponse, must be a dict. not string (safe=False would be another option)
-    return HttpResponse(content, content_type="application/json")
+    return response
 
 
