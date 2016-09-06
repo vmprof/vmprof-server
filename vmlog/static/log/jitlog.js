@@ -422,13 +422,6 @@ Trace.prototype.forEachOp = function(fn) {
   return false
 }
 
-Trace.prototype.for_each_merge_point = function(fn) {
-  // the stage 'asm' does not carry any information about
-  // the debug merge point. the rewrite step throws away this information
-  return this.get_stage('opt').for_each_merge_point(fn)
-}
-
-
 Trace.prototype.get_stage = function(name) {
   if (this._stages[name] !== undefined) {
     return this._stages[name]
@@ -468,35 +461,11 @@ Stage.prototype.get_operation_by_index = function(index) {
   return this.ops[index]
 }
 
-Stage.prototype.for_each_merge_point = function(fn) {
-  // merge_points is a hash: integer (index) -> [merge points]
-  // a single index can have several merge points. thus
-  // the double nested loop
-  var mps = this._data.merge_points || {}
-  for (var key in mps) {
-    if (key === "first"){ continue }
-    var points = mps[key]
-    for (var i = 0; i < points.length; i++) {
-      var mp = new MergePoint(points[i])
-      if (!fn.call(mp, mp)) {
-        return true
-      }
-    }
-  }
-  return false
-}
-
 Stage.prototype.get_first_merge_point = function() {
-  var mp = this._data.merge_points || {}
-  var first_index = mp['first']
-  if (!first_index) {
-    return null
-  }
-  var list = mp[first_index]
-  if (list.length == 0) {
-    return null
-  }
-  return new MergePoint(list[0])
+  var mps = this._data.merge_points || []
+  if (mps.length == 0) { return null; }
+  var mp = mps[0]
+  return new MergePoint(mp)
 }
 
 
@@ -549,9 +518,10 @@ ResOp.prototype.has_stitched_trace = function() {
 
 ResOp.prototype.update_link = function() {
   if (this._link_updated === false) {
+    //var trace = this._jitlog._descrnmr_to_trace[parseInt(this._data.descr_number,16)]
     var mytrace = this._stage._trace
     // the target trace
-    this._link = mytrace._opidx_to_trace[self.index]
+    this._link = mytrace._opidx_to_trace[this.index]
     this._link_updated = true
   }
 }
@@ -559,8 +529,6 @@ ResOp.prototype.update_link = function() {
 ResOp.prototype.get_stitched_trace = function() {
   this.update_link()
   return this._link
-  //var stitched = this._jitlog._descrnmr_to_trace[parseInt(this._data.descr_number,16)]
-  //return stitched
 }
 
 ResOp.prototype.get_stitch_id = function() {
@@ -597,18 +565,8 @@ ResOp.prototype.format_resop = function(prefix, suffix, html) {
   if (descr) {
     var descr_str = descr.replace("<","").replace(">","")
     descr = (' <span class="resop-descr">' + descr_str + "</span>");
-    if (this.has_descr() && html && this._stage.name === "asm") {
-      var trace = undefined
-      var jl = this._jitlog
-      if (opname == 'label') {
-        console.warn("label?")
-        //trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
-      } else if (opname == 'jump') {
-        console.warn("jump?")
-        //trace = jl._descrnmr_to_trace[parseInt(this._data.descr_number, 16)]
-      } else {
-        trace = this.get_stitched_trace()
-      }
+    if (this.has_descr() && html && this._stage._name === "asm") {
+      var trace = this.get_stitched_trace()
       if (trace) {
         var id = trace.id
         descr = ' <a class="resop-descr" ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">&rarr; '+descr_str+'</a>'
@@ -657,31 +615,59 @@ ResOp.prototype.to_html = function(index) {
   return this.format_resop(prefix, suffix, true);
 }
 
+ResOp.prototype.get_merge_points_for_index = function(index) {
+  var data = this._stage._data
+  var mps = []
+  var allmps = data.merge_points
+  // we can also preconstruct this!
+  for (var i = 0; i < allmps.length; i++) {
+    var mp = allmps[i]
+    if (mp.i > index) { break }
+    if (mp.i < index) { continue }
+    mps.push(mp)
+  }
+  return mps
+}
+
 ResOp.prototype.source_code = function(index) {
   // first extract the merge points for this index
-  var data = this._stage._data
-  var merge_points = data.merge_points[index]
-  if (!merge_points) { return '' }
+  var mps = this.get_merge_points_for_index(index)
+
+  // no merge point found! just quit here
+  if (mps.length == 0) { return '' }
 
   // try to find the previous merge point
-  var prev_merge_points
-  for (prev_index = index - 1; prev_index >= 0; prev_index -= 1) {
-    prev_merge_points = data.merge_points[prev_index]
-    if (prev_merge_points) {
+  var data = this._stage._data
+  var allmps = data.merge_points
+  var prev_merge_point = undefined
+  var i = 0
+  for (;i < allmps.length;) {
+    var mp = allmps[i]
+    if (mp.i < index) {
+      i++
+      continue
+    }
+    break
+  }
+  for (;i >= 0;i--) {
+    var mp = allmps[i]
+    if (mp.i < index) {
+      prev_merge_point = mp
       break
     }
   }
+
   var resop = this
   var text = []
   var code = this._stage._code
   var last_filename
   var last_lineno
   var last_scope
-  if (prev_merge_points) {
-    last_filename = prev_merge_points[prev_merge_points.length - 1].filename
-    last_lineno = prev_merge_points[prev_merge_points.length - 1].lineno
+  if (prev_merge_point) {
+    last_filename = prev_merge_point.filename
+    last_lineno = prev_merge_point.lineno
   }
-  merge_points.forEach(function(mp) {
+  mps.forEach(function(mp) {
     var same_line = (last_filename == mp.filename) && (last_lineno == mp.lineno)
     // only print the source line if it is different than the source line of
     // the previous merge point. Often, it is the same source line, since there
@@ -707,8 +693,7 @@ ResOp.prototype.source_code = function(index) {
 
 ResOp.prototype.byte_codes = function(index) {
   // first extract the merge points for this index
-  var data = this._stage._data
-  var merge_points = data.merge_points[index]
+  var merge_points= this.get_merge_points_for_index(index)
   var resop = this
   var text = []
   var code = this._stage._code

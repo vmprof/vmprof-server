@@ -99,6 +99,8 @@ def json_serialize(response, cmd, **kwargs):
 def _load_jitlog_model(request, checksum):
     try:
         objs = BinaryJitLog.objects.filter(checksum=checksum)
+        if len(objs) == 0:
+            raise Http404
         if len(objs) != 1:
             raise BadRequest("checksum has several jit logs")
         # authentication? we do not implement that yet?

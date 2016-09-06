@@ -162,6 +162,7 @@ span.resop-descr {
 
 a.resop-descr {
     font-size: 0.7em;
+    cursor: pointer;
 }
 
 span.resop-run-count {

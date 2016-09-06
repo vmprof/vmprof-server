@@ -31,8 +31,9 @@ class LogMetaSerializer(BaseSerializer):
                 lineno, filename = mp.get_source_line()
                 mp_meta['lineno'] = lineno
                 mp_meta['filename'] = filename
-            if trace.parent:
-                mp_meta['parent'] = hex(trace.parent.unique_id)
+            par = trace.get_parent()
+            if par:
+                mp_meta['parent'] = hex(par.unique_id)
             mp_meta['stamp'] = trace.stamp
             # serialize all trace connections
             links[id] = idxtoid = {}
@@ -44,6 +45,8 @@ class LogMetaSerializer(BaseSerializer):
                     idxtoid[0] = target.get_id()
                 else:
                     idxtoid[origop.getindex()] = target.get_id()
+            if len(links[id]) == 0:
+                del links[id]
         #for descr_number, pointintrace in forest.labels.items():
         #    op = pointintrace.get_operation()
         #    labels[descr_number].append([pointintrace.trace.get_id(), op.getindex()])
@@ -62,13 +65,13 @@ class LogMetaSerializer(BaseSerializer):
 class OperationSerializer(BaseSerializer):
     def to_representation(self, op):
         if isinstance(op, MergePoint):
-            mp_dict = {}
+            mp_dict = {'i': op.getindex()}
             for sem_type, value in op.values.items():
                 name = const.SEM_TYPE_NAMES[sem_type]
                 mp_dict[name] = value
             return mp_dict
         else:
-            dict = { 'num': op.opnum }
+            dict = { 'num': op.opnum, 'i': op.index }
             if op.args: dict['args'] = op.args
             if op.result: dict['res'] = op.result
             if op.descr: dict['descr'] = op.descr
@@ -84,21 +87,20 @@ class StageSerializer(BaseSerializer):
     def to_representation(self, stage):
         op_serializer = OperationSerializer()
         ops = []
-        merge_points = defaultdict(list)
         # merge points is a dict mapping from index -> merge_points
         stage_dict = { 'ops': ops }
         source_code = {}
-        for i,op in enumerate(stage.ops):
+        for i,op in enumerate(stage.get_ops()):
             op_stage_dict = op_serializer.to_representation(op)
-            if isinstance(op, MergePoint):
-                index = len(ops)
-                merge_points[index].append(op_stage_dict)
-                if len(merge_points) == 1:
-                    # fast access for the first debug merge point!
-                    merge_points['first'] = index
-            else:
-                ops.append(op_stage_dict)
-        stage_dict['merge_points'] = dict(merge_points)
+            ops.append(op_stage_dict)
+        #
+        stage_dict['merge_points'] = merge_points = []
+        # fast access for the first debug merge point!
+        for i,mp in enumerate(stage.get_merge_points()):
+            assert mp.is_debug()
+            mpdict = op_serializer.to_representation(mp)
+            merge_points.append(mpdict)
+        #
         return stage_dict
 
 class TraceSerializer(BaseSerializer):
@@ -117,19 +119,17 @@ class TraceSerializer(BaseSerializer):
 
             merge_points = stage_dict.get('merge_points', None)
             if merge_points:
-                for index, mps in merge_points.items():
-                    if index == 'first': continue
-                    for mp in mps:
-                        if 'filename' in mp and 'lineno' in mp:
-                            # both filename and line number is known, try to extract it from the uploaded data
-                            filename = mp['filename']
-                            lineno = mp['lineno']
-                            indent, line = trace.forest.get_source_line(filename, lineno)
-                            if line:
-                                if filename not in source_code:
-                                    source_code[filename] = {}
-                                lines = source_code[filename]
-                                lines[lineno] = (indent, line)
+                for i, mp in enumerate(merge_points):
+                    if 'filename' in mp and 'lineno' in mp:
+                        # both filename and line number is known, try to extract it from the uploaded data
+                        filename = mp['filename']
+                        lineno = mp['lineno']
+                        indent, line = trace.forest.get_source_line(filename, lineno)
+                        if line:
+                            if filename not in source_code:
+                                source_code[filename] = {}
+                            lines = source_code[filename]
+                            lines[lineno] = (indent, line)
         if trace.is_bridge():
             op = trace.get_failing_guard()
             if op:
