@@ -16,8 +16,6 @@ def test_to_json_meta_info():
     stage = trace.start_mark(const.MARK_TRACE_OPT)
     stage.append_op(MergePoint({const.MP_SCOPE[0]: 'my_func' }))
     json = LogMetaSerializer().to_representation(forest)
-    del json['labels']
-    del json['jumps']
     assert json == \
             { 'resops': { 15: 'divide' },
               'traces': { 0: { 'scope': 'my_func', 'filename': None, 'lineno': 0,
@@ -25,7 +23,7 @@ def test_to_json_meta_info():
                   'stamp': 0 } },
               'word_size': 8,
               'machine': 'x86',
-              'links': {0: {}},
+              'links': {},
             }
 
 def test_to_json_meta_links():
@@ -53,12 +51,10 @@ def test_to_json_meta_links():
     #
     stage = trunk.start_mark(const.MARK_TRACE_OPT)
     j = LogMetaSerializer().to_representation(forest)
-    assert len(j['links']) == 4
+    assert len(j['links']) == 2
     links = j['links']
     assert links[0] == {42: 1, 0: 2}
     assert links[1] == {0: 3}
-    assert links[2] == {}
-    assert links[3] == {}
 
 DEFAULT_TEST_RESOPS = {
     # do NOT edit this numbers
@@ -101,9 +97,9 @@ def test_serialize_trace(forest):
     t = TraceSerializer().to_representation(trunk)
     assert t['stages'].get('opt', None) == {
         'merge_points': [],
-        'ops': [{ 'num': 17, 'args': 'p0,i0', 'res': 'i1', 'descr':'descr', 'descr_number': '0x1' },
-                { 'num': 16, 'args': 'i1,i1', 'res': 'i2' },
-                { 'num': 15, 'descr':'guarddescr', 'res': 'i2', 'descr_number': '0x2' }]
+        'ops': [{ 'i':0, 'num': 17, 'args': 'p0,i0', 'res': 'i1', 'descr':'descr', 'descr_number': '0x1' },
+                { 'i':1, 'num': 16, 'args': 'i1,i1', 'res': 'i2' },
+                { 'i':2, 'num': 15, 'descr':'guarddescr', 'res': 'i2', 'descr_number': '0x2' }]
     }
 
 def test_serialize_debug_merge_point(forest):
@@ -118,15 +114,14 @@ def test_serialize_debug_merge_point(forest):
     stage = dict['stages']['opt']
     assert len(stage['merge_points']) == 1
     merge_points = stage['merge_points']
-    assert 0 in merge_points.keys()
-    assert merge_points['first'] == 0
-    assert merge_points[0][0] == {
+    assert merge_points == [{
+            'i': 0,
             'filename': '/x.py',
             'lineno': 2,
             'scope': 'funcname',
             'index': 4,
             'opcode': 'LOAD_FAST'
-           }
+           }]
 
 def test_serialize_visual_trace_tree(forest):
     trunk = forest.add_trace('loop', 0, 0)
