@@ -1,0 +1,8 @@
+<h2 style="margin-top: 0">
+  <tt>
+    <a style="color: inherit" href="{% url "profiles_list" %}?q={{ profile.top_level_function|urlencode }}">{{ profile.top_level_function }}</a>
+  </tt>
+  <small>
+    <a style="color: inherit" href="{% url "profiles_list" %}?q={{ profile.project|urlencode }}">{{ profile.project }}</a>
+  </small>
+</h2>

@@ -1,0 +1,91 @@
+{% load static %}
+<!doctype html>
+
+<head>
+  <meta charset="utf-8">
+  <link href="{% static "vendor/font-awesome.min.css" %}" rel="stylesheet">
+  <link href="{% static "vendor/bootstrap.min.css" %}" rel="stylesheet">
+  <link href="{% static "vendor/bootstrap-theme.min.css" %}">
+  <script src="{% static "vendor/jquery-2.2.3.min.js" %}"></script>
+  <script src="{% static "vendor/msgpack.js" %}"></script>
+  <script src="{% static "vendor/jquery.binarytransport.js" %}"></script>
+  <script src="{% static "vendor/bootstrap.min.js" %}"></script>
+  <script src="{% static "vendor/list.min.js" %}"></script>
+  <script src="{% static "vendor/list.fuzzysearch.min.js" %}"></script>
+  <script>
+    function ajaxMsgpack(conf) {
+      conf = $.extend({}, conf, {dataType: "binary", processData: false});
+      conf.url += "&msgpack";
+      return $.ajax(conf).then(decodeMsgpack);
+    }
+
+    function decodeMsgpack(blob, callback) {
+      var deferred = $.Deferred();
+      var reader = new FileReader();
+      $(reader).on("loadend", function () {
+        var decodedData = msgpack.decode(reader.result);
+        deferred.resolve(decodedData);
+      });
+      reader.readAsArrayBuffer(blob);
+      return deferred.promise();
+    }
+
+    function showError(title, text) {
+      var content = $("<strong>").text(title + ": ")
+               .add($("<span>").text(text));
+      $("#error-alert").html(content).fadeIn("fast");
+    }
+
+    function formatBytes(val, axis) {
+      if (val > 1024 * 1024) {
+        return (val / 1024 / 1024).toFixed(2) + " GiB";
+      } else if (val > 1024) {
+        return (val / 1024).toFixed() + " MiB";
+      } else {
+        return val + " KiB";
+      }
+    }
+  </script>
+
+  <style>
+    html, body { height: 100%; }
+    nav > ol.breadcrumb {
+      padding: 0 15px;
+    }
+    nav > ol.breadcrumb > li+li:before {
+      content: "›";
+      font-size: 20px;
+    }
+    nav > ol.breadcrumb > li > * {
+      font-size: 1.2em;
+      padding: 15px;
+      line-height: 20px;
+      display: inline-block;
+    }
+    nav > ol.breadcrumb > li > a {
+    }
+    nav > ol.breadcrumb > li.brand a { color: #777; font-weight: bold; }
+  </style>
+
+  {% block extra_head %}
+  {% endblock %}
+
+  <title>vmprof</title>
+</head>
+
+<body>
+  <div class="container">
+    <nav>
+      <ol class="breadcrumb">
+        <li class="brand"><a href="{% url "profiles_list" %}">vmprof</a></li>
+        {% block breadcrumbs %}
+        {% endblock %}
+      </ol>
+    </nav>
+  </div>
+  <div class="container">
+    <div class="alert alert-warning" id="error-alert" style="display: none"></div>
+  </div>
+  {% block content %}
+  {% endblock %}
+</body>

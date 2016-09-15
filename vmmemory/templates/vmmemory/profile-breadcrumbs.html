@@ -1,0 +1,43 @@
+<li>
+  <a href="{% url "profiles_list" %}?q={{ profile.project|urlencode }}">{{ profile.project }}</a>
+</li>
+<li>
+  <tt>
+    <a href="{% url "profiles_list" %}?q={{ profile.top_level_function|urlencode }}">{{ profile.top_level_function }}</a>
+  </tt>
+</li>
+<li>
+  <div class="btn-group">
+    {% if profile.memory_profile %}
+    <a class="btn btn-default {% if which == "mem" %}active{% endif %}" href="{% url "mem_profile" profile.pk %}">Memory</a>
+    {% endif %}
+    <a class="btn btn-default {% if which == "cpu" %}active{% endif %}" href="{% url "cpu_profile" profile.pk %}">CPU</a>
+  </div>
+  <!--
+  <span>
+    {% if which == "mem" %}
+      <span>Memory</span>
+      /
+      <a href="{% url "cpu_profile" profile.pk %}">CPU</a>
+    {% else %}
+      {% if profile.memory_profile %}
+        <a href="{% url "mem_profile" profile.pk %}">Memory</a>
+      {% else %}
+        <span class="text-muted" title="Memory tracking was disabled when creating this profile">Memory</span>
+      {% endif %}
+      /
+      <span>CPU</span>
+    {% endif %}
+  </span>
+  -->
+</li>
+
+<div class="navbar-header navbar-right">
+  <div class="navbar-text">
+    {% if which == "mem" %}
+      {% include "profiles/peak-mem.html" with profile=profile %}
+    {% else %}
+      {% include "profiles/duration.html" with profile=profile %}
+    {% endif %}
+  </div>
+</div>

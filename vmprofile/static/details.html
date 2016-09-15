@@ -20,11 +20,11 @@
 
     <ol class="breadcrumb">
         <li>
-            <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}">{{ log.data.argv }}</a>
+            <a ng-href="#/{{ log.checksum }}/?view={{ visualization }}">{{ log.data.argv }}</a>
             <span ng-if="name">: {{ name }}</span>
         </li>
         <li ng-repeat="path in paths">
-            <a ng-href="/#/{{ log.checksum }}/?view={{ visualization }}&id={{ path.path }}">
+            <a ng-href="#/{{ log.checksum }}/?view={{ visualization }}&id={{ path.path }}">
                 {{ path.name }} {{ "(" + (path.percentage * 100).toFixed(2) + "%)" }}
             </a>
         </li>

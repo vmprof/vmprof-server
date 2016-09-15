@@ -23,6 +23,7 @@ INSTALLED_APPS = (
     'webapp',
     'vmprofile',
     'vmlog',
+    'vmmemory',
 )
 
 MIDDLEWARE_CLASSES = (

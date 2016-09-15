@@ -1,0 +1,37 @@
+<div class="modal fade" id="share-search-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Share this search</h4>
+      </div>
+      <div class="modal-body">
+        <p>Copy this link to share the current filter.</p>
+        <div class="form-group">
+          <input type=text id="share-search-input" class="form-control">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #share-search-input { width: 100%; font-family: monospace; }
+</style>
+
+<script>
+$(function () {
+  $("#share-search-modal").on("shown.bs.modal", function (e) {
+    $("#share-search-input").select();
+  });
+
+  function updateShareSearch() {
+    const query = $(".search").val();
+    $("#share-search-button").prop("disabled", query ? "" : "yes");
+    const searchUrl = window.location.origin + "{% url "profiles_list" %}?q=" + encodeURIComponent(query);
+    $("#share-search-input").val(searchUrl);
+  }
+
+  list.on("searchComplete", updateShareSearch);
+  updateShareSearch();
+});
+</script>

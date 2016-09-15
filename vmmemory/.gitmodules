@@ -1,0 +1,3 @@
+[submodule "vmprof-server"]
+	path = vmprof-server
+	url = https://github.com/vmprof/vmprof-server

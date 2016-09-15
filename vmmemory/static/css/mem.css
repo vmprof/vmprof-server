@@ -1,0 +1,66 @@
+img.loading {
+	position: fixed;
+	width: 60px;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+#chart-container, #annotation {
+  float: left;
+}
+#chart-container {
+  z-index: 1;
+  background: white;
+  width: 73%;
+  height: 100%;
+}
+#chart { height: 100%; }
+#annotation {
+  width: 25%;
+  height: 100%;
+  padding-left: 2%;
+  border-left: 1px solid #eee;
+}
+.mem-consumption {
+  text-align: right;
+  padding-bottom: 15px;
+}
+.stacktrace ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+.stacktrace li {
+  font-family: monospace;
+  position: relative;
+  height: 1.5em;
+  overflow: hidden;
+}
+.stacktrace .func {
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+  z-index: 2;
+  padding-right: 2em;
+  background: linear-gradient(to right,
+    white 0, white 80%, white 80%, rgba(255,255,255,0) 120%
+  );
+}
+.stacktrace .file {
+  position: absolute;
+  white-space: nowrap;
+  right: 0;
+  font-size: 0.85em;
+}
+.stacktrace-secondary .stacktrace-count {
+  text-align: right;
+  border-bottom: 1px solid #eee;
+  margin-top: 20px;
+}
+.stacktrace-secondary .stacktrace-count:hover {
+  cursor: help;
+}
+.stacktrace-secondary .stacktrace-secondary-help small {
+  margin-top: 50px;
+  display: block;
+  line-height: 1.1;
+}

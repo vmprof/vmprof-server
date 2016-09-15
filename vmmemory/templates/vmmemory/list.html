@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+  #profiles-list li {
+    position: relative;
+  }
+  #profiles-list li .profile-name a {
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+  }
+  #profiles-list li .profile-name a:hover h4 span {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row" id="profile-list" style="visibility: hidden">
+    <div class="col-md-10 col-md-offset-1">
+      <div class="form-group">
+        <div class="input-group">
+          <span class="input-group-addon"><i class="fa fa-search"></i></span>
+          <input type="search" class="search form-control" placeholder="Filter by project or callable..." autofocus/>
+          <!-- Share this search -->
+          <span class="input-group-btn">
+            <button class="btn btn-default" type=button id="share-search-button"
+                    data-toggle=modal data-target="#share-search-modal">
+              <i class="fa fa-share"></i>
+            </button>
+          </span>
+          <!---->
+        </div>
+      </div>
+
+      <ul class="list list-group" id="profiles-list">
+        {% for profile in profiles %}
+          <li class="list-group-item" style="padding-bottom: 0">
+            <div class="row">
+              <div class="col-xs-8 col-md-6 profile-name">
+                <a href="{% url "mem_profile" profile.pk %}">
+                  <h4 class="list-group-item-heading">
+                    <span>{{ profile.project }}</span>
+                    {% if profile.top_level_function %}
+                      <code style="margin-left: 10px">{{ profile.top_level_function }}</code>
+                    {% endif %}
+                  </h4>
+                </a>
+              </div>
+              <div class="col-xs-2">
+                {% if profile.memory_profile %}
+                  {% include "profiles/peak-mem.html" with profile=profile %}
+                {% endif %}
+              </div>
+              <div class="col-xs-2">
+                {% include "profiles/duration.html" with profile=profile %}
+              </div>
+              <div class="col-md-2 text-right visible-lg visible-md">
+                <small class="text-muted" title="{{ profile.created }}">
+                  {{ profile.created|timesince }} ago
+                </small>
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+<div>
+
+<script>
+/* http://stackoverflow.com/questions/901115/ */
+function getParameterByName(e,n){n||(n=window.location.href),e=e.replace(/[\[\]]/g,"\\$&");var r=new RegExp("[?&]"+e+"(=([^&#]*)|&|#|$)"),a=r.exec(n);return a?a[2]?decodeURIComponent(a[2].replace(/\+/g," ")):"":null}
+
+var list;
+
+$(function () {
+  /* Search */
+  list = new List("profile-list", {valueNames: ["list-group-item-heading"]});
+
+  /* Fancy search show/hide */
+  var speed = null;
+  list.templater.clear = jQuery.noop; // relying on `show`/`hide` instead
+  list.templater.show = function(item) {
+    $(item.elm).show(speed);
+  };
+  list.templater.hide = function(item) {
+    $(item.elm).hide(speed);
+  };
+
+  /* Pre-populate search field */
+  const lastSearch = getParameterByName('q') || localStorage.__vmprof_viewer_lastSearchInput;
+  if (lastSearch) {
+    $(".search").val(lastSearch);
+    list.search(lastSearch);
+  }
+  /* Remember last search */
+  list.on("searchComplete", function (data) {
+    localStorage.__vmprof_viewer_lastSearchInput = $(".search").val();
+  });
+
+  /* Delete last search if "home" was clicked */
+  $("nav .breadcrumb .brand").on("click", function () {
+    localStorage.__vmprof_viewer_lastSearchInput = "";
+  });
+
+  /* Show site */
+  $("#profile-list").css("visibility", "");
+
+  /* Use fancy search show/hide from now on */
+  speed = 'fast';
+});
+</script>
+
+<!-- Share this search -->
+{% include "profiles/list-share-this-search.html" %}
+<!---->
+{% endblock %}

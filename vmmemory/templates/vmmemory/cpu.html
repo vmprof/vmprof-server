@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+  <base href="{% url "cpu_profile" profile.pk %}">
+  <link href="{% static "vmprof-server/main.css" %}" rel="stylesheet" />
+  <script src="{% static "vmprof-server/libs/lodash.min.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/moment.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/angular.min.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/angular-resource.min.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/angular-cookies.min.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/angular-route.min.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/raphael-min.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/treemap/treemap-squarify.js" %}"></script>
+  <script src="{% static "vmprof-server/libs/treemap/treemap-raphael.js" %}"></script>
+  <script src="{% static "vmprof-server/stats.js" %}"></script>
+  <script src="{% static "vmprof-server/visualizations.js" %}"></script>
+  <script src="{% static "js/cpu.js" %}"></script>
+  <script>
+    var PROFILE_FETCH_URL = "{{ profile_fetch_url }}?";
+    var ADDR_NAME_MAP_FETCH_URL = "{{ addr_name_fetch_url }}?";
+    var TOP_LEVEL_FUNCTION = "{{ profile.top_level_function }}";
+  </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+  {% include "profiles/profile-breadcrumbs.html" with which="cpu" %}
+{% endblock %}
+
+{% block content %}
+<div ng-app="vmprof" ng-controller="details">
+  <div class="container">
+    <div ng-view></div>
+  </div>
+</div>
+{% endblock %}

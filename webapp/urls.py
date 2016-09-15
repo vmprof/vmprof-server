@@ -26,7 +26,8 @@ urlpatterns = [
     url(r'^api/log/meta/(?P<profile>[0-9a-z]*)/$', meta),
     url(r'^api/log/trace/(?P<profile>[0-9a-z]*)/$', trace),
     url(r'^api/log/stitches/(?P<profile>[0-9a-z]*)/$', stitches),
-    url(r'^$', index)
+    url(r'^$', index),
+    url(r'^mem/', include('vmmemory.urls')),
 ]
 
 if settings.DEBUG:
