@@ -14,7 +14,7 @@ class Log(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     #
     checksum = models.CharField(max_length=32, primary_key=True)
-    cpu_profile = models.FileField(upload_to=get_profile_storage_directory)
+    cpu_profile = models.FileField(upload_to=get_profile_storage_directory, null=True)
     # deprecated, do NOT use!
     data = models.TextField()
 

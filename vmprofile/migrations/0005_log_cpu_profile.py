@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='log',
             name='cpu_profile',
-            field=models.FileField(default=None, upload_to=vmprofile.models.get_profile_storage_directory),
+            field=models.FileField(null=True, default=None, upload_to=vmprofile.models.get_profile_storage_directory),
             preserve_default=False,
         ),
     ]
