@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 from vmlog.models import BinaryJitLog, get_reader
 from vmlog.serializer import (VisualTraceTreeSerializer, LogMetaSerializer,
         TraceSerializer, BadRequest)
-from vmprofile.models import Log
+from vmprofile.models import RuntimeData
 from jitlog.parser import _parse_jitlog
 from jitlog.objects import MergePoint
 from jitlog import constants as const
@@ -52,11 +52,11 @@ class BinaryJitLogFileUploadView(views.APIView):
         user = request.user if request.user.is_authenticated() else None
 
         if profile.strip() == "":
-            profile_obj = None
+            runtime_data= None
         else:
-            profile_obj = Log.objects.get(checksum=profile)
+            runtime_data = RuntimeData.objects.get(pk=profile)
         log, _ = BinaryJitLog.objects.get_or_create(file=file_obj, checksum=checksum,
-                                                    user=user, profile=profile_obj)
+                                                    user=user, runtime_data=runtime_data)
 
         return Response(log.checksum)
 

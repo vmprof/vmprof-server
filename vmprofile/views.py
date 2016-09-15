@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
 
-from vmprofile.models import Log
+from vmprofile.models import RuntimeData
 
 
 username_max = auth.models.User._meta.get_field('username').max_length
@@ -55,16 +55,16 @@ class UserRegisterSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=6, max_length=password_max)
 
 
-class LogSerializer(serializers.ModelSerializer):
+class RuntimeDataSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
     jitlog_checksum = serializers.SerializerMethodField()
 
     class Meta:
-        model = Log
+        model = RuntimeData
 
     def get_jitlog_checksum(self, obj):
         if obj.jitlog:
-            model = obj.jitlog.first()
+            model = obj.log.first()
             if model:
                 return model.checksum
         return None
@@ -72,24 +72,23 @@ class LogSerializer(serializers.ModelSerializer):
     def get_data(self, obj):
         return json.loads(obj.data)
 
-
-class LogListSerializer(serializers.ModelSerializer):
+class RuntimeDataListSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
-        model = Log
-        fields = ('checksum', 'user', 'created', 'vm', 'name')
+        model = RuntimeData
+        fields = ('user', 'created', 'vm', 'name')
 
 
-class LogViewSet(viewsets.ModelViewSet):
-    queryset = Log.objects.select_related('user')
-    serializer_class = LogListSerializer
+class RuntimeDataViewSet(viewsets.ModelViewSet):
+    queryset = RuntimeData.objects.select_related('user')
+    serializer_class = RuntimeDataListSerializer
     permission_classes = (permissions.AllowAny,)
 
     def get_serializer_class(self):
         if 'pk' in self.kwargs:
-            return LogSerializer
-        return LogListSerializer
+            return RuntimeDataSerializer
+        return RuntimeDataListSerializer
 
     def create(self, request):
         data = json.dumps(request.data).encode('utf-8')

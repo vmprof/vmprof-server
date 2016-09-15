@@ -1,13 +1,14 @@
 from __future__ import unicode_literals
 from django.db import models
-from vmprofile.models import Log
+from vmprofile.models import RuntimeData
 
 
 def get_profile_storage_directory(profile, filename):
-    return "%d/%s" % (profile.pk, filename)
+    return "mem/%d/%s" % (profile.pk, filename)
 
 
 class MemoryProfile(models.Model):
+    checksum = models.CharField(max_length=128, primary_key=True)
     # actual data
     memory_profile = models.FileField(upload_to=get_profile_storage_directory)
     addr_name_map = models.FileField(upload_to=get_profile_storage_directory)
@@ -26,8 +27,8 @@ class MemoryProfile(models.Model):
     profile_resolution = models.BigIntegerField(blank=True, null=True)
 
     # relations
-    upload = models.ForeignKey(Log, related_name='memory_profile',
-                               null=True, blank=False)
+    #runtime_data = models.ForeignKey(RuntimeData, related_name='memory_profile',
+    #                                 null=True, blank=False)
 
     @property
     def max_memory_use_gib(self):

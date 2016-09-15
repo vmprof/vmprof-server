@@ -8,17 +8,19 @@ from django.conf import settings
 from django.contrib import admin
 from django.core.cache import caches
 
-from vmprofile.models import Log as Profile
+from vmprofile.models import RuntimeData
 
 from forestcache.cache import get_reader
 
+def get_profile_storage_directory(profile, filename):
+    return "log/%d/%s" % (profile.pk, filename)
+
 class BinaryJitLog(models.Model):
-    checksum = models.CharField(max_length=32, primary_key=True)
+    checksum = models.CharField(max_length=128, primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to='uploads/%Y/%m/%d')
+    file = models.FileField(upload_to=get_profile_storage_directory)
     # relations
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
-    profile = models.ForeignKey(Profile, related_name='jitlog',
+    profile = models.ForeignKey(RuntimeData, related_name='jitlog',
                                 null=True, blank=False)
 
     def decode_forest(self):
@@ -31,4 +33,4 @@ class BinaryJitLog(models.Model):
 
 @admin.register(BinaryJitLog)
 class BinaryJitLogAdmin(admin.ModelAdmin):
-    list_display = ('checksum', 'created', 'file', 'user', 'profile')
+    list_display = ('checksum', 'created', 'file', 'profile')

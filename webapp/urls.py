@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.conf import settings
 
 from rest_framework import routers
-from vmprofile.views import MeView, LogViewSet, TokenViewSet
+from vmprofile.views import MeView, RuntimeDataViewSet, TokenViewSet
 from vmlog.views import (meta, trace, stitches,
         BinaryJitLogFileUploadView)
 from django.conf.urls import url, include
@@ -11,8 +11,8 @@ from django.contrib.staticfiles import views as static
 from webapp.views import index
 
 router = routers.DefaultRouter()
-router.register(r'log', LogViewSet)
-router.register(r'profile', LogViewSet)
+router.register(r'log', RuntimeDataViewSet)
+router.register(r'profile', RuntimeDataViewSet)
 router.register(r'token', TokenViewSet, base_name="token")
 #router.register(r'log/meta', MetaForestViewSet)
 #router.register(r'log/trace', TraceViewSet)
