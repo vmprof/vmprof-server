@@ -1,20 +1,22 @@
 from __future__ import unicode_literals
 from django.db import models
+from vmprofile.models import Log
 
 
 def get_profile_storage_directory(profile, filename):
     return "%d/%s" % (profile.pk, filename)
 
 
-class ProfileRun(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
+class MemoryProfile(models.Model):
+    # actual data
+    memory_profile = models.FileField(upload_to=get_profile_storage_directory)
+    addr_name_map = models.FileField(upload_to=get_profile_storage_directory)
+
+    # data that can be extracted from the log
+    version = models.IntegerField()
     start_date = models.DateTimeField(blank=True, null=True)
     project = models.CharField(max_length=200)
     top_level_function = models.CharField(max_length=200, blank=True)
-    version = models.IntegerField()
-    cpu_profile = models.FileField(upload_to=get_profile_storage_directory)
-    memory_profile = models.FileField(upload_to=get_profile_storage_directory)
-    addr_name_map = models.FileField(upload_to=get_profile_storage_directory)
     #: Maximum memory used by the function, in KiB. (max: 8 ZiB)
     max_memory_use = models.BigIntegerField(blank=True, null=True)
     #: Time spent in the function (in microseconds; this is simply a cached
@@ -23,8 +25,9 @@ class ProfileRun(models.Model):
     #: Time resolution of profile (delay between profile ticks in microseconds)
     profile_resolution = models.BigIntegerField(blank=True, null=True)
 
-    class Meta:
-        ordering = ['-created']
+    # relations
+    upload = models.ForeignKey(Log, related_name='memory_profile',
+                               null=True, blank=False)
 
     @property
     def max_memory_use_gib(self):

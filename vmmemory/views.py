@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.gzip import gzip_page
 from django.utils.dateparse import parse_datetime
 
-from vmmemory.models import ProfileRun
+from vmmemory.models import MemoryProfile
 
 
 class MsgpackResponse(http.HttpResponse):
@@ -37,7 +37,7 @@ def submit_profile(request):
     data = msgpack.unpack(request)
     assert data['version'] in {1, 2}
 
-    profile_run = ProfileRun(
+    profile_run = MemoryProfile(
         project=data['project'],
         version=data['version'],
         max_memory_use=data['max_mem'],
@@ -57,11 +57,11 @@ def submit_profile(request):
 
 
 def profiles_list(request):
-    return render(request, "profiles/list.html", {'profiles': ProfileRun.objects.all()})
+    return render(request, "profiles/list.html", {'profiles': MemoryProfile.objects.all()})
 
 
 def show_profile(request, profile_type, pk):
-    profile = get_object_or_404(ProfileRun, pk=pk)
+    profile = get_object_or_404(MemoryProfile, pk=pk)
     return render(request, "profiles/%s.html" % profile_type, {
         'profile': profile,
         'profile_fetch_url': reverse('api_fetch_%s' % profile_type, kwargs={'pk': profile.pk}),
@@ -70,14 +70,14 @@ def show_profile(request, profile_type, pk):
 
 
 def fetch_profile(request, attr, pk):
-    profile = get_object_or_404(ProfileRun, pk=pk)
+    profile = get_object_or_404(MemoryProfile, pk=pk)
     data = getattr(profile, attr)
     return GzipMsgpackResponse(data)
 
 
 @gzip_page
 def fetch_mem_profile(request, pk):
-    profile = get_object_or_404(ProfileRun, pk=pk)
+    profile = get_object_or_404(MemoryProfile, pk=pk)
 
     full_profile = msgpack.unpack(gzip.GzipFile(fileobj=profile.memory_profile))
     resampled_profile = resample_memory_profile(full_profile,
@@ -130,5 +130,5 @@ def aggregate_trace(traces):
                 common_prefix = common_prefix[:i]
                 break
 
-    most_frequent_trace, count = max(frequencies.items(), key=lambda (k, v): v)
+    most_frequent_trace, count = max(frequencies.items(), key=lambda k, v: v)
     return len(traces), common_prefix, count, most_frequent_trace[len(common_prefix):]
