@@ -9,7 +9,7 @@ def get_profile_storage_directory(profile, filename):
     return "cpu/%d/%s" % (profile.pk, filename)
 
 class RuntimeData(models.Model):
-    rid = models.CharField(max_length=100, default=uuid.uuid4, primary_key=True)
+    runtime_id = models.CharField(max_length=64, default=uuid.uuid4, primary_key=True, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
     vm = models.CharField(max_length=32, blank=True)
@@ -21,12 +21,12 @@ class RuntimeData(models.Model):
 # rename that model to CPUProfile, add new model 'Upload', ...
 class CPUProfile(models.Model):
     checksum = models.CharField(max_length=128, primary_key=True)
-    cpu_profile = models.FileField(upload_to=get_profile_storage_directory)
+    file = models.FileField(null=True, upload_to=get_profile_storage_directory)
     # deprecated, do NOT use!
     data = models.TextField(null=True)
 
     runtime_data = models.OneToOneField(RuntimeData, related_name='cpu_profile',
-                                        null=True, blank=False, on_delete=models.CASCADE)
+                                        null=True, blank=True, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if not self.checksum:

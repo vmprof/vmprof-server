@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='binaryjitlog',
             name='profile',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='jitlog', to='vmprofile.Log'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='jitlog', to='vmprofile.CPUProfile'),
         ),
     ]

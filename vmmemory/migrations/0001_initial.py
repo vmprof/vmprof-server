@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='MemoryProfile',
             fields=[
                 ('checksum', models.CharField(max_length=128, primary_key=True, serialize=False)),
-                ('memory_profile', models.FileField(upload_to=vmmemory.models.get_profile_storage_directory)),
+                ('file', models.FileField(upload_to=vmmemory.models.get_profile_storage_directory)),
                 ('addr_name_map', models.FileField(upload_to=vmmemory.models.get_profile_storage_directory)),
                 ('version', models.IntegerField()),
                 ('start_date', models.DateTimeField(blank=True, null=True)),

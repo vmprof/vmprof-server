@@ -17,7 +17,9 @@ def forward_func(apps, schema_editor):
         rd.created = prof.created
         rd.user = prof.user
         rd.name = prof.name
+        rd.save()
         prof.runtime_data = rd
+        prof.save()
 
 def backward_func(apps, schema_editor):
     RuntimeData = apps.get_model("vmprofile", "RuntimeData")
@@ -28,6 +30,7 @@ def backward_func(apps, schema_editor):
         cpup.user = rd.user
         cpup.name = rd.name
         cpup.vm = rd.vm
+        cpup.save()
     RuntimeData.objects.delete()
 
 class Migration(migrations.Migration):
@@ -41,7 +44,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RuntimeData',
             fields=[
-                ('rid', models.CharField(default=uuid.uuid4, max_length=100, primary_key=True, serialize=False)),
+                ('runtime_id', models.CharField(default=uuid.uuid4, max_length=64, primary_key=True, unique=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('vm', models.CharField(blank=True, max_length=32)),
                 ('name', models.CharField(blank=True, max_length=256)),
@@ -54,7 +57,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cpuprofile',
             name='runtime_data',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='cpu_profile', to='vmprofile.RuntimeData'),
+            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                       related_name='cpu_profile', to='vmprofile.RuntimeData'),
         ),
         migrations.RunPython(forward_func, backward_func),
         migrations.AlterModelOptions(
@@ -82,10 +86,10 @@ class Migration(migrations.Migration):
             name='checksum',
             field=models.CharField(max_length=128, primary_key=True, serialize=False),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='cpuprofile',
-            name='cpu_profile',
-            field=models.FileField(upload_to=vmprofile.models.get_profile_storage_directory),
+            name='file',
+            field=models.FileField(null=True, upload_to=vmprofile.models.get_profile_storage_directory),
         ),
         migrations.AlterField(
             model_name='cpuprofile',

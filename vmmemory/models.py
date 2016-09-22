@@ -10,7 +10,7 @@ def get_profile_storage_directory(profile, filename):
 class MemoryProfile(models.Model):
     checksum = models.CharField(max_length=128, primary_key=True)
     # actual data
-    memory_profile = models.FileField(upload_to=get_profile_storage_directory)
+    file = models.FileField(upload_to=get_profile_storage_directory)
     addr_name_map = models.FileField(upload_to=get_profile_storage_directory)
 
     # data that can be extracted from the log

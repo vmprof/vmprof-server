@@ -8,7 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('vmprofile', '0005_log_cpu_profile'),
+        ('vmprofile', '0004_auto_20150921_1116'),
     ]
 
     operations = [
