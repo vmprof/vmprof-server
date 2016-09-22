@@ -6,6 +6,10 @@ from rest_framework import routers
 from vmprofile.views import MeView, RuntimeDataViewSet, TokenViewSet
 from vmlog.views import (meta, trace, stitches,
         BinaryJitLogFileUploadView)
+from vmprofile.views import runtime_new, runtime_freeze
+from vmlog.views import upload_jit
+from vmprofile.views import upload_cpu
+from vmprofile.views import upload_cpu as upload_mem
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
 from webapp.views import index
@@ -19,15 +23,23 @@ router.register(r'token', TokenViewSet, base_name="token")
 #router.register(r'log/stitches', VisualTraceTreeViewSet)
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include(router.urls)),
-    url(r'^api/user/', MeView.as_view()),
-    url(r'^api/jitlog/(?P<profile>[0-9a-z]*)/?$', BinaryJitLogFileUploadView.as_view()),
-    url(r'^api/log/meta/(?P<profile>[0-9a-z]*)/$', meta),
-    url(r'^api/log/trace/(?P<profile>[0-9a-z]*)/$', trace),
-    url(r'^api/log/stitches/(?P<profile>[0-9a-z]*)/$', stitches),
     url(r'^$', index),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^mem/', include('vmmemory.urls')),
+    #
+    url(r'^api/', include(router.urls)),
+    #
+    url(r'^api/user/', MeView.as_view()),
+    #
+    url(r'^api/runtime/new/?$', runtime_new),
+    url(r'^api/runtime/(?P<rid>[0-9a-z]*)/freeze/?$', runtime_freeze),
+    url(r'^api/runtime/upload/jit/(?P<rid>[0-9a-z]*)/add/?$', upload_jit),
+    url(r'^api/runtime/upload/cpu/(?P<rid>[0-9a-z]*)/add/?$', upload_cpu),
+    url(r'^api/runtime/upload/mem/(?P<rid>[0-9a-z]*)/add/?$', upload_mem),
+    #
+    url(r'^api/jit/meta/(?P<profile>[0-9a-z]*)/$', meta),
+    url(r'^api/jit/trace/(?P<profile>[0-9a-z]*)/$', trace),
+    url(r'^api/jit/stitches/(?P<profile>[0-9a-z]*)/$', stitches),
 ]
 
 if settings.DEBUG:

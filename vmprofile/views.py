@@ -185,3 +185,15 @@ class TokenViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data)
 
+
+from vmprofile.models import RuntimeData
+
+def runtime_new(request):
+    rdat = RuntimeData.objects.create()
+    return JsonResponse([rdat.rid])
+
+def runtime_freeze(request, rid):
+    pass
+
+def upload_cpu(request, rid):
+    pass

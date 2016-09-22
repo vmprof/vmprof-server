@@ -144,3 +144,5 @@ def stitches(request, profile):
     return response
 
 
+def upload_jit(request, rid):
+    pass
