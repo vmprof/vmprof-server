@@ -542,7 +542,7 @@ ResOp.prototype.has_descr = function() {
 ResOp.prototype.format_resop = function(prefix, suffix, html) {
   if ('res' in this._data && this._data.res !== '?') {
     if (html) {
-       prefix += this.format_var(this._data.res) + ' = '
+       prefix += this.format_var(this._data.res, 'result') + ' = '
     } else {
        prefix += this._data.res + ' = '
     }
@@ -579,7 +579,7 @@ ResOp.prototype.format_resop = function(prefix, suffix, html) {
          opname + '</span>(' + arg_str + ')' + descr + suffix
 }
 
-ResOp.prototype.format_var = function(variable) {
+ResOp.prototype.format_var = function(variable, classes) {
   var type = 'const';
   if (variable.startsWith("i") ||
       variable.startsWith("r") ||
@@ -588,7 +588,10 @@ ResOp.prototype.format_var = function(variable) {
       variable.startsWith("f")) {
     var type = 'var';
   }
-  return '<span class="'+type+' varid-' + variable + '">' + variable + '</span>'
+  if (!classes) {
+    classes = ''
+  }
+  return '<span class="'+ classes +' '+type+' varid-' + variable + '">' + variable + '</span>'
 }
 
 ResOp.prototype.to_s = function() {
