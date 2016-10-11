@@ -540,7 +540,7 @@ ResOp.prototype.has_descr = function() {
 }
 
 ResOp.prototype.format_resop = function(prefix, suffix, html) {
-  if ('rs' in this._data && this._data.res !== '?') {
+  if ('res' in this._data && this._data.res !== '?') {
     if (html) {
        prefix += this.format_var(this._data.res) + ' = '
     } else {
