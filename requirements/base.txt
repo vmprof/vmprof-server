@@ -6,3 +6,4 @@ six==1.10
 django_compressor
 csscompressor
 twisted
+django-appconf
