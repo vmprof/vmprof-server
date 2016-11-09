@@ -13,11 +13,11 @@ def forward_func(apps, schema_editor):
     RuntimeData = apps.get_model("vmprofile", "RuntimeData")
     CPUProfile = apps.get_model("vmprofile", "CPUProfile")
     for prof in CPUProfile.objects.all():
-        import pdb; pdb.set_trace()
         rd = RuntimeData.objects.create()
         rd.created = prof.created
         rd.user = prof.user
         rd.name = prof.name
+        rd.vm = prof.vm
         rd.save()
         prof.runtime_data = rd
         prof.save()
