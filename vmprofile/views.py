@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
 import hashlib
-from urllib import request, parse
+import uuid
+from urllib import parse
 
 from django.conf.urls import url, include
 from django.contrib import auth
@@ -15,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
 
-from vmprofile.models import RuntimeData
+from vmprofile.models import RuntimeData, CPUProfile
 
 
 username_max = auth.models.User._meta.get_field('username').max_length
@@ -64,20 +65,22 @@ class RuntimeDataSerializer(serializers.ModelSerializer):
 
     def get_jitlog_checksum(self, obj):
         if obj.jitlog:
-            model = obj.log.first()
+            model = obj.jitlog.first()
             if model:
                 return model.checksum
         return None
 
     def get_data(self, obj):
-        return json.loads(obj.data)
+        if obj.cpu_profile is not None:
+            return json.loads(obj.cpu_profile.data)
+        return "{}"
 
 class RuntimeDataListSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = RuntimeData
-        fields = ('user', 'created', 'vm', 'name')
+        fields = ('user', 'created', 'vm', 'name', 'runtime_id')
 
 
 class RuntimeDataViewSet(viewsets.ModelViewSet):
@@ -91,18 +94,20 @@ class RuntimeDataViewSet(viewsets.ModelViewSet):
         return RuntimeDataListSerializer
 
     def create(self, request):
-        data = json.dumps(request.data).encode('utf-8')
-        checksum = hashlib.md5(data).hexdigest()
+        # compatability! remove this at some point!
+        data = request.data
         user = request.user if request.user.is_authenticated() else None
-        log, _ = self.queryset.get_or_create(
-            data=data,
-            checksum=checksum,
+        runtime, _ = self.queryset.get_or_create(
             user=user,
             vm=request.data['VM'],
             name=request.data['argv']
         )
-
-        return Response(log.checksum)
+        data = json.dumps(request.data).encode('utf-8')
+        checksum = uuid.uuid4() # hashlib.md5(data).hexdigest()
+        cpuprof = CPUProfile.objects.create(data=data, runtime_data=runtime,
+                                            file=None, checksum=checksum)
+        cpuprof.save()
+        return Response(runtime.runtime_id)
 
     def get_queryset(self):
         if not self.request.user.is_authenticated():
@@ -190,7 +195,7 @@ from vmprofile.models import RuntimeData
 
 def runtime_new(request):
     rdat = RuntimeData.objects.create()
-    return JsonResponse([rdat.rid])
+    return Response({'status':'ok','runtime_id': rdat.rid})
 
 def runtime_freeze(request, rid):
     pass

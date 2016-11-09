@@ -25,7 +25,7 @@
             <h4 class="media-heading" id="media-heading">
 
               <span ng-if="log.user">{{ log.user.username }}</span><span ng-if="!log.user"><i style="color: #888">anonymous</i></span>:
-	      <a ng-href="#{{ log.checksum }}"> {{ log.name }}</a>
+	      <a ng-href="#/{{ log.runtime_id }}"> {{ log.name }}</a>
             </h4>
 
             <div class="times" >

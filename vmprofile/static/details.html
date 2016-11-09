@@ -7,7 +7,7 @@
 <div id="item" ng-show="noprofile" class="well">
     <h2 class="text-center">There is no profile data :(</h2>
 
-    <div class="text-center" ng-show="has_jitlog">
+    <div class="text-center" ng-show="log.jitlog_checksum">
         <h3>But there is a JIT log.</h3>
         <a
            ng-href="#/{{ log.jitlog_checksum }}/traces">
@@ -51,8 +51,8 @@
                 <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
             </span>
 
-            <span class="pull-right">
-                <a ng-href="#/{{ log.jitlog_checksum }}/traces">JIT Log</a>
+            <span class="pull-right" ng-show="log.jitlog_checksum">
+                <a ng-href="#/{{ log.jitlog_checksum }}/traces">show PyPy's JIT compiler log</a>
             </span>
         </div>
 

@@ -13,6 +13,7 @@ def forward_func(apps, schema_editor):
     RuntimeData = apps.get_model("vmprofile", "RuntimeData")
     CPUProfile = apps.get_model("vmprofile", "CPUProfile")
     for prof in CPUProfile.objects.all():
+        import pdb; pdb.set_trace()
         rd = RuntimeData.objects.create()
         rd.created = prof.created
         rd.user = prof.user
@@ -54,6 +55,11 @@ class Migration(migrations.Migration):
                 'ordering': ['-created'],
             },
         ),
+        migrations.AlterField(
+            model_name='cpuprofile',
+            name='checksum',
+            field=models.CharField(max_length=128, primary_key=True, serialize=False),
+        ),
         migrations.AddField(
             model_name='cpuprofile',
             name='runtime_data',
@@ -80,11 +86,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='cpuprofile',
             name='vm',
-        ),
-        migrations.AlterField(
-            model_name='cpuprofile',
-            name='checksum',
-            field=models.CharField(max_length=128, primary_key=True, serialize=False),
         ),
         migrations.AddField(
             model_name='cpuprofile',
