@@ -29,13 +29,6 @@ class CPUProfile(models.Model):
     runtime_data = models.OneToOneField(RuntimeData, related_name='cpu_profile',
                                         null=True, blank=True, on_delete=models.CASCADE)
 
-    #def save(self, *args, **kwargs):
-    #    if not self.checksum:
-    #        data = self.data
-    #        self.checksum = hashlib.md5(data).hexdigest()
-
-    #    return super(CPUProfile, self).save(*args, **kwargs)
-
 @admin.register(RuntimeData)
 class RuntimeDataAdmin(admin.ModelAdmin):
     list_display = ('name', 'vm', 'user', 'created')

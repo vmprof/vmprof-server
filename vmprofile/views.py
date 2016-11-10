@@ -104,7 +104,7 @@ class RuntimeDataViewSet(viewsets.ModelViewSet):
         runtime = self.queryset.create(user=user, vm=vm, name=name, completed=True)
         data = json.dumps(data).encode('utf-8')
         CPUProfile.objects.create(data=data, runtime_data=runtime, file=None)
-        return Response(runtime.runtime_id)
+        return Response(str(runtime.runtime_id))
 
     def get_queryset(self):
         if not self.request.user.is_authenticated():
@@ -203,7 +203,7 @@ def runtime_new(request):
     user = request.user if request.user.is_authenticated() else None
     rdat = RuntimeData.objects.create(user=user, vm=vm, name=name)
     rdat.save()
-    return Response({'status':'ok','runtime_id': rdat.runtime_id})
+    return Response({'status':'ok','runtime_id': str(rdat.runtime_id)})
 
 def try_get_runtimedata(request, rid):
     try:
