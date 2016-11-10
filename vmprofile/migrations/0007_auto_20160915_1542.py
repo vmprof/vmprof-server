@@ -18,6 +18,7 @@ def forward_func(apps, schema_editor):
         rd.user = prof.user
         rd.name = prof.name
         rd.vm = prof.vm
+        rd.completed = True
         rd.save()
         prof.runtime_data = rd
         prof.save()
@@ -55,10 +56,15 @@ class Migration(migrations.Migration):
                 'ordering': ['-created'],
             },
         ),
+        migrations.RenameField(
+            model_name='cpuprofile',
+            old_name='checksum',
+            new_name='cpuprofile_id',
+        ),
         migrations.AlterField(
             model_name='cpuprofile',
-            name='checksum',
-            field=models.CharField(max_length=128, primary_key=True, serialize=False),
+            name='cpuprofile_id',
+            field=models.CharField(default=uuid.uuid4, max_length=64, primary_key=True, serialize=False),
         ),
         migrations.AddField(
             model_name='cpuprofile',
@@ -96,5 +102,10 @@ class Migration(migrations.Migration):
             model_name='cpuprofile',
             name='data',
             field=models.TextField(null=True),
+        ),
+        migrations.AddField(
+            model_name='runtimedata',
+            name='completed',
+            field=models.BooleanField(default=False),
         ),
     ]

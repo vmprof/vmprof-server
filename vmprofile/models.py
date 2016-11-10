@@ -14,14 +14,14 @@ class RuntimeData(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=False)
     vm = models.CharField(max_length=32, blank=True)
     name = models.CharField(max_length=256, blank=True)
+    completed = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created']
 
 # rename that model to CPUProfile, add new model 'Upload', ...
 class CPUProfile(models.Model):
-    #cpuprofile_id = models.CharField(max_length=64, default=uuid.uuid4, primary_key=True)
-    checksum = models.CharField(max_length=128, primary_key=True)
+    cpuprofile_id = models.CharField(max_length=64, default=uuid.uuid4, primary_key=True)
     file = models.FileField(null=True, upload_to=get_profile_storage_directory)
     # deprecated, do NOT use!
     data = models.TextField(null=True)
@@ -29,12 +29,12 @@ class CPUProfile(models.Model):
     runtime_data = models.OneToOneField(RuntimeData, related_name='cpu_profile',
                                         null=True, blank=True, on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
-        if not self.checksum:
-            data = self.data
-            self.checksum = hashlib.md5(data).hexdigest()
+    #def save(self, *args, **kwargs):
+    #    if not self.checksum:
+    #        data = self.data
+    #        self.checksum = hashlib.md5(data).hexdigest()
 
-        return super(CPUProfile, self).save(*args, **kwargs)
+    #    return super(CPUProfile, self).save(*args, **kwargs)
 
 @admin.register(RuntimeData)
 class RuntimeDataAdmin(admin.ModelAdmin):

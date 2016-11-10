@@ -32,10 +32,10 @@ urlpatterns = [
     url(r'^api/user/', MeView.as_view()),
     #
     url(r'^api/runtime/new/?$', runtime_new),
-    url(r'^api/runtime/(?P<rid>[0-9a-z]*)/freeze/?$', runtime_freeze),
-    url(r'^api/runtime/upload/jit/(?P<rid>[0-9a-z]*)/add/?$', upload_jit),
-    url(r'^api/runtime/upload/cpu/(?P<rid>[0-9a-z]*)/add/?$', upload_cpu),
-    url(r'^api/runtime/upload/mem/(?P<rid>[0-9a-z]*)/add/?$', upload_mem),
+    url(r'^api/runtime/(?P<rid>[0-9a-z-]*)/freeze/?$', runtime_freeze),
+    url(r'^api/runtime/upload/jit/(?P<rid>[0-9a-z-]*)/add/?$', upload_jit),
+    url(r'^api/runtime/upload/cpu/(?P<rid>[0-9a-z-]*)/add/?$', upload_cpu),
+    url(r'^api/runtime/upload/mem/(?P<rid>[0-9a-z-]*)/add/?$', upload_mem),
     #
     url(r'^api/jit/meta/(?P<profile>[0-9a-z]*)/$', meta),
     url(r'^api/jit/trace/(?P<profile>[0-9a-z]*)/$', trace),

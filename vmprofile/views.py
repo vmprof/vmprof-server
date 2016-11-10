@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 import json
 import hashlib
-import uuid
 from urllib import parse
 
-from django.conf.urls import url, include
 from django.contrib import auth
 
 from rest_framework import views
 from rest_framework import status
 from rest_framework import permissions
+from rest_framework.permissions import AllowAny
 from rest_framework import validators
-from rest_framework import pagination
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
+from rest_framework.parsers import FileUploadParser
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import permission_classes
+from rest_framework.exceptions import ValidationError, APIException
+
 
 from vmprofile.models import RuntimeData, CPUProfile
-
 
 username_max = auth.models.User._meta.get_field('username').max_length
 password_max = auth.models.User._meta.get_field('password').max_length
@@ -86,7 +88,7 @@ class RuntimeDataListSerializer(serializers.ModelSerializer):
 class RuntimeDataViewSet(viewsets.ModelViewSet):
     queryset = RuntimeData.objects.select_related('user')
     serializer_class = RuntimeDataListSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (AllowAny,)
 
     def get_serializer_class(self):
         if 'pk' in self.kwargs:
@@ -96,17 +98,12 @@ class RuntimeDataViewSet(viewsets.ModelViewSet):
     def create(self, request):
         # compatability! remove this at some point!
         data = request.data
+        name = data['argv']
+        vm = data['VM']
         user = request.user if request.user.is_authenticated() else None
-        runtime, _ = self.queryset.get_or_create(
-            user=user,
-            vm=request.data['VM'],
-            name=request.data['argv']
-        )
-        data = json.dumps(request.data).encode('utf-8')
-        checksum = uuid.uuid4() # hashlib.md5(data).hexdigest()
-        cpuprof = CPUProfile.objects.create(data=data, runtime_data=runtime,
-                                            file=None, checksum=checksum)
-        cpuprof.save()
+        runtime = self.queryset.create(user=user, vm=vm, name=name, completed=True)
+        data = json.dumps(data).encode('utf-8')
+        CPUProfile.objects.create(data=data, runtime_data=runtime, file=None)
         return Response(runtime.runtime_id)
 
     def get_queryset(self):
@@ -191,14 +188,48 @@ class TokenViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-from vmprofile.models import RuntimeData
 
+class ObjectNotFound(APIException):
+    status_code = 404
+    default_detail = 'object was not found, check the request parameters'
+    default_code = 'object not found'
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
 def runtime_new(request):
-    rdat = RuntimeData.objects.create()
-    return Response({'status':'ok','runtime_id': rdat.rid})
+    data = request.data
+    name = data['argv']
+    vm = data['VM']
+    user = request.user if request.user.is_authenticated() else None
+    rdat = RuntimeData.objects.create(user=user, vm=vm, name=name)
+    rdat.save()
+    return Response({'status':'ok','runtime_id': rdat.runtime_id})
 
+def try_get_runtimedata(request, rid):
+    try:
+        obj = RuntimeData.objects.get(pk=rid)
+        return obj
+    except RuntimeData.DoesNotExist:
+        raise ObjectNotFound
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
 def runtime_freeze(request, rid):
-    pass
+    runtimedata = try_get_runtimedata(request, rid)
+    runtimedata.completed = True
+    runtimedata.save()
+    return Response({'status': 'ok'})
 
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+@parser_classes((FileUploadParser,))
 def upload_cpu(request, rid):
-    pass
+    runtimedata = try_get_runtimedata(request, rid)
+    if runtimedata.completed:
+        raise ValidationError("the runtime data is already frozen, cannot upload any more files")
+
+    file_obj = request.data['file']
+    CPUProfile.objects.create(runtime_data=runtimedata, file=file_obj)
+    return Response({'status': 'ok'})
+
