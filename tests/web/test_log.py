@@ -1,7 +1,7 @@
 import pytest
 
 from django.contrib import auth
-from vmprofile.models import Log as Profile
+from vmprofile.models import RuntimeData, CPUProfile
 
 
 @pytest.mark.django_db
@@ -16,8 +16,8 @@ def test_log_get_user(client):
         password
     )
 
-    Profile.objects.create(user=user, checksum="1", data="{}")
-    Profile.objects.create(user=None, checksum="2", data="{}")
+    rd1 = RuntimeData.objects.create(user=user)
+    rd2 = RuntimeData.objects.create(user=None)
 
     response = client.get('/api/log/')
 
