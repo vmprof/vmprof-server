@@ -28,7 +28,7 @@ notifications:
       - "%{repository}@%{branch}: %{message} (%{build_url})"
     use_notice: true
     on_success: always
-    on_failure: always
+    on_failure: change
 
   email:
     on_success: change

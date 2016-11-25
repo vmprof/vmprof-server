@@ -10,11 +10,11 @@ class TestBinaryJitLogDecode(TestCase):
     fixtures = ['vmlog/test/fixtures.yaml']
 
     def test_parse(self):
-        bjl = BinaryJitLog.objects.get(checksum='richards')
-        forest = bjl.decode_forest()
+        bjl = BinaryJitLog.objects.get(pk='richards')
+        bjl.decode_forest()
 
     def test_parse_log_with_source_code(self):
-        bjl = BinaryJitLog.objects.get(checksum='1v1')
+        bjl = BinaryJitLog.objects.get(pk='1v1')
         forest = bjl.decode_forest()
         assert dict(forest.source_lines['/a.py']) == {
             1: (4,'a = b + c')
@@ -27,7 +27,8 @@ class TestBinaryJitLogDecode(TestCase):
         }
 
     def test_get_meta_for_jitlog(self):
-        response = self.client.get('/api/log/meta/richards/')
+        response = self.client.get('/api/jit/meta/richards/')
+        assert response.status_code == 200
         jsondata = response.json()
         traces = jsondata['traces']
         assert 'resops' in jsondata and 'traces' in jsondata
@@ -43,16 +44,16 @@ class TestBinaryJitLogDecode(TestCase):
             pytest.fail("profile did not contain the function name schedule")
 
     def test_get_trace_missing_id(self):
-        response = self.client.get('/api/log/trace/1v1/') # missing id
+        response = self.client.get('/api/jit/trace/1v1/') # missing id
         assert response.status_code == 404
 
     def test_get_trace_as_json(self):
-        response = self.client.get('/api/log/trace/1v1/?id=0')
+        response = self.client.get('/api/jit/trace/1v1/?id=0')
         assert response.status_code == 200
         assert response.json() != {}
 
     def test_get_visual_trace(self):
-        response = self.client.get('/api/log/stitches/1v1/?id=1')
+        response = self.client.get('/api/jit/stitches/1v1/?id=1')
         assert response.status_code == 200
         j = response.json()
         del j['measures']

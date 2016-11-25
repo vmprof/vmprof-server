@@ -4,6 +4,7 @@ import hashlib
 from urllib import parse
 
 from django.contrib import auth
+from django.http import HttpResponse
 
 from rest_framework import views
 from rest_framework import status
@@ -18,8 +19,9 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.decorators import permission_classes
 from rest_framework.exceptions import ValidationError, APIException
 
-
 from vmprofile.models import RuntimeData, CPUProfile
+
+from webapp.views import json_serialize
 
 username_max = auth.models.User._meta.get_field('username').max_length
 password_max = auth.models.User._meta.get_field('password').max_length
@@ -232,4 +234,21 @@ def upload_cpu(request, rid):
     file_obj = request.data['file']
     CPUProfile.objects.create(runtime_data=runtimedata, file=file_obj)
     return Response({'status': 'ok'})
+
+@api_view(['GET'])
+@permission_classes((AllowAny,))
+def get_cpu(request, rid):
+    rd = RuntimeData.objects.get(pk=rid)
+    profile = rd.cpu_profile
+    if profile.data is None:
+        return load_cpu_json(request, rd)
+    # legacy, used for old profiles
+    return HttpResponse(profile.data, content_type="application/json")
+
+def load_cpu_json(request, rd):
+    response = HttpResponse(content_type="application/json")
+    json_serialize(response, "cpu {filename} {runtime_id}-cpu",
+                             filename=rd.cpu_profile.file,
+                             runtime_id=rd.runtime_id)
+    return response
 

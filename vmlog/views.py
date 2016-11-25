@@ -21,7 +21,7 @@ from vmprofile.models import RuntimeData
 from jitlog.parser import _parse_jitlog
 from jitlog.objects import MergePoint
 from jitlog import constants as const
-
+from webapp.views import json_serialize
 
 from rest_framework import views
 from rest_framework.response import Response
@@ -73,45 +73,16 @@ class JsonExceptionHandlerMixin(object):
             msg = exc.args[0]
         return JsonResponse({'code': code, 'message': msg}, status=code)
 
-def json_serialize(response, cmd, **kwargs):
-    filename = "cache.socket"
-    command = cmd.format(**kwargs) + '\r\n'
-    if os.path.exists(filename):
-        client = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM)
-        client.connect(filename)
-        client.send(command.encode('utf-8'))
-        content = []
-        while True:
-            data = client.recv(4096)
-            if data == b"":
-                break
-            response.write(data)
-    else:
-        # should never be hit in production!!
-        from twisted.test import proto_helpers
-        from forestcache.cache import CacheProtocol
-        prot = CacheProtocol()
-        prot.transport = proto_helpers.StringTransport()
-        prot.lineReceived(command.encode('utf-8'))
-        response.write(prot.transport.value().decode('utf-8'))
 
 
-def _load_jitlog_model(request, checksum):
+def _load_jitlog_model(request, jid):
     try:
-        objs = BinaryJitLog.objects.filter(checksum=checksum)
-        if len(objs) == 0:
-            raise Http404
-        if len(objs) != 1:
-            raise BadRequest("checksum has several jit logs")
-        # authentication? we do not implement that yet?
-        return objs[0]
+        obj = BinaryJitLog.objects.get(pk=jid)
+        return obj
     except ObjectDoesNotExist:
         raise Http404
 
     raise BadRequest
-
-def json_response(content):
-    return HttpResponse(content, content_type="application/json")
 
 def meta(request, profile):
     jl = _load_jitlog_model(request, profile)
