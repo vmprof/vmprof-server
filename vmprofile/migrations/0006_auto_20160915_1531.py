@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('vmprofile', '0004_auto_20150921_1116'),
+        ('vmlog', '0001_initial'),
     ]
 
     operations = [
