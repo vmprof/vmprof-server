@@ -19,15 +19,15 @@ class Migration(migrations.Migration):
             model_name='binaryjitlog',
             name='user',
         ),
-        migrations.AddField(
-            model_name='binaryjitlog',
-            name='jitlog_id',
-            field=models.CharField(default=uuid.uuid4, max_length=64, primary_key=True, serialize=False),
-        ),
         migrations.AlterField(
             model_name='binaryjitlog',
             name='checksum',
             field=models.CharField(max_length=128),
+        ),
+        migrations.AddField(
+            model_name='binaryjitlog',
+            name='jitlog_id',
+            field=models.CharField(default=uuid.uuid4, max_length=64, primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='binaryjitlog',
