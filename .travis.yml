@@ -17,6 +17,7 @@ before_install:
   - psql -c 'create database vmprof;' -U postgres
 install:
   - pip install -r requirements/testing.txt
+  - ./manage.py migrate
 
 script:
   - py.test . -v
