@@ -101,7 +101,7 @@ class Cache(object):
 
 CACHE = {}
 
-BASE = "([a-zA-Z0-9/.\-]+) ([a-zA-Z0-9-]+)"
+BASE = "([a-zA-Z0-9/.\-_]+) ([a-zA-Z0-9-]+)"
 GENERIC_REQ = re.compile('([^ ]+) '+BASE)
 
 META_REQUEST = re.compile('meta '+BASE)

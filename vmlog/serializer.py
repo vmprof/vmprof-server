@@ -189,7 +189,7 @@ class FlamegraphSerializer(BaseSerializer):
         data = {
             "VM": stats.interp,
             "profiles": profiles,
-            "argv": stats.interp,
+            "argv": "%s %s" % (stats.interp, stats.getargv()),
             "version": 2,
         }
         return { 'data': data }
