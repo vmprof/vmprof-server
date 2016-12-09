@@ -183,3 +183,13 @@ class VisualTraceTreeSerializer(BaseSerializer):
             d['errors'] = errors
         return d
 
+class FlamegraphSerializer(BaseSerializer):
+    def to_representation(self, stats):
+        profiles = stats.get_tree()._serialize()
+        data = {
+            "VM": stats.interp,
+            "profiles": profiles,
+            "argv": stats.interp,
+            "version": 2,
+        }
+        return { 'data': data }

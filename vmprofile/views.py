@@ -75,8 +75,11 @@ class RuntimeDataSerializer(serializers.ModelSerializer):
         return None
 
     def get_data(self, obj):
-        if obj.cpu_profile is not None:
-            return json.loads(obj.cpu_profile.data)
+        if hasattr(obj, 'cpu_profile'):
+            if obj.cpu_profile.data is None:
+                raise Exception("lecay method, remove RuntimeDataSerializer")
+            else:
+                return json.loads(obj.cpu_profile.data)
         return "{}"
 
 class RuntimeDataListSerializer(serializers.ModelSerializer):
@@ -247,8 +250,9 @@ def get_cpu(request, rid):
 
 def load_cpu_json(request, rd):
     response = HttpResponse(content_type="application/json")
-    json_serialize(response, "cpu {filename} {runtime_id}-cpu",
-                             filename=rd.cpu_profile.file,
-                             runtime_id=rd.runtime_id)
+    cpu = rd.cpu_profile
+    json_serialize(response, "cpu {filename} {runtime_id}",
+                             filename=cpu.file,
+                             runtime_id=cpu.cpuprofile_id)
     return response
 

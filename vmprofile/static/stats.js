@@ -1,7 +1,7 @@
 var Stats = function (data) {
-	this.argv = data.argv;
-	this.VM = data.VM || "cpython";
-	this.nodes = this.makeTree(data.profiles);
+    this.argv = data.argv;
+    this.VM = data.VM || "cpython";
+    this.nodes = this.makeTree(data.profiles);
 };
 
 var FunctionData = function (elem) {
@@ -38,7 +38,7 @@ function walk_tree(n)
 }
 
 Stats.prototype.makeTree = function(t) {
-	var n = new Node(t[0], t[1], t[2], t[3], t[4]);
+    var n = new Node(t[0], t[1], t[2], t[3], t[4]);
     allStats = {};
     n.walk(function (elem) {
         if (allStats[elem.addr] === undefined) {
@@ -51,21 +51,21 @@ Stats.prototype.makeTree = function(t) {
     });
     this.allStats = allStats;
     n.countCumulativeMeta();
-	return n;
+    return n;
 };
 
 function Node(name, addr, total, meta, children) {
-	this.total = total;
-	this.name = name;
-	this.addr = addr;
+    this.total = total;
+    this.name = name;
+    this.addr = addr;
     this.meta = meta;
-	this.children = [];
-	for (var i in children) {
-		c = children[i];
-		this.children[i] = new Node(c[0], c[1], c[2], c[3], c[4]);
-	}
+    this.children = [];
+    for (var i in children) {
+        c = children[i];
+        this.children[i] = new Node(c[0], c[1], c[2], c[3], c[4]);
+    }
     var c = {};
-	this.self = this.count_self();
+    this.self = this.count_self();
 };
 
 Node.prototype.countCumulativeMeta = function () {
@@ -157,12 +157,12 @@ Node.prototype.walk = function(cb) {
 };
 
 Node.prototype.count_self = function () {
-	var s = this.total;
-	for (var i in this.children) {
-		c = this.children[i];
-		s -= c.total;
-	}
-	return s;
+    var s = this.total;
+    for (var i in this.children) {
+        c = this.children[i];
+        s -= c.total;
+    }
+    return s;
 };
 
 Node.prototype.max_self = function() {
@@ -176,44 +176,42 @@ Node.prototype.max_self = function() {
     return max;
 }
 
-
-
 Stats.prototype.getProfiles = function(path) {
-	var total = this.nodes.total;
-	var nodes = this.nodes;
-	if (!path) {
-		path = [];
-	} else {
-		path = path.split(",");
-	}
-	var path_so_far = [];
-	var paths = [];
-	for (var i in path) {
-		var elem = path[i];
-		total = nodes.total;
-		paths.push({'name': nodes.name.split(":", 2)[1],
-					'path':path_so_far.toString(),
-					"percentage": nodes.total / this.nodes.total});
-		path_so_far.push(elem);
-		nodes = nodes.children[elem];
-	}
-	paths.push({'name': nodes.name.split(":", 2)[1],
-				'path':path_so_far.toString(),
-				"percentage": nodes.total / this.nodes.total });
-	var res = this.process(nodes.children, total, this.nodes.total, path,
+    var total = this.nodes.total;
+    var nodes = this.nodes;
+    if (!path) {
+        path = [];
+    } else {
+        path = path.split(",");
+    }
+    var path_so_far = [];
+    var paths = [];
+    for (var i in path) {
+        var elem = path[i];
+        total = nodes.total;
+        paths.push({'name': nodes.name.split(":", 2)[1],
+                    'path':path_so_far.toString(),
+                    "percentage": nodes.total / this.nodes.total});
+        path_so_far.push(elem);
+        nodes = nodes.children[elem];
+    }
+    paths.push({'name': nodes.name.split(":", 2)[1],
+                'path':path_so_far.toString(),
+                "percentage": nodes.total / this.nodes.total });
+    var res = this.process(nodes.children, total, this.nodes.total, path,
                            paths);
     res.root = nodes;
     return res;
 };
 
 function split_name(name) {
-	var nameSegments = name.split(":");
-	var file;
-	if (nameSegments.length > 4) {
-		file = nameSegments.slice(4, nameSegments.length).join(":");
-	} else {
-		file = nameSegments[3];
-	}
+    var nameSegments = name.split(":");
+    var file;
+    if (nameSegments.length > 4) {
+        file = nameSegments.slice(4, nameSegments.length).join(":");
+    } else {
+        file = nameSegments[3];
+    }
     return {file: file, funcname:nameSegments[1], line: nameSegments[2]};
 }
 
@@ -230,36 +228,36 @@ function parse_func_name(name)
 }
 
 Stats.prototype.process = function(functions, parent, total, path_so_far, paths) {
-	var top = [];
+    var top = [];
 
-	for (var i in functions) {
-		var func = functions[i];
-		var name = parse_func_name(functions[i].name);
+    for (var i in functions) {
+        var func = functions[i];
+        var name = parse_func_name(functions[i].name);
         var file = name[2];
-		var path;
-		if (path_so_far.length == 0) {
-			path = i.toString();
-		} else {
-			path = path_so_far + "," + i.toString();
-		}
-		top.push({
-			path: path,
-			name: name[0],
-			line: name[1],
-			file: file,
-			times: func.total,
-			self: func.self / total * 100
-		});
-	}
-	top.sort(function(a, b) {
-		return b.times - a.times;
-	});
-	var max = parent || top[0].times;
+        var path;
+        if (path_so_far.length == 0) {
+            path = i.toString();
+        } else {
+            path = path_so_far + "," + i.toString();
+        }
+        top.push({
+            path: path,
+            name: name[0],
+            line: name[1],
+            file: file,
+            times: func.total,
+            self: func.self / total * 100
+        });
+    }
+    top.sort(function(a, b) {
+        return b.times - a.times;
+    });
+    var max = parent || top[0].times;
 
-	return {'profiles': top.map(function(a) {
-		a.total = a.times / total * 100;
-		a.times = a.times / max * 100;
-		return a;
-	}), 'paths': paths};
+    return {'profiles': top.map(function(a) {
+        a.total = a.times / total * 100;
+        a.times = a.times / max * 100;
+        return a;
+    }), 'paths': paths};
 
 };

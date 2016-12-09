@@ -340,7 +340,7 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
     }
     $scope.loading = true;
 
-    $http.get('/api/log/' + $routeParams.log + '/', {cache: true}
+    $http.get('/api/flamegraph/' + $routeParams.log + '/get', {cache: true}
         ).then(function (response) {
             $scope.log = response.data;
             $scope.stats = new Stats(response.data.data);

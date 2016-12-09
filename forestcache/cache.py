@@ -15,6 +15,8 @@ from twisted.internet import protocol
 from twisted.internet import reactor
 from jitlog import parser
 from vmlog import serializer
+from vmprof.profiler import read_profile as read_cpu_profile
+import io
 
 from twisted.python import log
 
@@ -23,7 +25,14 @@ def get_reader(filename):
         return gzip.GzipFile(filename)
     elif filename.endswith(".bz2"):
         return bz2.BZ2File(filename, "rb", 2048)
-    raise NotImplementedError("use gzip/bz2 for compression!")
+    return open(filename, 'rb')
+
+def try_gunzip_or_plain(fileobj):
+    is_gzipped = fileobj.read(2) == b'\037\213'
+    fileobj.seek(-2, os.SEEK_CUR)
+    if is_gzipped:
+        fileobj = io.BufferedReader(gzip.GzipFile(fileobj=fileobj))
+    return fileobj
 
 class Cache(object):
 
@@ -57,7 +66,7 @@ class Cache(object):
             self.decay(force=True)
             current = self.memory_usage()
             if current > self.maxsize:
-                log.msg("cannot add forest to the cache, it should not consume more memory")
+                log.msg("cannot add profile to the cache, it should not consume more memory")
                 return # well, we cannot add this to the cache!
         else:
             self.decay()
@@ -92,8 +101,8 @@ class Cache(object):
 
 CACHE = {}
 
-BASE = "([a-zA-Z0-9/.\-]+) ([a-zA-Z0-9]+)"
-GENERIC_REQ = re.compile('[^ ]+ '+BASE)
+BASE = "([a-zA-Z0-9/.\-]+) ([a-zA-Z0-9-]+)"
+GENERIC_REQ = re.compile('([^ ]+) '+BASE)
 
 META_REQUEST = re.compile('meta '+BASE)
 META_SERIALIZER = serializer.LogMetaSerializer()
@@ -103,6 +112,8 @@ TRACE_SERIALIZER = serializer.TraceSerializer()
 
 STITCH_REQUEST = re.compile('stitch '+BASE+' (\d+)')
 STITCH_SERIALIZER = serializer.VisualTraceTreeSerializer()
+
+FLAMEGRAPH_SERIALIZER = serializer.FlamegraphSerializer()
 
 CACHE = Cache(4 * 1024 * 1024 * 1024) # 4 GB
 
@@ -121,14 +132,15 @@ class CacheProtocol(LineReceiver):
             self.transport.loseConnection()
             return
 
-        filename = match.group(1)
-        checksum = match.group(2)
+        cmd = match.group(1)
+        filename = match.group(2)
+        checksum = match.group(3)
         if not os.path.exists(filename):
             self.transport.loseConnection()
             return
 
         start = time.time()
-        forest = self.load(filename, checksum)
+        profile = self.load(cmd, filename, checksum)
         parsing_secs = time.time() - start
 
         size = os.path.getsize(filename)
@@ -140,21 +152,23 @@ class CacheProtocol(LineReceiver):
         start = time.time()
         #
         jsondata = None
+        if data.startswith("cpu"):
+            jsondata = FLAMEGRAPH_SERIALIZER.to_representation(profile)
         if data.startswith("meta"):
             match = META_REQUEST.match(data)
             if match:
-                jsondata = META_SERIALIZER.to_representation(forest)
+                jsondata = META_SERIALIZER.to_representation(profile)
         elif data.startswith("trace"):
             match = TRACE_REQUEST.match(data) 
             if match:
                 uid = int(match.group(3))
-                trace = forest.get_trace_by_id(uid)
+                trace = profile.get_trace_by_id(uid)
                 jsondata = TRACE_SERIALIZER.to_representation(trace)
         elif data.startswith("stitch"):
             match = STITCH_REQUEST.match(data) 
             if match:
                 uid = int(match.group(3))
-                trace = forest.get_trace_by_id(uid)
+                trace = profile.get_trace_by_id(uid)
                 jsondata = STITCH_SERIALIZER.to_representation(trace)
         #
         json_secs = time.time() - start
@@ -162,23 +176,27 @@ class CacheProtocol(LineReceiver):
         if jsondata:
             measures['json'] = '%.3fms' % (json_secs * 1000.0)
             jsondata['measures'] = measures
-            log.msg("sent data, closing connection")
             self.sendLine(json.dumps(jsondata).encode('utf-8'))
+            log.msg("sent data, closing connection")
         else:
             log.msg("no data sent, closing connection")
         self.transport.loseConnection()
 
-    def load(self, filename, checksum):
-        forest = self.cache.get(checksum)
-        if forest:
-            log.msg("cached forest (checksum %s)" % (checksum,))
-            return forest
-        fobj = get_reader(filename)
-        forest = parser._parse_jitlog(fobj)
-        self.cache.put(checksum, forest)
+    def load(self, type, filename, checksum):
+        profile = self.cache.get(checksum)
+        if profile:
+            log.msg("cached profile (checksum %s)" % (checksum,))
+            return profile
+
+        with get_reader(filename) as fobj:
+            if type == "cpu":
+                profile = read_cpu_profile(fobj)
+            else:
+                profile = parser._parse_jitlog(fobj)
+            self.cache.put(checksum, profile)
         assert self.cache.get(checksum) is not None
         log.msg("parsed jitlog in file %s (checksum %s)" % (filename, checksum))
-        return forest
+        return profile
 
     def connectionLost(self, reason):
         # Clean up the timeout, if necessary.
