@@ -193,3 +193,8 @@ class FlamegraphSerializer(BaseSerializer):
             "version": 2,
         }
         return { 'data': data }
+
+class MemorygraphSerializer(BaseSerializer):
+    def to_representation(self, stats):
+        profiles = {'a':1}
+        return profiles

@@ -13,38 +13,6 @@
   <script src="{% static "vendor/list.min.js" %}"></script>
   <script src="{% static "vendor/list.fuzzysearch.min.js" %}"></script>
   <script>
-    function ajaxMsgpack(conf) {
-      conf = $.extend({}, conf, {dataType: "binary", processData: false});
-      conf.url += "&msgpack";
-      return $.ajax(conf).then(decodeMsgpack);
-    }
-
-    function decodeMsgpack(blob, callback) {
-      var deferred = $.Deferred();
-      var reader = new FileReader();
-      $(reader).on("loadend", function () {
-        var decodedData = msgpack.decode(reader.result);
-        deferred.resolve(decodedData);
-      });
-      reader.readAsArrayBuffer(blob);
-      return deferred.promise();
-    }
-
-    function showError(title, text) {
-      var content = $("<strong>").text(title + ": ")
-               .add($("<span>").text(text));
-      $("#error-alert").html(content).fadeIn("fast");
-    }
-
-    function formatBytes(val, axis) {
-      if (val > 1024 * 1024) {
-        return (val / 1024 / 1024).toFixed(2) + " GiB";
-      } else if (val > 1024) {
-        return (val / 1024).toFixed() + " MiB";
-      } else {
-        return val + " KiB";
-      }
-    }
   </script>
 
   <style>

@@ -114,6 +114,7 @@ STITCH_REQUEST = re.compile('stitch '+BASE+' (\d+)')
 STITCH_SERIALIZER = serializer.VisualTraceTreeSerializer()
 
 FLAMEGRAPH_SERIALIZER = serializer.FlamegraphSerializer()
+MEMORYGRAPH_SERIALIZER = serializer.MemorygraphSerializer()
 
 CACHE = Cache(4 * 1024 * 1024 * 1024) # 4 GB
 
@@ -154,6 +155,8 @@ class CacheProtocol(LineReceiver):
         jsondata = None
         if data.startswith("cpu"):
             jsondata = FLAMEGRAPH_SERIALIZER.to_representation(profile)
+        if data.startswith("mem"):
+            jsondata = MEMORYGRAPH_SERIALIZER.to_representation(profile)
         if data.startswith("meta"):
             match = META_REQUEST.match(data)
             if match:
@@ -189,7 +192,7 @@ class CacheProtocol(LineReceiver):
             return profile
 
         with get_reader(filename) as fobj:
-            if type == "cpu":
+            if type == "cpu" or type == "mem":
                 profile = read_cpu_profile(fobj)
             else:
                 profile = parser._parse_jitlog(fobj)

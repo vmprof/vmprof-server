@@ -10,41 +10,51 @@
   </div>
 
   <div class="row">
-    <div class="col-md-12">
-      <img id="loading_img" ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
+    <img id="loading_img" ng-show="loading" class="center-block loading" src="/static/images/loader.gif" />
+  </div>
 
-      <div ng-show="!loading" class="list-group" ng-init="ago=true">
-
-        <div class="media" ng-repeat="log in logs" ng-style="background(log.created)">
-          <div class="media-left">
-
-            <img class="media-object" ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
-
-          </div>
-          <div class="media-body">
-            <h4 class="media-heading" id="media-heading">
-
-              <span ng-if="log.user">{{ log.user.username }}</span><span ng-if="!log.user"><i style="color: #888">anonymous</i></span>:
-	      <a ng-href="#/{{ log.runtime_id }}"> {{ log.name }}</a>
-            </h4>
-
-            <div class="times" >
-              <span class="vm-name">{{ log.vm }}</span> / 
-              <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
-              <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
-            </div>
-          </div>
-        </div>
-	
-	<button ng-if="next" type="button"
-		class="btn btn-success btn-block"
-		ng-click="more(next)">
-	  More
-	</button>
-	
+  <div ng-show="!loading" class="list-group" ng-init="ago=true">
+    <div class="row profile-entry" ng-repeat="log in logs" ng-style="background(log.created)">
+      <div class="col-md-1">
+          <img class="media-object" ng-if="!log.user"
+               ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
       </div>
-      
+      <div class="col-md-4">
+        <div class="list-argv list-title">
+          <span class="vm-name label label-default">{{ log.vm }}</span>
+          {{log.name}}
+        </div>
+        <div class="list-username">
+            <span ng-if="log.user">{{ log.user.username }}</span>
+            <span ng-if="!log.user"><i style="color: #888">anonymous</i></span>
+        </div>
+        <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
+        <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
+      </div>
+      <div class="col-md-4">
+          <a class="list-profile-link" href="#/{{ log.runtime_id }}">
+            <i class="fa-code"></i> cpu
+          </a><br>
+          <a class="list-profile-link" href="#/{{ log.runtime_id }}/memory">
+            <i class="fa-area-chart"></i> memory
+          </a><br>
+          <a ng-if="{{ log.jitlog }}" class="list-profile-link" href="#/{{ log.runtime_id }}/traces">
+            <i class="fa-cogs"></i> jit
+          </a>
+      </div>
+      <div class="col-md-3" >
+          <dl class="list-properties">
+              <dt>Time</dt> <dd>1 sec</dd> <br>
+              <dt>Arch</dt> <dd>x86 64 bit</dd>
+          </dl>
+      </div>
     </div>
   </div>
+
+  <button ng-if="next" type="button"
+          class="btn btn-success btn-block"
+          ng-click="more(next)">
+    More
+  </button>
 
 </div>

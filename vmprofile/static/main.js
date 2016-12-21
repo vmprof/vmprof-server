@@ -31,6 +31,10 @@ app = angular.module(
                 templateUrl: '/static/details.html',
                 controller: 'details'
             })
+            .when('/:log/memory', {
+                templateUrl: '/static/memory.html',
+                controller: 'memory'
+            })
             .when('/:log/traces', {
                 templateUrl: '/static/log/traces.html',
                 controller: 'jit-trace-forest'
@@ -346,5 +350,43 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
             $scope.stats = new Stats(response.data.data);
             display_log($scope, $routeParams, $timeout, $location);
     });
+});
+
+app.controller('memory', function ($scope, $http, $routeParams, $timeout,
+                                    $location) {
+
+//var PROFILE_FETCH_URL = "{{ profile_fetch_url }}?";
+//var ADDR_NAME_MAP_FETCH_URL = "{{ addr_name_fetch_url }}?";
+//var PROFILE_PERIOD = {{ profile.profile_resolution|default:"null" }};
+//var START_DATE = {% if profile.start_date %}new Date("{{ profile.start_date.isoformat }}");
+//                 {% else %}null;{% endif %}
+  //$.views.settings.delimiters("<%", "%>");
+  //var addrNameMapFetch = ajaxMsgpack({url: ADDR_NAME_MAP_FETCH_URL});
+  //$.when(addrNameMapFetch, retrievePlotData())
+  // .then(setupPlot, function (err) { showError("Error retrieving profile data", err.statusText); });
+
+  $scope.loading = true
+  $scope.reload_graph = function(x0, x1) {
+    var url = '/api/memorygraph/' + $routeParams.log + '/get?'
+    var params = []
+    if (x0 !== undefined) { params.push('x0='+x0) }
+    if (x1 !== undefined) { params.push('x1='+x1) }
+    $http.get(url + params.join('&'), {cache: true})
+       .then(function (response) {
+         $scope.loading = false
+       });
+  }
+
+  $scope.reload_graph();
+});
+
+app.directive('memoryChart', function($timeout){
+  return {
+    'link': function(scope, element, attrs) {
+      scope.$on('chart-init', function() {
+        scope.graph = new Graph(element);
+      })
+    }
+  }
 });
 

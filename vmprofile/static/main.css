@@ -2,31 +2,62 @@ nav .navbar-right a.dropdown-toggle {
     padding: 2px 6px 2px 4px;
 }
 
+#list {
+    border: none;
+}
+
 #list .display-control{
     margin-bottom: 15px;
 }
 
 #list img.media-object{
-    width: 42px;
-    height: 42px;
+    width: 62px;
+    height: 62px;
 }
 
-#list .media {
-    margin-top: 0;
+#list .profile-entry {
+    margin: 0;
     border-bottom: 1px solid #eee;
     padding: 10px 0 10px 10px;
 }
 
-#list .media:first-child {
+#list .profile-entry:first-child {
     border-top: 1px solid #eee;
 }
 
+.list-title {
+    font-size: 1.5em;
+}
 
-#list .media .times:hover {
+.list-profile-link {
+    font-size: 1.2em;
+    margin-right: 15px;
+}
+
+dl.list-properties dd {
+    display: inline-block;
+}
+dl.list-properties dt {
+    display: inline-block;
+    text-transform: uppercase;
+    font-weight: normal;
+    min-width: 50px;
+    font: "monospace";
+}
+
+#list .times {
+    display: inline-block;
+    float: right;
+}
+
+.vm-name {
+}
+
+#list .profile-entry .times:hover {
     cursor: pointer;
 }
 
-#list .media .media-body {
+#list .profile-entry .media-body {
     padding-left: 2px;
 }
 

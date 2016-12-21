@@ -1,0 +1,64 @@
+
+  <!--link rel="stylesheet" href="{% static "css/mem.css" %}"-->
+<img class="loading" src="/static/images/loader.gif">
+<div class="container-fluid" style="height: calc(100% - 150px)">
+  <div id="chart-container">
+    <div id="chart" memory-chart></div>
+    <div class="btn-group pull-left" data-toggle="buttons">
+      <label class="btn btn-default active"><input name="time-mode-select" type="radio" autocomplete="off" checked>absolute time</label>
+      <label class="btn btn-default       "><input name="time-mode-select" type="radio" autocomplete="off"        >relative time</label>
+    </div>
+    <div class="btn-group pull-right" data-toggle="buttons">
+      <label class="btn btn-default active"><input name="trace-select" type="radio" autocomplete="off" checked>max</label>
+      <label class="btn btn-default       "><input name="trace-select" type="radio" autocomplete="off"        >mean</label>
+      <label class="btn btn-default       "><input name="trace-select" type="radio" autocomplete="off"        >max + mean</label>
+    </div>
+  </div>
+  <div id="annotation">
+  </div>
+
+</div>
+
+<!--script type="text/x-jsrender" id="stacktrace-tmpl">
+<ul>
+<%for%>
+  <li>
+  <%if #data%>
+    <span class=func><%>funcName%></span>
+    <span class=file title="<%>sourceFile%>:<%>lineNo%>"><%>shortSourceFile%>:<%>lineNo%></span>
+  <%else%>
+    <span class=func>&lt;unknown&gt;</span>
+  <%/if%>
+  </li>
+<%else%>
+  <li><span class=func>&lt;unknown, probably non-Python&gt;</span></li>
+<%/for%>
+</ul>
+</script>
+
+<script type="text/x-jsrender" id="annotation-tmpl">
+<div class="mem-consumption">
+  <big><big><%>~formatBytes(memMean)%></big></big>
+  <div><small>mean consumption</small></div>
+</div>
+<div class="stacktrace">
+  <%include tmpl="#stacktrace-tmpl" union/%>
+</div>
+<%if mostFrequent && mostFrequent.length%>
+  <div class="stacktrace stacktrace-secondary">
+    <div class="stacktrace-count">
+      <small>
+        <%>(mostFrequentCount/unionCount*100).toFixed(0)%>%
+      </small>
+    </div>
+    <%include tmpl="#stacktrace-tmpl" mostFrequent/%>
+    <div class="stacktrace-secondary-help">
+      <small class="text-muted">
+        Stacktrace above: common to all <%>unionCount%> samples of this data point.<br>
+        Stacktrace below: most frequent stack trace (<%>(mostFrequentCount/unionCount*100).toFixed(0)%>%)
+        of the <%>unionCount%> samples of this data point.
+      </small>
+    </div>
+  </div>
+<%/if%>
+</script-->

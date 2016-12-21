@@ -256,3 +256,21 @@ def load_cpu_json(request, rd):
                              runtime_id=cpu.cpuprofile_id)
     return response
 
+@api_view(['GET'])
+@permission_classes((AllowAny,))
+def get_memory(request, rid):
+    rd = RuntimeData.objects.get(pk=rid)
+    profile = rd.cpu_profile
+    if profile.data is not None:
+        raise ObjectNotFound
+    # legacy, used for old profiles
+
+    return load_memory_json(request, rd)
+
+def load_memory_json(request, rd):
+    response = HttpResponse(content_type="application/json")
+    cpu = rd.cpu_profile
+    json_serialize(response, "mem {filename} {runtime_id}",
+                             filename=cpu.file,
+                             runtime_id=cpu.cpuprofile_id)
+    return response

@@ -12,10 +12,9 @@
         <link href="{% static "main.css" %}" rel="stylesheet" />
         {% endcompress %}
 
-        <!-- copy to server static -->
         {% compress js %}
+        <!-- vendor deps -->
         <script src="{% static "libs/d3.min.js" %}" charset="utf-8"></script>
-
         <script src="{% static "libs/jquery-2.1.1.min.js" %}"></script>
         <script src="{% static "libs/lodash.min.js" %}"></script>
         <script src="{% static "libs/moment.js" %}"></script>
@@ -30,7 +29,10 @@
         <script src="{% static "libs/raphael-min.js" %}"></script>
         <script src="{% static "libs/treemap/treemap-squarify.js" %}"></script>
         <script src="{% static "libs/treemap/treemap-raphael.js" %}"></script>
-        <script src="{% static "numeral.min.js" %}"></script>
+        <script src="{% static "libs/numeral.min.js" %}"></script>
+        <script src="{% static "libs/jsrender.min.js" %}"></script>
+        <script src="{% static "libs/msgpack.js" %}"></script>
+        <script src="{% static "libs/plotly-latest.min.js" %}"></script>
 
         <script src="{% static "stats.js" %}"></script>
         <script src="{% static "visualizations.js" %}"></script>
@@ -41,7 +43,8 @@
         <script src="{% static "log/jitlog.js" %}"></script>
         <script src="{% static "log/forest.js" %}"></script>
         <script src="{% static "log/main.js" %}"></script>
-        <!-- make this smaller -->
+        <script src="{% static "memory.js" %}"></script>
+
         {% endcompress %}
 
     <script>
