@@ -1,13 +1,3 @@
-numeric = {}
-numeric.linspace = function linspace(a,b,n) {
-    if(typeof n === "undefined") n = Math.max(Math.round(b-a)+1,1);
-    if(n<2) { return n===1?[a]:[]; }
-    var i,ret = Array(n);
-    n--;
-    for(i=n;i>=0;i--) { ret[i] = (i*b+(n-i)*a)/n; }
-    return ret;
-}
-
 function ajaxMsgpack(conf) {
   conf = $.extend({}, conf, {dataType: "binary", processData: false});
   conf.url += "&msgpack";
@@ -83,7 +73,6 @@ Graph.prototype.init = function(scope, domTarget) {
   this.traceSelection = "max";
   this.timeMode = "relative"
   this.scope = scope
-  //this.resetData();
 
   // Initialise empty Plotly plot
   this.ploty = Plotly.newPlot(this.domTarget, [], {yaxis: {showticklabels: false}}, {displayModeBar: true});
@@ -91,26 +80,50 @@ Graph.prototype.init = function(scope, domTarget) {
 }
 
 Graph.prototype.resample_memory_profile = function(data, start, end, window_size) {
-    //def resample_memory_profile(memory_profile, start, end, window_size=100):
-    start = Math.max(0, start)
-    end = Math.min(data.length, end)
-    window_size = Math.min(window_size || 100, end - start)
+  start = Math.max(0, start)
+  end = Math.min(data.length, end)
+  window_size = Math.min(window_size || 100, end - start)
 
-    bins = numeric.linspace(start, end, window_size)
-    //df = pandas.DataFrame(memory_profile).rename(columns={0: 'trace', 1: 'mem'})
-    //df = df.groupby(pandas.cut(df.index, bins, include_lowest=True, right=True))
-    //df = df.aggregate({
-    //    'mem': ['mean', 'max'],
-    //    'trace': aggregate_trace,
-    //})
+  var linspace = numeric.linspace(start, end, window_size)
+  // we want to partition using time, thus
+  var index_bins = numeric.bin(linspace)
+  numeric.assign_bin(index_bins, data,
+      function(i,x) { return i; }, // key to lookup bin
+      function(i,x) { return x[1]; }) // value insert memory
+    // TODO    'trace': aggregate_trace,
     return {
-        'x': bins,
-        'mean': bins,
-        'max': bins,
-        //#'mean': list(df['mem']['mean'].values),
-        //#'max': list(df['mem']['max'].values),
-        //#'trace': list(df['trace']['aggregate_trace'].values),
+        'x': linspace,
+        'mean': numeric.mean_bin(index_bins),
+        'max': numeric.max_bin(index_bins),
+        // TODO 'trace': list(df['trace']['aggregate_trace'].values),
     }
+}
+
+Graph.prototype.aggregate_trace = function(traces) {
+
+// TODO
+//def aggregate_trace(traces):
+//    if traces.empty:
+//        return [], []
+//
+//    iterator = iter(traces)
+//
+//    common_prefix = tuple(next(iterator))
+//    frequencies = collections.defaultdict(int)
+//    frequencies[common_prefix] = 1
+//
+//    for row in iterator:
+//        if not row:
+//            continue
+//        frequencies[tuple(row)] += 1
+//        common_prefix = common_prefix[:len(row)]
+//        for i, elem in enumerate(common_prefix):
+//            if elem != row[i]:
+//                common_prefix = common_prefix[:i]
+//                break
+//
+//    most_frequent_trace, count = max(frequencies.items(), key=lambda k, v: v)
+//    return len(traces), common_prefix, count, most_frequent_trace[len(common_prefix):]
 }
 
 Graph.prototype.reset = function(plotData, addrNameMap) {
@@ -259,7 +272,7 @@ Graph.prototype.makePlotlyGraph = function () {
       x: self.currentData.x.map(self.xToPlotly.bind(self)),
       y: self.currentData[attr],
       mode: "line",
-      text: "TODO",//self.currentData[attr].map(formatBytes),
+      text: self.currentData[attr].map(formatBytes),
       hoverinfo: "text+name",
       showlegend: false,
     }, opts);
