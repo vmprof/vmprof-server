@@ -1,0 +1,14 @@
+
+<div class="row" ng-if="detailtop">
+  <div class="col-md-12 content-top-profile-info">
+      Profile with id {{ detailtop.runtime_id }}
+      <div class="btn-group pull-right">
+        <a href="#/{{ detailtop.runtime_id }}" class="btn btn-default"
+           ng-class="{'active': detailtop.cpu}">CPU</a>
+        <a href="#/{{ detailtop.runtime_id }}/memory" class="btn btn-default"
+           ng-class="{'active': detailtop.memory}">Memory</a>
+        <a href="#/{{ detailtop.runtime_id }}/traces" class="btn btn-default"
+           ng-class="{'active': detailtop.jit}">JIT</a>
+      </div>
+  </div>
+</div>

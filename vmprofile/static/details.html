@@ -1,19 +1,13 @@
 <img ng-show="loading && !noprofile" class="center-block loading" src="/static/images/loader.gif" />
 
+<div detail-top></div>
+
  <!-- this is used just as the the container of tooltips, so that I can style
       them selectively in main.css -->
 <div id="wide-popovers"></div>
 
 <div id="item" ng-show="noprofile" class="well">
-    <h2 class="text-center">There is no profile data :(</h2>
-
-    <div class="text-center" ng-show="log.jitlog_checksum">
-        <h3>But there is a JIT log.</h3>
-        <a
-           ng-href="#/{{ log.jitlog_checksum }}/traces">
-             <i class="fa fa-file-text"></i> view here
-        </a>
-    </div>
+    <h2 class="text-center">There is no profile data</h2>
 </div>
 
 <div id="item" ng-show="!loading" ng-hide="noprofile">

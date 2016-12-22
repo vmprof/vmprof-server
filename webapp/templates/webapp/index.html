@@ -10,6 +10,7 @@
         <link href="{% static "libs/bootstrap/css/bootstrap-theme.css" %}" rel="stylesheet" />
         <link href="{% static "libs/font-awesome-4.3.0/css/font-awesome.css" %}" rel="stylesheet" >
         <link href="{% static "main.css" %}" rel="stylesheet" />
+        <link href="{% static "memory.css" %}" rel="stylesheet" />
         {% endcompress %}
 
         {% compress js %}
@@ -34,7 +35,6 @@
         <script src="{% static "libs/msgpack.js" %}"></script>
         <script src="{% static "libs/plotly-latest.min.js" %}"></script>
 
-        <script src="{% static "numeric.js" %}"></script>
         <script src="{% static "stats.js" %}"></script>
         <script src="{% static "visualizations.js" %}"></script>
         <script src="{% static "main.js" %}"></script>
@@ -62,19 +62,17 @@
     </head>
 
     <body ng-controller="main">
-        <nav class="navbar navbar-inverse" role="navigation">
-            <div class="container">
-                <div class="navbar-header">
-                    <a class="navbar-brand" ng-href="#/">
-                        <img src="/static/images/vmprof-logo.png" style="width: 128px; height: 22px;" alt="vmprof logo" />
-                    </a>
-                </div>
-                <ul class="nav navbar-nav navbar-right text-uppercase">
-
+        <nav class="navbar vmprof-nav" role="navigation">
+            <div class="container" style="text-align:center;">
+                <ul class="nav navbar-nav text-uppercase vmprof-navbar">
+                    <li><a target="_blank" href="https://vmprof.readthedocs.org/">About</a></li>
+                    <li><a target="_blank" href="https://vmprof.readthedocs.org/">Docs</a></li>
+                    <li>
+                        <a href="https://vmprof.com">
+                            <img src="/static/images/vmprof-logo.png" class="vmprof-logo-navbar" alt="vmprof logo" /></li>
+                        </a>
                     <li ng-hide="user"><a href="#/login">Login</a></li>
                     <li ng-hide="user"><a href="#/register">Register</a></li>
-            <li><a target="_blank" href="https://vmprof.readthedocs.org/">Docs</a></li>
-
                     <li ng-show="user" class="dropdown">
                         <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                             <img ng-src="{{ user.gravatar }}" alt="{{ user.username }}" />
@@ -90,7 +88,7 @@
         </nav>
 
         <div class="container">
-            <div ng-view></div>
+          <div ng-view></div>
         </div>
 
         <div class="container footer text-center">

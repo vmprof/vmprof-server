@@ -602,3 +602,33 @@ ul.trace-entries {
     float: right;
     margin-top: 5px;
 }
+
+.vmprof-logo-navbar {
+    margin: 0;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 128;
+    height: 22px;
+}
+
+.vmprof-navbar {
+    display: inline-block;
+    margin: 0 auto 0 auto;
+    text-align: center;
+    float: none;
+}
+
+.vmprof-nav {
+    border-bottom: 4px solid #3a3a3b;
+    margin-bottom: 10px;
+}
+
+.vmprof-nav a {
+    color: #222120;
+}
+
+.content-top-profile-info {
+  background: #eee;
+  padding: 10px;
+  margin-bottom: 10px;
+}

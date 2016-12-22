@@ -336,20 +336,25 @@ function display_log($scope, $routeParams, $timeout, $location)
 
 app.controller('details', function ($scope, $http, $routeParams, $timeout,
                                     $location) {
-    angular.element('svg').remove();
+  $scope.detailtop = {
+    cpu: true,
+    runtime_id: $routeParams.log,
+  }
 
-    if ($scope.stats) {
-        display_log($scope, $routeParams, $timeout, $location);
-        return;
-    }
-    $scope.loading = true;
+  angular.element('svg').remove();
 
-    $http.get('/api/flamegraph/' + $routeParams.log + '/get', {cache: true}
-        ).then(function (response) {
-            $scope.log = response.data;
-            $scope.stats = new Stats(response.data.data);
-            display_log($scope, $routeParams, $timeout, $location);
-    });
+  if ($scope.stats) {
+      display_log($scope, $routeParams, $timeout, $location);
+      return;
+  }
+  $scope.loading = true;
+
+  $http.get('/api/flamegraph/' + $routeParams.log + '/get', {cache: true}
+      ).then(function (response) {
+          $scope.log = response.data;
+          $scope.stats = new Stats(response.data.data);
+          display_log($scope, $routeParams, $timeout, $location);
+  });
 });
 
 app.directive('memoryChart', function($timeout){
@@ -375,6 +380,11 @@ app.controller('memory', function ($scope, $http, $routeParams, $timeout,
   //$.when(addrNameMapFetch, retrievePlotData())
   // .then(setupPlot, function (err) { showError("Error retrieving profile data", err.statusText); });
 
+  $scope.detailtop = {
+    memory: true,
+    runtime_id: $routeParams.log,
+  }
+
   $scope.loading = true
   $scope.graph = new Graph();
   $scope.reload_graph = function(x0, x1) {
@@ -394,3 +404,8 @@ app.controller('memory', function ($scope, $http, $routeParams, $timeout,
 });
 
 
+app.directive('detailTop', function($timeout){
+  return {
+    'templateUrl': 'static/detailtop.html'
+  }
+});

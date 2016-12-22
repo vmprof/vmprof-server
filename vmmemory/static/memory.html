@@ -1,25 +1,26 @@
 
-  <!--link rel="stylesheet" href="{% static "css/mem.css" %}"-->
 <img class="loading" ng-if="loading" src="/static/images/loader.gif">
+<div detail-top>a</div>
 <div class="container-fluid" style="height: calc(100% - 150px)">
-  <div id="chart-container">
-    <div id="chart" memory-chart></div>
-    <div class="btn-group pull-left" data-toggle="buttons">
-      <label class="btn btn-default active"><input name="time-mode-select" type="radio" autocomplete="off" checked>absolute time</label>
-      <label class="btn btn-default       "><input name="time-mode-select" type="radio" autocomplete="off"        >relative time</label>
-    </div>
-    <div class="btn-group pull-right" data-toggle="buttons">
-      <label class="btn btn-default active"><input name="trace-select" type="radio" autocomplete="off" checked>max</label>
-      <label class="btn btn-default       "><input name="trace-select" type="radio" autocomplete="off"        >mean</label>
-      <label class="btn btn-default       "><input name="trace-select" type="radio" autocomplete="off"        >max + mean</label>
-    </div>
+  <div class="row">
+      <div id="chart-container" class="col-md-9">
+        <div id="chart" memory-chart></div>
+        <div class="btn-group pull-left" data-toggle="buttons">
+          <label class="btn btn-default active"><input name="time-mode-select" type="radio" autocomplete="off" checked>absolute time</label>
+          <label class="btn btn-default       "><input name="time-mode-select" type="radio" autocomplete="off"        >relative time</label>
+        </div>
+        <div class="btn-group pull-right" data-toggle="buttons">
+          <label class="btn btn-default active"><input name="trace-select" type="radio" autocomplete="off" checked>max</label>
+          <label class="btn btn-default       "><input name="trace-select" type="radio" autocomplete="off"        >mean</label>
+          <label class="btn btn-default       "><input name="trace-select" type="radio" autocomplete="off"        >max + mean</label>
+        </div>
+      </div>
+      <div id="annotation" class="col-md-3" memory-annotation>
+      </div>
   </div>
-  <div id="annotation">
-  </div>
-
 </div>
 
-<!--script type="text/x-jsrender" id="stacktrace-tmpl">
+<script type="text/x-jsrender" id="stacktrace-tmpl">
 <ul>
 <%for%>
   <li>
@@ -61,4 +62,4 @@
     </div>
   </div>
 <%/if%>
-</script-->
+</script>

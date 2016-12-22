@@ -1,24 +1,12 @@
-img.loading {
-	position: fixed;
-	width: 60px;
-	top: 40%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-}
 #chart-container, #annotation {
   float: left;
 }
 #chart-container {
   z-index: 1;
   background: white;
-  width: 73%;
-  height: 100%;
 }
 #chart { height: 100%; }
 #annotation {
-  width: 25%;
-  height: 100%;
-  padding-left: 2%;
   border-left: 1px solid #eee;
 }
 .mem-consumption {
@@ -64,3 +52,4 @@ img.loading {
   display: block;
   line-height: 1.1;
 }
+

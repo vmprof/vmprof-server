@@ -1,4 +1,5 @@
 import base64
+import datetime
 from collections import defaultdict
 
 from jitlog.objects import MergePoint
@@ -18,8 +19,8 @@ class LogMetaSerializer(BaseSerializer):
         # construct json
         traces = {}
         links = {}
-        labels = defaultdict(list)
-        jumps = defaultdict(list)
+        #labels = defaultdict(list)
+        #jumps = defaultdict(list)
         for id, trace in forest.traces.items():
             mp = trace.get_first_merge_point()
             counter_points = trace.get_counter_points()
@@ -92,7 +93,6 @@ class StageSerializer(BaseSerializer):
         ops = []
         # merge points is a dict mapping from index -> merge_points
         stage_dict = { 'ops': ops }
-        source_code = {}
         for i,op in enumerate(stage.get_ops()):
             op_stage_dict = op_serializer.to_representation(op)
             ops.append(op_stage_dict)
@@ -155,7 +155,7 @@ class VisualTraceTreeSerializer(BaseSerializer):
         worklist = [trace]
         while worklist:
             trace = worklist.pop()
-            hex_unique_id = hex(trace.unique_id)
+            #hex_unique_id = hex(trace.unique_id)
             stage = trace.get_stage('asm')
             if not stage:
                 continue
@@ -251,6 +251,12 @@ class MemorygraphSerializer(BaseSerializer):
         return len(traces), common_prefix, count, most_frequent_trace[len(common_prefix):]
 
 
+STRFTIME_FMT = '%m/%d/%Y %H:%M:%S %z'
+
 class CPUMetaSerializer(BaseSerializer):
     def to_representation(self, stats):
-        return {'arch':'linux64','os':'fedora 25'}
+        return {'arch': stats.getmeta('arch', 'unkown'),
+                'os': stats.getmeta('os', 'unknown') + ' ' + stats.getmeta('bits', ''),
+                'start_time': stats.start_time.strftime(STRFTIME_FMT),
+                'end_time': stats.end_time.strftime(STRFTIME_FMT),
+               }

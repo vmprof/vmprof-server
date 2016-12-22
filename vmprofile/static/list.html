@@ -38,14 +38,14 @@
           <a class="list-profile-link" href="#/{{ log.runtime_id }}/memory">
             <i class="fa-area-chart"></i> memory
           </a><br>
-          <a ng-if="{{ log.jitlog }}" class="list-profile-link" href="#/{{ log.runtime_id }}/traces">
+          <a ng-if="log.jitlog_id" class="list-profile-link" href="#/{{ log.runtime_id }}/traces">
             <i class="fa-cogs"></i> jit
           </a>
       </div>
       <div class="col-md-3" >
           <dl class="list-properties">
-              <dt>Time</dt> <dd>1 sec</dd> <br>
-              <dt>Arch</dt> <dd>x86 64 bit</dd>
+              <dt>Time</dt> <dd>{{ log.time_in_seconds }} sec</dd> <br>
+              <dt>OS</dt> <dd>{{ log.os }}</dd>
           </dl>
       </div>
     </div>

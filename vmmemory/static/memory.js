@@ -79,57 +79,9 @@ Graph.prototype.init = function(scope, domTarget) {
   this.nPlotlyTraces = 0;
 }
 
-Graph.prototype.resample_memory_profile = function(data, start, end, window_size) {
-  start = Math.max(0, start)
-  end = Math.min(data.length, end)
-  window_size = Math.min(window_size || 100, end - start)
-
-  var linspace = numeric.linspace(start, end, window_size)
-  // we want to partition using time, thus
-  var index_bins = numeric.bin(linspace)
-  numeric.assign_bin(index_bins, data,
-      function(i,x) { return i; }, // key to lookup bin
-      function(i,x) { return x[1]; }) // value insert memory
-    // TODO    'trace': aggregate_trace,
-    return {
-        'x': linspace,
-        'mean': numeric.mean_bin(index_bins),
-        'max': numeric.max_bin(index_bins),
-        // TODO 'trace': list(df['trace']['aggregate_trace'].values),
-    }
-}
-
-Graph.prototype.aggregate_trace = function(traces) {
-
-// TODO
-//def aggregate_trace(traces):
-//    if traces.empty:
-//        return [], []
-//
-//    iterator = iter(traces)
-//
-//    common_prefix = tuple(next(iterator))
-//    frequencies = collections.defaultdict(int)
-//    frequencies[common_prefix] = 1
-//
-//    for row in iterator:
-//        if not row:
-//            continue
-//        frequencies[tuple(row)] += 1
-//        common_prefix = common_prefix[:len(row)]
-//        for i, elem in enumerate(common_prefix):
-//            if elem != row[i]:
-//                common_prefix = common_prefix[:i]
-//                break
-//
-//    most_frequent_trace, count = max(frequencies.items(), key=lambda k, v: v)
-//    return len(traces), common_prefix, count, most_frequent_trace[len(common_prefix):]
-}
-
 Graph.prototype.reset = function(plotData, addrNameMap) {
   this.addrNameMap = addrNameMap
-  this.currentData = this.resample_memory_profile(plotData, 0, Number.MAX_SAFE_INTEGER)
-  this.current
+  this.currentData = plotData
   var chart = $(self.domTarget)
   var graph = this
 

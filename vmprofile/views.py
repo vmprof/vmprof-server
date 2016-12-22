@@ -22,9 +22,11 @@ from rest_framework.decorators import permission_classes
 from rest_framework.exceptions import ValidationError, APIException
 
 from vmprofile.models import RuntimeData, CPUProfile
-from vmmemory.models import MemoryProfile
+#from vmmemory.models import MemoryProfile
 
 from webapp.views import json_serialize
+
+from vmlog.serializer import STRFTIME_FMT
 
 username_max = auth.models.User._meta.get_field('username').max_length
 password_max = auth.models.User._meta.get_field('password').max_length
@@ -90,7 +92,9 @@ class RuntimeDataListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RuntimeData
-        fields = ('user', 'created', 'vm', 'name', 'runtime_id')
+        fields = ('user', 'created', 'vm', 'name', 'runtime_id',
+                  'start_time', 'stop_time', 'arch', 'os',
+                  'time_in_seconds', 'jitlog_id')
 
 
 class RuntimeDataViewSet(viewsets.ModelViewSet):
@@ -239,16 +243,14 @@ def extract_meta(rd):
 
     start_time = jsondata.get('start_time', None)
     if start_time:
-        rd.start_time = datetime.datetime.strptime(start_time)
-    stop_time = jsondata.get('stop_time', None)
-    if stop_time:
-        rd.stop_time = datetime.datetime.strptime(stop_time)
+        rd.start_time = datetime.datetime.strptime(start_time, STRFTIME_FMT)
+    end_time = jsondata.get('end_time', None)
+    if end_time:
+        rd.stop_time = datetime.datetime.strptime(end_time, STRFTIME_FMT)
+
+    rd.arch = jsondata.get('arch', 'unknown')
+    rd.os = jsondata.get('os', 'unknown')
     rd.save()
-
-
-    cpu.arch = jsondata.get('arch', 'unknown')
-    cpu.os = jsondata.get('os', 'unknown')
-    cpu.save()
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
