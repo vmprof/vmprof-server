@@ -379,6 +379,7 @@ app.controller('memory', function ($scope, $http, $routeParams, $timeout,
   //var addrNameMapFetch = ajaxMsgpack({url: ADDR_NAME_MAP_FETCH_URL});
   //$.when(addrNameMapFetch, retrievePlotData())
   // .then(setupPlot, function (err) { showError("Error retrieving profile data", err.statusText); });
+  $.views.settings.delimiters("<%", "%>");
 
   $scope.detailtop = {
     memory: true,

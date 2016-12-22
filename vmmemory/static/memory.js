@@ -74,15 +74,19 @@ Graph.prototype.init = function(scope, domTarget) {
   this.timeMode = "relative"
   this.scope = scope
 
+  var layout = {
+    yaxis: {showticklabels: false}
+  }
+
   // Initialise empty Plotly plot
-  this.ploty = Plotly.newPlot(this.domTarget, [], {yaxis: {showticklabels: false}}, {displayModeBar: true});
+  this.ploty = Plotly.newPlot(this.domTarget, [], layout, {displayModeBar: true});
   this.nPlotlyTraces = 0;
 }
 
 Graph.prototype.reset = function(plotData, addrNameMap) {
   this.addrNameMap = addrNameMap
   this.currentData = plotData
-  var chart = $(self.domTarget)
+  var chart = $(this.domTarget)
   var graph = this
 
   chart.on("plotly_relayout", function (event, eventData) {
