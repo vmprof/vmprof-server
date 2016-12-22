@@ -114,7 +114,10 @@ STITCH_REQUEST = re.compile('stitch '+BASE+' (\d+)')
 STITCH_SERIALIZER = serializer.VisualTraceTreeSerializer()
 
 FLAMEGRAPH_SERIALIZER = serializer.FlamegraphSerializer()
+MEMORYGRAPH_REQUEST = re.compile('mem '+BASE+' (\d+.\d+) (\d+.\d+|inf)')
 MEMORYGRAPH_SERIALIZER = serializer.MemorygraphSerializer()
+
+META_CPU_SERIALIZER = serializer.CPUMetaSerializer()
 
 CACHE = Cache(4 * 1024 * 1024 * 1024) # 4 GB
 
@@ -126,18 +129,23 @@ class CacheProtocol(LineReceiver):
         log.msg("new connection opened")
 
     def lineReceived(self, bytesline):
+        try:
+            self._handle(bytesline)
+        except Exception as e:
+            self.sendLine(("{'error': '%s'}" % str(e)).encode('utf-8'))
+        self.transport.loseConnection()
+
+    def _handle(self, bytesline):
         data = bytesline.decode('utf-8')
         # generic match
         match = GENERIC_REQ.match(data)
         if not match:
-            self.transport.loseConnection()
             return
 
         cmd = match.group(1)
         filename = match.group(2)
         checksum = match.group(3)
         if not os.path.exists(filename):
-            self.transport.loseConnection()
             return
 
         start = time.time()
@@ -153,11 +161,18 @@ class CacheProtocol(LineReceiver):
         start = time.time()
         #
         jsondata = None
-        if data.startswith("cpu"):
+        if data.startswith("metacpu"):
+            jsondata = META_CPU_SERIALIZER.to_representation(profile)
+        elif data.startswith("cpu"):
             jsondata = FLAMEGRAPH_SERIALIZER.to_representation(profile)
-        if data.startswith("mem"):
-            jsondata = MEMORYGRAPH_SERIALIZER.to_representation(profile)
-        if data.startswith("meta"):
+        elif data.startswith("mem"):
+            match = MEMORYGRAPH_REQUEST.match(data)
+            if not match:
+                return
+            start = float(match.group(3))
+            stop  = float(match.group(4))
+            jsondata = MEMORYGRAPH_SERIALIZER.to_representation(profile, start, stop)
+        elif data.startswith("meta"):
             match = META_REQUEST.match(data)
             if match:
                 jsondata = META_SERIALIZER.to_representation(profile)
@@ -183,7 +198,6 @@ class CacheProtocol(LineReceiver):
             log.msg("sent data, closing connection")
         else:
             log.msg("no data sent, closing connection")
-        self.transport.loseConnection()
 
     def load(self, type, filename, checksum):
         profile = self.cache.get(checksum)
@@ -192,7 +206,7 @@ class CacheProtocol(LineReceiver):
             return profile
 
         with get_reader(filename) as fobj:
-            if type == "cpu" or type == "mem":
+            if type == "cpu" or type == "mem" or type == "metacpu":
                 profile = read_cpu_profile(fobj)
             else:
                 profile = parser._parse_jitlog(fobj)

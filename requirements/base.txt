@@ -7,3 +7,5 @@ django_compressor
 csscompressor
 twisted
 django-appconf
+pandas
+msgpack-python

@@ -4,6 +4,9 @@ from collections import defaultdict
 from jitlog.objects import MergePoint
 from jitlog import constants as const
 
+import pandas
+import numpy
+
 class BaseSerializer(object):
     pass
 
@@ -195,8 +198,59 @@ class FlamegraphSerializer(BaseSerializer):
         return { 'data': data }
 
 class MemorygraphSerializer(BaseSerializer):
-    def to_representation(self, stats):
+    def to_representation(self, stats, start, end):
         mem_profile = [(list(prof[0]), prof[3]) for prof in stats.profiles]
         adr_dict = {k: v for k, v in stats.adr_dict.items()}
-        return {'mem_profile': mem_profile,
+        prof = self.resample_memory_profile(mem_profile, start, end)
+
+        return {'mem_profile': prof,
                 'addr_name_map': adr_dict}
+
+    def resample_memory_profile(self, memory_profile, start, end, window_size=100):
+        start = int(max(0, start))
+        end = int(min(len(memory_profile), end))
+        window_size = min(window_size, end - start)
+
+        df = pandas.DataFrame(memory_profile).rename(columns={0: 'trace', 1: 'mem'})
+        bins = numpy.linspace(start, end, window_size, dtype='int')
+        df = df.groupby(pandas.cut(df.index, bins, include_lowest=True, right=True))
+        df = df.aggregate({
+            'mem': ['mean', 'max'],
+            'trace': self.aggregate_trace,
+        })
+        # ugh, numpy.int64 is not json serializable. it was at some point (2.7.x, but not anymore)
+        # we should fix this by exporting by msgpack at some point
+        return {
+            'x': [int(i) for i in bins[:-1]],
+            'mean': [int(i) for i in df['mem']['mean'].values],
+            'max': [int(i) for i in df['mem']['max'].values],
+            'trace': list(df['trace']['aggregate_trace'].values),
+        }
+
+    def aggregate_trace(self, traces):
+        if traces.empty:
+            return [], []
+
+        iterator = iter(traces)
+
+        common_prefix = tuple(next(iterator))
+        frequencies = defaultdict(int)
+        frequencies[common_prefix] = 1
+
+        for row in iterator:
+            if not row:
+                continue
+            frequencies[tuple(row)] += 1
+            common_prefix = common_prefix[:len(row)]
+            for i, elem in enumerate(common_prefix):
+                if elem != row[i]:
+                    common_prefix = common_prefix[:i]
+                    break
+
+        most_frequent_trace, count = max(frequencies.items(), key=lambda x: x[1])
+        return len(traces), common_prefix, count, most_frequent_trace[len(common_prefix):]
+
+
+class CPUMetaSerializer(BaseSerializer):
+    def to_representation(self, stats):
+        return {'arch':'linux64','os':'fedora 25'}

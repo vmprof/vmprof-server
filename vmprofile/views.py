@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import io
 import json
 import hashlib
+import datetime
 from urllib import parse
 
 from django.contrib import auth
@@ -20,6 +22,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.exceptions import ValidationError, APIException
 
 from vmprofile.models import RuntimeData, CPUProfile
+from vmmemory.models import MemoryProfile
 
 from webapp.views import json_serialize
 
@@ -225,6 +228,27 @@ def runtime_freeze(request, rid):
     runtimedata.save()
     return Response({'status': 'ok'})
 
+def extract_meta(rd):
+    cpu = rd.cpu_profile
+    strio = io.StringIO()
+    json_serialize(strio, "metacpu {filename} {runtime_id}",
+                             filename=cpu.file,
+                             runtime_id=cpu.cpuprofile_id)
+    strio.seek(0)
+    jsondata = json.loads(strio.read())
+
+    start_time = jsondata.get('start_time', None)
+    if start_time:
+        rd.start_time = datetime.datetime.strptime(start_time)
+    stop_time = jsondata.get('stop_time', None)
+    if stop_time:
+        rd.stop_time = datetime.datetime.strptime(stop_time)
+    rd.save()
+
+
+    cpu.arch = jsondata.get('arch', 'unknown')
+    cpu.os = jsondata.get('os', 'unknown')
+    cpu.save()
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
@@ -236,6 +260,10 @@ def upload_cpu(request, rid):
 
     file_obj = request.data['file']
     CPUProfile.objects.create(runtime_data=runtimedata, file=file_obj)
+    # TODO spawn background task to propagate CPUProfile and MemoryProfile details
+    # for now this is good enough I guess?
+    extract_meta(runtimedata)
+
     return Response({'status': 'ok'})
 
 @api_view(['GET'])
@@ -252,25 +280,6 @@ def load_cpu_json(request, rd):
     response = HttpResponse(content_type="application/json")
     cpu = rd.cpu_profile
     json_serialize(response, "cpu {filename} {runtime_id}",
-                             filename=cpu.file,
-                             runtime_id=cpu.cpuprofile_id)
-    return response
-
-@api_view(['GET'])
-@permission_classes((AllowAny,))
-def get_memory(request, rid):
-    rd = RuntimeData.objects.get(pk=rid)
-    profile = rd.cpu_profile
-    if profile.data is not None:
-        raise ObjectNotFound
-    # legacy, used for old profiles
-
-    return load_memory_json(request, rd)
-
-def load_memory_json(request, rd):
-    response = HttpResponse(content_type="application/json")
-    cpu = rd.cpu_profile
-    json_serialize(response, "mem {filename} {runtime_id}",
                              filename=cpu.file,
                              runtime_id=cpu.cpuprofile_id)
     return response

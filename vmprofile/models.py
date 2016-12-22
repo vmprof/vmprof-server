@@ -16,6 +16,9 @@ class RuntimeData(models.Model):
     name = models.CharField(max_length=256, blank=True)
     completed = models.BooleanField(default=False)
 
+    start_time = models.DateTimeField(null=True)
+    stop_time = models.DateTimeField(null=True)
+
     class Meta:
         ordering = ['-created']
 
@@ -28,6 +31,9 @@ class CPUProfile(models.Model):
 
     runtime_data = models.OneToOneField(RuntimeData, related_name='cpu_profile',
                                         null=True, blank=True, on_delete=models.CASCADE)
+
+    arch = models.CharField(max_length=25, default="")
+    os = models.CharField(max_length=25, default="")
 
 @admin.register(RuntimeData)
 class RuntimeDataAdmin(admin.ModelAdmin):

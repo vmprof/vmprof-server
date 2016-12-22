@@ -8,7 +8,8 @@ from vmlog.views import (meta, trace, stitches,
         BinaryJitLogFileUploadView)
 from vmprofile.views import runtime_new, runtime_freeze
 from vmlog.views import upload_jit
-from vmprofile.views import upload_cpu, get_cpu, get_memory
+from vmprofile.views import upload_cpu, get_cpu
+from vmmemory.views import get_memory
 from vmmemory import views as mem_views
 from django.conf.urls import url, include
 from django.contrib.staticfiles import views as static
