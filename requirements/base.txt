@@ -6,5 +6,4 @@ six==1.10
 django_compressor
 csscompressor
 twisted
-pandas
-msgpack-python
+django-appconf
