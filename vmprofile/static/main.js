@@ -352,9 +352,19 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
     });
 });
 
+app.directive('memoryChart', function($timeout){
+  return {
+    'restrict': 'EA',
+    'scope': true,
+    'link': function(scope, element, attrs) {
+      scope.graph.init(scope, element);
+    }
+  }
+});
+
 app.controller('memory', function ($scope, $http, $routeParams, $timeout,
                                     $location) {
-
+  // TODO
 //var PROFILE_FETCH_URL = "{{ profile_fetch_url }}?";
 //var ADDR_NAME_MAP_FETCH_URL = "{{ addr_name_fetch_url }}?";
 //var PROFILE_PERIOD = {{ profile.profile_resolution|default:"null" }};
@@ -366,6 +376,7 @@ app.controller('memory', function ($scope, $http, $routeParams, $timeout,
   // .then(setupPlot, function (err) { showError("Error retrieving profile data", err.statusText); });
 
   $scope.loading = true
+  $scope.graph = new Graph();
   $scope.reload_graph = function(x0, x1) {
     var url = '/api/memorygraph/' + $routeParams.log + '/get?'
     var params = []
@@ -374,19 +385,12 @@ app.controller('memory', function ($scope, $http, $routeParams, $timeout,
     $http.get(url + params.join('&'), {cache: true})
        .then(function (response) {
          $scope.loading = false
+         var data = response.data
+         $scope.graph.reset(data['mem_profile'], data['addr_name_map'])
        });
   }
 
   $scope.reload_graph();
 });
 
-app.directive('memoryChart', function($timeout){
-  return {
-    'link': function(scope, element, attrs) {
-      scope.$on('chart-init', function() {
-        scope.graph = new Graph(element);
-      })
-    }
-  }
-});
 

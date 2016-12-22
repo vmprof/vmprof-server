@@ -1,3 +1,13 @@
+numeric = {}
+numeric.linspace = function linspace(a,b,n) {
+    if(typeof n === "undefined") n = Math.max(Math.round(b-a)+1,1);
+    if(n<2) { return n===1?[a]:[]; }
+    var i,ret = Array(n);
+    n--;
+    for(i=n;i>=0;i--) { ret[i] = (i*b+(n-i)*a)/n; }
+    return ret;
+}
+
 function ajaxMsgpack(conf) {
   conf = $.extend({}, conf, {dataType: "binary", processData: false});
   conf.url += "&msgpack";
@@ -54,9 +64,61 @@ function parseStackTraceLine(line) {
 }
 
 
-function setupPlot (addrNameMap, plotData) {
-  var chart = $("#chart"),
-      graph = new Graph(chart[0], addrNameMap, plotData);
+
+
+/*
+NOTE: Both vmprof and plotly use the term "trace".
+- A vmprof trace is a stack trace (technically: a list of instruction pointers)
+- A plotly trace is a "line in the graph"/"single graph".
+
+We use the term "graph" for plotly traces here, and the term "stack trace"
+for vmprof traces.
+*/
+
+function Graph() {
+}
+
+Graph.prototype.init = function(scope, domTarget) {
+  this.domTarget = domTarget[0];
+  this.traceSelection = "max";
+  this.timeMode = "relative"
+  this.scope = scope
+  //this.resetData();
+
+  // Initialise empty Plotly plot
+  this.ploty = Plotly.newPlot(this.domTarget, [], {yaxis: {showticklabels: false}}, {displayModeBar: true});
+  this.nPlotlyTraces = 0;
+}
+
+Graph.prototype.resample_memory_profile = function(data, start, end, window_size) {
+    //def resample_memory_profile(memory_profile, start, end, window_size=100):
+    start = Math.max(0, start)
+    end = Math.min(data.length, end)
+    window_size = Math.min(window_size || 100, end - start)
+
+    bins = numeric.linspace(start, end, window_size)
+    //df = pandas.DataFrame(memory_profile).rename(columns={0: 'trace', 1: 'mem'})
+    //df = df.groupby(pandas.cut(df.index, bins, include_lowest=True, right=True))
+    //df = df.aggregate({
+    //    'mem': ['mean', 'max'],
+    //    'trace': aggregate_trace,
+    //})
+    return {
+        'x': bins,
+        'mean': bins,
+        'max': bins,
+        //#'mean': list(df['mem']['mean'].values),
+        //#'max': list(df['mem']['max'].values),
+        //#'trace': list(df['trace']['aggregate_trace'].values),
+    }
+}
+
+Graph.prototype.reset = function(plotData, addrNameMap) {
+  this.addrNameMap = addrNameMap
+  this.currentData = this.resample_memory_profile(plotData, 0, Number.MAX_SAFE_INTEGER)
+  this.current
+  var chart = $(self.domTarget)
+  var graph = this
 
   chart.on("plotly_relayout", function (event, eventData) {
     if (eventData["xaxis.autorange"] || eventData["yaxis.autorange"]) {
@@ -110,30 +172,7 @@ function setupPlot (addrNameMap, plotData) {
     graph.render();
   });
 
-  graph.render();
-}
-
-
-/*
-NOTE: Both vmprof and plotly use the term "trace".
-- A vmprof trace is a stack trace (technically: a list of instruction pointers)
-- A plotly trace is a "line in the graph"/"single graph".
-
-We use the term "graph" for plotly traces here, and the term "stack trace"
-for vmprof traces.
-*/
-
-function Graph(domTarget, addrNameMap, initialData) {
-  this.domTarget = domTarget;
-  this.addrNameMap = addrNameMap;
-  this.initialData = initialData;
-  this.traceSelection = "max";
-  this.timeMode = START_DATE === null ? "relative" : "absolute";
-  this.resetData();
-
-  // Initialise empty Plotly plot
-  Plotly.newPlot(this.domTarget, [], {yaxis: {showticklabels: false}}, {displayModeBar: true});
-  this.nPlotlyTraces = 0;
+  this.render();
 }
 
 Graph.prototype.setTraceSelection = function (s) {
@@ -191,21 +230,24 @@ Graph.prototype.mergeData = function (d1, d2) {
 };
 
 Graph.prototype.xToPlotly = function(x) {
-  if (PROFILE_PERIOD !== null) {
-    var offset = this.timeMode === "absolute" ? START_DATE : new Date(-3600000);
-    return new Date(offset.valueOf() + x * PROFILE_PERIOD / 1000);
-  } else {
-    return x;
-  }
+  return x
+  // save and retrieve from this.scope
+  // TODO if (PROFILE_PERIOD !== null) {
+  // TODO   var offset = this.timeMode === "absolute" ? START_DATE : new Date(-3600000);
+  // TODO   return new Date(offset.valueOf() + x * PROFILE_PERIOD / 1000);
+  // TODO } else {
+  // TODO   return x;
+  // TODO }
 }
 
 Graph.prototype.xFromPlotly = function (x) {
-  if (PROFILE_PERIOD !== null) {
-    var offset = this.timeMode === "absolute" ? START_DATE : new Date(-3600000);
-    return (x.valueOf() - offset.valueOf()) * 1000 / PROFILE_PERIOD;
-  } else {
-    return x;
-  }
+  return x;
+ //TODO if (PROFILE_PERIOD !== null) {
+ //TODO   var offset = this.timeMode === "absolute" ? START_DATE : new Date(-3600000);
+ //TODO   return (x.valueOf() - offset.valueOf()) * 1000 / PROFILE_PERIOD;
+ //TODO } else {
+ //TODO   return x;
+ //TODO }
 }
 
 Graph.prototype.makePlotlyGraph = function () {
@@ -217,7 +259,7 @@ Graph.prototype.makePlotlyGraph = function () {
       x: self.currentData.x.map(self.xToPlotly.bind(self)),
       y: self.currentData[attr],
       mode: "line",
-      text: self.currentData[attr].map(formatBytes),
+      text: "TODO",//self.currentData[attr].map(formatBytes),
       hoverinfo: "text+name",
       showlegend: false,
     }, opts);

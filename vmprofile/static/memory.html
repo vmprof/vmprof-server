@@ -1,6 +1,6 @@
 
   <!--link rel="stylesheet" href="{% static "css/mem.css" %}"-->
-<img class="loading" src="/static/images/loader.gif">
+<img class="loading" ng-if="loading" src="/static/images/loader.gif">
 <div class="container-fluid" style="height: calc(100% - 150px)">
   <div id="chart-container">
     <div id="chart" memory-chart></div>

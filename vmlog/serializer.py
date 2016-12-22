@@ -196,5 +196,7 @@ class FlamegraphSerializer(BaseSerializer):
 
 class MemorygraphSerializer(BaseSerializer):
     def to_representation(self, stats):
-        profiles = {'a':1}
-        return profiles
+        mem_profile = [(list(prof[0]), prof[3]) for prof in stats.profiles]
+        adr_dict = {k: v for k, v in stats.adr_dict.items()}
+        return {'mem_profile': mem_profile,
+                'addr_name_map': adr_dict}
