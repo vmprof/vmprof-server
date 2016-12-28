@@ -1,7 +1,8 @@
 import json
 from twisted.trial import unittest
-from forestcache.cache import CacheFactory
+from vmcache.cache import CacheFactory
 from twisted.test import proto_helpers
+from vmcache.cache import Cache
 
 class TestCache(unittest.TestCase):
     def setup_method(self, name):
@@ -41,8 +42,6 @@ class TestCache(unittest.TestCase):
         assert result['root'] != ''
         assert len(result['stitches']) != {}
 
-from forestcache.cache import Cache
-
 class FakeCache(Cache):
     def memory_usage(self):
         return len(self.cache)
@@ -74,5 +73,4 @@ class TestUnitCache(object):
         assert cache.decay(force=True) == 1
         assert len(cache.cache) == 3
         assert cache.get(4) is None
-
 

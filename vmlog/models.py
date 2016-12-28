@@ -7,7 +7,7 @@ from django.contrib import admin
 
 from vmprofile.models import RuntimeData
 
-from forestcache.cache import get_reader
+from vmcache.cache import get_reader
 
 def get_profile_storage_directory(profile, filename):
     return "log/%d/%s" % (profile.pk, filename)
@@ -23,7 +23,7 @@ class BinaryJitLog(models.Model):
 
     def decode_forest(self):
         # ultra slow, especially when run on cpython 3.5
-        # see forestcache.cache for a faster impl. using pypy.
+        # see vmcache.cache for a faster impl. using pypy.
         # it caches the results as well (not using pickle)
         with get_reader(self.file.name) as fd:
             forest = _parse_jitlog(fd)

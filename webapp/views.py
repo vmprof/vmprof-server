@@ -21,7 +21,7 @@ def json_serialize(response, cmd, **kwargs):
     else:
         # should never be hit in production!!
         from twisted.test import proto_helpers
-        from forestcache.cache import CacheProtocol
+        from vmcache.cache import CacheProtocol
         prot = CacheProtocol()
         prot.transport = proto_helpers.StringTransport()
         prot.lineReceived(command.encode('utf-8'))
