@@ -255,8 +255,11 @@ STRFTIME_FMT = '%m/%d/%Y %H:%M:%S %z'
 
 class CPUMetaSerializer(BaseSerializer):
     def to_representation(self, stats):
-        return {'arch': stats.getmeta('arch', 'unkown'),
+        dict = {'arch': stats.getmeta('arch', 'unkown'),
                 'os': stats.getmeta('os', 'unknown') + ' ' + stats.getmeta('bits', ''),
-                'start_time': stats.start_time.strftime(STRFTIME_FMT),
-                'end_time': stats.end_time.strftime(STRFTIME_FMT),
                }
+        if hasattr(stats, 'start_time') and stats.start_time:
+            dict['start_time'] = stats.start_time.strftime(STRFTIME_FMT)
+        if hasattr(stats, 'end_time') and stats.end_time:
+            dict['end_time'] = stats.end_time.strftime(STRFTIME_FMT)
+        return dict

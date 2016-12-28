@@ -152,6 +152,7 @@ class CacheProtocol(LineReceiver):
         profile = self.load(cmd, filename, checksum)
         parsing_secs = time.time() - start
 
+
         size = os.path.getsize(filename)
         measures = { 'parsing': '%.3fms' % (parsing_secs * 1000.0),
                      'log (zip)': '%.1fMB' % (size // 1024 // 1024),
