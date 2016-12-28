@@ -132,7 +132,7 @@ class CacheProtocol(LineReceiver):
         try:
             self._handle(bytesline)
         except Exception as e:
-            self.sendLine(("{'error': '%s'}" % str(e)).encode('utf-8'))
+            self.sendLine(('{"error": "%s"}' % str(e)).encode('utf-8'))
         self.transport.loseConnection()
 
     def _handle(self, bytesline):

@@ -4,10 +4,8 @@ from django.conf import settings
 
 from rest_framework import routers
 from vmprofile.views import MeView, RuntimeDataViewSet, TokenViewSet
-from vmlog.views import (meta, trace, stitches,
-        BinaryJitLogFileUploadView)
+from vmlog.views import (meta, trace, stitches, upload_jit)
 from vmprofile.views import runtime_new, runtime_freeze
-from vmlog.views import upload_jit
 from vmprofile.views import upload_cpu, get_cpu
 from vmmemory.views import get_memory
 from vmmemory import views as mem_views
@@ -32,6 +30,8 @@ urlpatterns = [
     url(r'^api/runtime/(?P<rid>[0-9a-z-]*)/freeze/?$', runtime_freeze),
     url(r'^api/runtime/upload/jit/(?P<rid>[0-9a-z-]*)/add/?$', upload_jit),
     url(r'^api/runtime/upload/cpu/(?P<rid>[0-9a-z-]*)/add/?$', upload_cpu),
+    # legacy api
+    url(r'^api/jitlog/(?P<rid>[0-9a-z-]*)/?$', upload_jit),
     #
     url(r'^api/jit/meta/(?P<profile>[0-9a-z]*)/?$', meta),
     url(r'^api/jit/trace/(?P<profile>[0-9a-z]*)/?$', trace),

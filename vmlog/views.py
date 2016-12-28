@@ -36,30 +36,6 @@ def compute_checksum(file_obj):
         hash.update(chunk)
     return hash.hexdigest()
 
-class BinaryJitLogFileUploadView(views.APIView):
-    parser_classes = (FileUploadParser,)
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request, profile, format=None):
-        file_obj = request.FILES['file']
-
-        filename = file_obj.name
-        if not filename.endswith('.zip'):
-            return HttpResponseBadRequest("must be gzip compressed")
-
-        checksum = compute_checksum(file_obj)
-
-        user = request.user if request.user.is_authenticated() else None
-
-        if profile.strip() == "":
-            runtime_data= None
-        else:
-            runtime_data = RuntimeData.objects.get(pk=profile)
-        log, _ = BinaryJitLog.objects.get_or_create(file=file_obj, checksum=checksum,
-                                                    user=user, runtime_data=runtime_data)
-
-        return Response(log.checksum)
-
 class JsonExceptionHandlerMixin(object):
     def handle_exception(self, exc):
         if isinstance(exc, Http404):
@@ -114,6 +90,30 @@ def stitches(request, profile):
                              filename=jl.file.path, profile=profile, uid=uid)
     return response
 
+from rest_framework.exceptions import ValidationError, APIException
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import permission_classes
+from vmprofile.views import try_get_runtimedata
 
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+@parser_classes((FileUploadParser,))
 def upload_jit(request, rid):
-    pass
+    runtimedata = try_get_runtimedata(request, rid)
+    if runtimedata.completed:
+        raise ValidationError("the runtime data is already frozen, cannot upload any more files")
+
+    file_obj = request.data['file']
+
+    filename = file_obj.name
+    if not filename.endswith('.zip'):
+        return HttpResponseBadRequest("must be gzip compressed")
+
+    checksum = compute_checksum(file_obj)
+
+    user = request.user if request.user.is_authenticated() else None
+
+    log, _ = BinaryJitLog.objects.get_or_create(file=file_obj, checksum=checksum,
+                                                user=user, runtime_data=runtimedata)
+
+    return Response(log.checksum)
