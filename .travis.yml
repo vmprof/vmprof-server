@@ -12,6 +12,8 @@ addons:
     packages:
       - libappindicator1
       - fonts-liberation
+      - python-dev
+      - libunwind8-dev
 
 before_install:
   - psql -c 'create database vmprof;' -U postgres
