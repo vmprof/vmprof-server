@@ -13,7 +13,7 @@ def get_profile_storage_directory(profile, filename):
     return "log/%d/%s" % (profile.pk, filename)
 
 class BinaryJitLog(models.Model):
-    jitlog_id = models.CharField(max_length=64, default=uuid.uuid4, primary_key=True)
+    jitlog_id = models.CharField(max_length=64, primary_key=True)
     checksum = models.CharField(max_length=128)
     created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to=get_profile_storage_directory)
