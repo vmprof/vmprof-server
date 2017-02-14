@@ -14,40 +14,42 @@
   </div>
 
   <div ng-show="!loading" class="list-group" ng-init="ago=true">
-    <div class="row profile-entry" ng-repeat="log in logs" ng-style="background(log.created)">
-      <div class="col-md-1">
-          <img class="media-object" ng-if="!log.user"
-               ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
-      </div>
-      <div class="col-md-4">
+    <div ng-repeat="log in logs" class="profile-entry" ng-style="background(log.created)">
         <div class="list-argv list-title">
-          <span class="vm-name label label-default">{{ log.vm }}</span>
-          {{log.name}}
+          <img class="media-object pull-right" ng-if="!log.user"
+               ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
+          {{log.name}}<br/>
         </div>
-        <div class="list-username">
-            <span ng-if="log.user">{{ log.user.username }}</span>
-            <span ng-if="!log.user"><i style="color: #888">anonymous</i></span>
+        <div class="row">
+          <div class="col-md-3">
+            <div style="margin-bottom: 5px;">
+            <span class="vm-name label label-default">{{ log.vm }}</span>
+            </div>
+            <div class="list-username">
+                <span ng-if="log.user">{{ log.user.username }}</span>
+                <span ng-if="!log.user"><i style="color: #888">anonymous</i></span>
+            </div>
+            <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
+            <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
+          </div>
+          <div class="col-md-3">
+              <a class="list-profile-link" href="#/{{ log.runtime_id }}">
+                &rarr; CPU Profile
+              </a><br>
+              <a class="list-profile-link" href="#/{{ log.runtime_id }}/memory">
+                &rarr; Memory Stats
+              </a><br>
+              <a ng-if="log.jitlog_id" class="list-profile-link" href="#/{{ log.runtime_id }}/traces">
+                &rarr; JIT Compiler Log
+              </a>
+          </div>
+          <div class="col-md-3" >
+              <dl class="list-properties">
+                  <dt>Time</dt> <dd>{{ log.time_in_seconds }} sec</dd> <br>
+                  <dt>OS</dt> <dd>{{ log.os }}</dd>
+              </dl>
+          </div>
         </div>
-        <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
-        <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
-      </div>
-      <div class="col-md-4">
-          <a class="list-profile-link" href="#/{{ log.runtime_id }}">
-            <i class="fa-code"></i> CPU Profile
-          </a><br>
-          <a class="list-profile-link" href="#/{{ log.runtime_id }}/memory">
-            <i class="fa-area-chart"></i> Memory Stats
-          </a><br>
-          <a ng-if="log.jitlog_id" class="list-profile-link" href="#/{{ log.runtime_id }}/traces">
-            <i class="fa-cogs"></i> JIT Compiler Log
-          </a>
-      </div>
-      <div class="col-md-3" >
-          <dl class="list-properties">
-              <dt>Time</dt> <dd>{{ log.time_in_seconds }} sec</dd> <br>
-              <dt>OS</dt> <dd>{{ log.os }}</dd>
-          </dl>
-      </div>
     </div>
   </div>
 
