@@ -27,17 +27,17 @@ class Migration(migrations.Migration):
             model_name='binaryjitlog',
             name='user',
         ),
-        migrations.AlterField(
-            model_name='binaryjitlog',
-            name='checksum',
-            field=models.CharField(max_length=128),
-        ),
         migrations.AddField(
             model_name='binaryjitlog',
             name='jitlog_id',
             field=models.CharField(max_length=64, null=True, unique=False),
         ),
         migrations.RunPython(forward_func, backward_func),
+        migrations.AlterField(
+            model_name='binaryjitlog',
+            name='checksum',
+            field=models.CharField(max_length=128),
+        ),
         migrations.AlterField(
             model_name='binaryjitlog',
             name='jitlog_id',
