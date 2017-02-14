@@ -18,7 +18,7 @@
         <div class="list-argv list-title">
           <img class="media-object pull-right" ng-if="!log.user"
                ng-src="{{ log.user.gravatar || '/static/images/logo_150.png' }}">
-          {{log.name}}<br/>
+          <a href="#//{{ log.runtime_id }}">{{log.name}}</a><br/>
         </div>
         <div class="row">
           <div class="col-md-3">
