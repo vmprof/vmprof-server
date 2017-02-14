@@ -33,13 +33,13 @@
       </div>
       <div class="col-md-4">
           <a class="list-profile-link" href="#/{{ log.runtime_id }}">
-            <i class="fa-code"></i> cpu
+            <i class="fa-code"></i> CPU Profile
           </a><br>
           <a class="list-profile-link" href="#/{{ log.runtime_id }}/memory">
-            <i class="fa-area-chart"></i> memory
+            <i class="fa-area-chart"></i> Memory Stats
           </a><br>
           <a ng-if="log.jitlog_id" class="list-profile-link" href="#/{{ log.runtime_id }}/traces">
-            <i class="fa-cogs"></i> jit
+            <i class="fa-cogs"></i> JIT Compiler Log
           </a>
       </div>
       <div class="col-md-3" >

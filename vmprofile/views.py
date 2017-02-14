@@ -268,9 +268,10 @@ def upload_cpu(request, rid):
         raise ValidationError("the runtime data is already frozen, cannot upload any more files")
 
     file_obj = request.data['file']
-    CPUProfile.objects.create(runtime_data=runtimedata, file=file_obj)
+    cpu = CPUProfile.objects.create(runtime_data=runtimedata, file=file_obj)
     # TODO spawn background task to propagate CPUProfile and MemoryProfile details
     # for now this is good enough I guess?
+
     if not extract_meta(runtimedata):
         raise ValidationError("could not extract meta data for profile %s" % rid)
 

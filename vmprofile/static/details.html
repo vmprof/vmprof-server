@@ -44,15 +44,15 @@
                 /
                 <strong>{{ (self_time * 100).toFixed(2) }}%</strong>
             </span>
-
-            <span class="pull-right" ng-show="log.jitlog_checksum">
-                <a ng-href="#/{{ log.jitlog_checksum }}/traces">show PyPy's JIT compiler log</a>
-            </span>
         </div>
 
         <div class="metadata" ng-if="root.cumulative_meta">
             <span class="label label-danger">
                 Interpreted: {{ (root.red() * 100).toFixed(2) }}%
+            </span>
+
+            <span class="label label-primary" ng-if="root.cumulative_meta">
+                Native: {{ (root.darkblue() * 100).toFixed(2) }}%
             </span>
 
             <span class="label label-warning" data-toggle="tooltip"

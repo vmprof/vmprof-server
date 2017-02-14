@@ -66,8 +66,11 @@ var Visualization = {};
 
     function pick_color(VM, node, width) {
         if (VM == "cpython") {
+            if (node.is_native()) {
+              return "#1695bf";
+            }
             var i = (parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length;
-            return colors[i];
+            return "#d9534f";
         }
         var phases = [{value: node.red(),    color: "#d9534f"},
                       {value: node.yellow(), color: "#f0ad4e"},
@@ -81,9 +84,10 @@ var Visualization = {};
         var ul = $('<ul class="list-inline">');
         var phases = [
             {text: "Interpreted: ", cls: "label-danger",  value: node.red()},
+            {text: "Native: ",      cls: "label-primary",    value: node.darkblue()},
             {text: "Warm-up: ",     cls: "label-warning", value: node.yellow()},
             {text: "JIT: ",         cls: "label-success", value: node.green()},
-            {text: "GC: ",          cls: "label-info",    value: node.gc()}
+            {text: "GC: ",          cls: "label-info",    value: node.gc()},
         ];
         for (var i in phases) {
             var phase = phases[i];
@@ -96,8 +100,14 @@ var Visualization = {};
         }
         var tooltip = ul[0].outerHTML;
         var name = split_name(node.name);
+        var title = "<b>function:</b> " + _.escape(name.funcname);
+        if (name.file != '-' && name.line != 0) {
+          title = title + " <b>file:</b> " + _.escape(name.file) + ":" + name.line;
+        } else {
+          title = title + " <b>file:</b> -";
+        }
         $(rect.node).add(text.node).popover({
-            title: "<b>function:</b> " + _.escape(name.funcname) + " <b>file:</b> " + _.escape(name.file) + ":" + name.line,
+            title: title,
             content: tooltip,
             container: "#wide-popovers",
             placement: "bottom",

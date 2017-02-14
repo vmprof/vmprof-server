@@ -6,6 +6,10 @@ app = angular.module(
                 templateUrl: '/static/list.html',
                 controller: 'list'
             })
+            .when('/about', {
+                templateUrl: '/static/about.html',
+                controller: 'about'
+            })
             .when('/login', {
                 templateUrl: '/static/login.html',
                 controller: 'login'
@@ -334,6 +338,9 @@ function display_log($scope, $routeParams, $timeout, $location)
     $scope.loading = false;
 }
 
+app.controller('about', function ($scope) {
+})
+
 app.controller('details', function ($scope, $http, $routeParams, $timeout,
                                     $location) {
   $scope.detailtop = {
@@ -352,7 +359,12 @@ app.controller('details', function ($scope, $http, $routeParams, $timeout,
   $http.get('/api/flamegraph/' + $routeParams.log + '/get', {cache: true}
       ).then(function (response) {
           $scope.log = response.data;
-          $scope.stats = new Stats(response.data.data);
+          var data = response.data;
+          if ('data' in data) {
+            // the new profile is nested once more
+            data = data.data;
+          }
+          $scope.stats = new Stats(data);
           display_log($scope, $routeParams, $timeout, $location);
   });
 });

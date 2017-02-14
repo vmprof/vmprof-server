@@ -68,6 +68,10 @@ function Node(name, addr, total, meta, children) {
     this.self = this.count_self();
 };
 
+Node.prototype.is_native = function () {
+  return this.name.length >= 2 && this.name[0] == 'n' && this.name[1] == ':'
+}
+
 Node.prototype.countCumulativeMeta = function () {
     for (var i in this.children) {
         this.children[i].countCumulativeMeta();
@@ -108,7 +112,11 @@ Node.prototype.green = function() {
 };
 
 Node.prototype.red = function() {
-    return 1 - this.green() - this.yellow();
+    return 1 - this.green() - this.yellow() - this.darkblue();
+};
+
+Node.prototype.darkblue = function() {
+    return dict_get(this.cumulative_meta, "native", 0) / this.total;
 };
 
 Node.prototype.yellow = function() {
