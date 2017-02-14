@@ -7,6 +7,14 @@ from django.db import migrations, models
 import django.db.models.deletion
 import vmlog.models
 
+def forward_func(apps, schema_editor):
+    BinaryJitLog = apps.get_model("vmlog", "BinaryJitLog")
+    for log in BinaryJitLog.objects.all():
+        log.jitlog_id = uuid.uuid4()
+        log.save()
+
+def backward_func(apps, schema_editor):
+    pass
 
 class Migration(migrations.Migration):
 
@@ -27,7 +35,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='binaryjitlog',
             name='jitlog_id',
-            field=models.CharField(default=uuid.uuid4, max_length=64, primary_key=True, serialize=False),
+            field=models.CharField(max_length=64, null=True, unique=False),
+        ),
+        migrations.RunPython(forward_func, backward_func),
+        migrations.AlterField(
+            model_name='binaryjitlog',
+            name='jitlog_id',
+            field=models.CharField(max_length=64, primary_key=True, serialize=True),
         ),
         migrations.AlterField(
             model_name='binaryjitlog',
