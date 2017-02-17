@@ -17,7 +17,7 @@ def json_serialize(response, cmd, **kwargs):
             data = client.recv(4096)
             if data == b"":
                 break
-            response.write(data)
+            response.write(data.decode('utf-8'))
     else:
         # should never be hit in production!!
         from twisted.test import proto_helpers
