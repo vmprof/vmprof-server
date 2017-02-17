@@ -233,31 +233,27 @@ def runtime_freeze(request, rid):
     return Response({'status': 'ok'})
 
 def extract_meta(rd):
-    try:
-        cpu = rd.cpu_profile
-        strio = io.StringIO()
-        json_serialize(strio, "metacpu {filename} {runtime_id}",
-                                 filename=cpu.file,
-                                 runtime_id=cpu.cpuprofile_id)
-        strio.seek(0)
-        jsondata = json.loads(strio.read())
+    cpu = rd.cpu_profile
+    strio = io.StringIO()
+    json_serialize(strio, "metacpu {filename} {runtime_id}",
+                             filename=cpu.file,
+                             runtime_id=cpu.cpuprofile_id)
+    strio.seek(0)
+    jsondata = json.loads(strio.read())
 
-        if 'error' in jsondata:
-            return False
+    if 'error' in jsondata:
+        raise ValidationError(jsondata['error'])
 
-        start_time = jsondata.get('start_time', None)
-        if start_time:
-            rd.start_time = datetime.datetime.strptime(start_time, STRFTIME_FMT)
-        end_time = jsondata.get('end_time', None)
-        if end_time:
-            rd.stop_time = datetime.datetime.strptime(end_time, STRFTIME_FMT)
+    start_time = jsondata.get('start_time', None)
+    if start_time:
+        rd.start_time = datetime.datetime.strptime(start_time, STRFTIME_FMT)
+    end_time = jsondata.get('end_time', None)
+    if end_time:
+        rd.stop_time = datetime.datetime.strptime(end_time, STRFTIME_FMT)
 
-        rd.arch = jsondata.get('arch', 'unknown')
-        rd.os = jsondata.get('os', 'unknown')
-        rd.save()
-    except:
-        return False
-    return True
+    rd.arch = jsondata.get('arch', 'unknown')
+    rd.os = jsondata.get('os', 'unknown')
+    rd.save()
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
@@ -272,8 +268,10 @@ def upload_cpu(request, rid):
     # TODO spawn background task to propagate CPUProfile and MemoryProfile details
     # for now this is good enough I guess?
 
-    if not extract_meta(runtimedata):
-        raise ValidationError("could not extract meta data for profile %s" % rid)
+    try:
+        extract_meta(runtimedata)
+    except Exception as e:
+        raise ValidationError("could not extract meta data for %s. exception: %s" % (rid, str(e)))
 
     return Response({'status': 'ok'})
 
