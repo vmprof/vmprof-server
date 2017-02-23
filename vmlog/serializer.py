@@ -251,7 +251,7 @@ class MemorygraphSerializer(BaseSerializer):
         return len(traces), common_prefix, count, most_frequent_trace[len(common_prefix):]
 
 
-STRFTIME_FMT = '%m/%d/%Y %H:%M:%S %z'
+STRFTIME_FMT = '%m/%d/%Y %H:%M:%S'
 
 class CPUMetaSerializer(BaseSerializer):
     def to_representation(self, stats):
