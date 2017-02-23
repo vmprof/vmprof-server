@@ -3,6 +3,7 @@ import hashlib
 import time
 import os
 import socket
+import uuid
 from collections import defaultdict
 from io import BytesIO
 
@@ -29,6 +30,11 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework import permissions
 from rest_framework.serializers import BaseSerializer
 from rest_framework import viewsets
+
+from rest_framework.exceptions import ValidationError, APIException
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import permission_classes
+from vmprofile.views import try_get_runtimedata
 
 def compute_checksum(file_obj):
     hash = hashlib.md5()
@@ -90,11 +96,6 @@ def stitches(request, profile):
                              filename=jl.file.path, profile=profile, uid=uid)
     return response
 
-from rest_framework.exceptions import ValidationError, APIException
-from rest_framework.decorators import api_view, parser_classes
-from rest_framework.decorators import permission_classes
-from vmprofile.views import try_get_runtimedata
-
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 @parser_classes((FileUploadParser,))
@@ -113,7 +114,9 @@ def upload_jit(request, rid):
 
     user = request.user if request.user.is_authenticated() else None
 
-    log, _ = BinaryJitLog.objects.get_or_create(file=file_obj, checksum=checksum,
-                                                user=user, runtime_data=runtimedata)
+    jitid = uuid.uuid4()
 
-    return Response(log.checksum)
+    log, _ = BinaryJitLog.objects.get_or_create(jitlog_id=jitid,\
+                file=file_obj, checksum=checksum, profile=runtimedata)
+
+    return Response({'status': 'ok', 'jid': log.pk})

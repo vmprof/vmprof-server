@@ -33,9 +33,9 @@ urlpatterns = [
     # legacy api
     url(r'^api/jitlog/(?P<rid>[0-9a-z-]*)/?$', upload_jit),
     #
-    url(r'^api/jit/meta/(?P<profile>[0-9a-z]*)/?$', meta),
-    url(r'^api/jit/trace/(?P<profile>[0-9a-z]*)/?$', trace),
-    url(r'^api/jit/stitches/(?P<profile>[0-9a-z]*)/?$', stitches),
+    url(r'^api/jit/meta/(?P<profile>[0-9a-z-]*)/?$', meta),
+    url(r'^api/jit/trace/(?P<profile>[0-9a-z-]*)/?$', trace),
+    url(r'^api/jit/stitches/(?P<profile>[0-9a-z-]*)/?$', stitches),
 
     url(r'^api/flamegraph/(?P<rid>[0-9a-z-]*)/get/?$', get_cpu),
     url(r'^api/memorygraph/(?P<rid>[0-9a-z-]*)/get/?$', get_memory),

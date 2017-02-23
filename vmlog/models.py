@@ -10,7 +10,7 @@ from vmprofile.models import RuntimeData
 from vmcache.cache import get_reader
 
 def get_profile_storage_directory(profile, filename):
-    return "log/%d/%s" % (profile.pk, filename)
+    return "log/%s/%s" % (profile.pk, filename)
 
 class BinaryJitLog(models.Model):
     jitlog_id = models.CharField(max_length=64, primary_key=True)
