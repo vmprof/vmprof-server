@@ -104,7 +104,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         $scope.loader.stop()
     }
 
-    var url = '/api/log/meta/' + $routeParams.log + '/'
+    var url = '/api/jit/meta/' + $routeParams.log + '/'
     $http.get(url, { cache: true }).then(function(response) {
       // success callback
       jitlog.set_meta(response.data)
@@ -149,7 +149,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
       $scope.selected_trace = null
       //
       $scope.$storage.last_trace_id = trace.get_id()
-      var url = '/api/log/trace/' + jitlog.checksum + "/?id=" + trace.get_id()
+      var url = '/api/jit/trace/' + jitlog.checksum + "/?id=" + trace.get_id()
       $http.get(url, { cache: true }).then(function(response) {
         // success callback
         // set the new type and the subject trace
@@ -164,7 +164,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
         http_request_errored(response, url)
       })
 
-      var url = '/api/log/stitches/' + jitlog.checksum + "/?id=" + trace.get_id()
+      var url = '/api/jit/stitches/' + jitlog.checksum + "/?id=" + trace.get_id()
       $http.get(url, { cache: true }).then(function(response) {
         // set the new type and the subject trace
         jitlog.add_measures('get stitches', response.data)
