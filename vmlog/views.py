@@ -111,11 +111,7 @@ def upload_jit(request, rid):
         return HttpResponseBadRequest("must be gzip compressed")
 
     checksum = compute_checksum(file_obj)
-
-    user = request.user if request.user.is_authenticated() else None
-
     jitid = uuid.uuid4()
-
     log, _ = BinaryJitLog.objects.get_or_create(jitlog_id=jitid,\
                 file=file_obj, checksum=checksum, profile=runtimedata)
 
