@@ -10,6 +10,22 @@ nav .navbar-right a.dropdown-toggle {
     margin-bottom: 15px;
 }
 
+.popup-images {
+    position: absolute;
+    right: 15px;
+    top: 5px;
+}
+
+.popup-images > img {
+    width: 20px;
+    height: 20px;
+}
+
+.popup-images > img:hover {
+    width: 45px;
+    height: 45px;
+}
+
 #list img.media-object{
     width: 62px;
     height: 62px;
@@ -26,13 +42,18 @@ nav .navbar-right a.dropdown-toggle {
 }
 
 .list-title a {
-    font-size: 1.3em;
+    font-size: 1.2em;
     color: #05486f;
 }
 
+.list-title {
+    position: relative;
+    margin-bottom: 10px;
+}
+
 .list-profile-link {
-    font-size: 1.2em;
-    margin-right: 15px;
+    font-size: 1.1em;
+    margin-left: 15px;
 }
 
 dl.list-properties dd {
@@ -56,7 +77,7 @@ dl.list-properties dt {
 
 .profile-entry:hover {
     cursor: pointer;
-    background: lightgray;
+    background: #eee;
 }
 
 #list .profile-entry .times:hover {
