@@ -65,10 +65,10 @@ var Visualization = {};
                   "rgb(231, 173, 15)"];
 
     function pick_color(VM, node, width) {
+        if (node.is_native()) {
+          return "#1695bf";
+        }
         if (VM == "cpython") {
-            if (node.is_native()) {
-              return "#1695bf";
-            }
             var i = (parseInt(node.addr.slice(node.addr.length - 6)) / 4) % colors.length;
             return "#d9534f";
         }
