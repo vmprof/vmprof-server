@@ -37,9 +37,9 @@
           </div>
           <div class="col-md-3" >
               <dl class="list-properties">
-                  <dt>time</dt> <dd>{{ log.time_in_seconds }} sec</dd> <br>
+                  <dt>took</dt> <dd>{{ log.time_in_seconds }} sec</dd> <br>
                   <dt>os</dt> <dd>{{ log.os }}</dd> <br>
-                  <dt>created</dt> <dd>
+                  <dt>time</dt> <dd>
                     <span ng-show="ago" ng-click="ago=false">{{ log.created | ago }}</span>
                     <span ng-hide="ago" ng-click="ago=true">{{ log.created }}</span>
                   </dd>

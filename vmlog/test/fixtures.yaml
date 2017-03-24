@@ -18,3 +18,12 @@
   fields:
     created: !!timestamp '2016-08-15 12:12:12.0+00:00'
     file: 'vmlog/test/data/log-test-3-sorting-v2.jlog.zip'
+- model: vmlog.binaryjitlog
+  pk: link
+  fields:
+    created: !!timestamp '2016-08-15 12:12:13.0+00:00'
+    file: 'vmlog/test/data/test-link.log.jit'
+- model: vmprofile.cpuprofile
+  pk: linkjit
+  fields:
+    file: 'vmlog/test/data/test-link.log'
