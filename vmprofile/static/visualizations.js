@@ -275,14 +275,12 @@ var Visualization = {};
     };
 
     Visualization.functionDetails = function($element, height, addr, $scope,
-                                              $location) {
+                                             $location) {
         // get 10 most prominent functions we call from all the call sites
         // below addr
         var found = [];
 
-
-        function walk_recursive(n, flag, accum)
-        {
+        function walk_recursive(n, flag, accum) {
             if (flag) {
                 accum = clone(accum);
                 accum[n.addr] = 'a';
