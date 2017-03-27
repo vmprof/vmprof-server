@@ -112,11 +112,18 @@ Node.prototype.green = function() {
 };
 
 Node.prototype.red = function() {
-    return 1 - this.green() - this.yellow() - this.darkblue();
+  if (this.is_native()) {
+    return 0;
+  }
+
+  return 1 - this.green() - this.yellow();
 };
 
 Node.prototype.darkblue = function() {
-    return dict_get(this.cumulative_meta, "native", 0) / this.total;
+  if (!this.is_native()) {
+    return 0;
+  }
+  return dict_get(this.cumulative_meta, "native", 0) / this.total;
 };
 
 Node.prototype.yellow = function() {

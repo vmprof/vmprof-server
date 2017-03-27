@@ -659,3 +659,7 @@ ul.trace-entries {
   padding: 10px;
   margin-bottom: 10px;
 }
+
+.cpu-link-jit {
+    float: right;
+}

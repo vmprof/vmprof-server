@@ -90,7 +90,7 @@ var Visualization = {};
         var ul = $('<ul class="list-inline">');
         var phases = [
             {text: "Interpreted: ", cls: "label-danger",  value: node.red()},
-            {text: "Native: ",      cls: "label-primary",    value: node.darkblue()},
+            {text: "Native: ",      cls: "label-primary", value: node.darkblue()},
             {text: "Warm-up: ",     cls: "label-warning", value: node.yellow()},
             {text: "JIT: ",         cls: "label-success", value: node.green()},
             {text: "GC: ",          cls: "label-info",    value: node.gc()},
