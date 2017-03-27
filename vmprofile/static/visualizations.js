@@ -80,6 +80,12 @@ var Visualization = {};
         return compute_gradient(phases, width);
     }
 
+    function create_jit_log_link(node, rect, text) {
+      var span = $('<span class="cpu-link-jit">')
+      span.append('to jit')
+      $(rect.node).add(span.node)
+    }
+
     function add_tooltip(node, rect, text) {
         var ul = $('<ul class="list-inline">');
         var phases = [
@@ -161,6 +167,7 @@ var Visualization = {};
             var cur_path = path.toString();
 
             add_tooltip(node, rect, text);
+            create_jit_log_link(node, rect, text);
 
             st.hover(
                 function(e) {
