@@ -110,8 +110,8 @@ class RuntimeDataViewSet(viewsets.ModelViewSet):
     def create(self, request):
         # compatability! remove this at some point!
         data = request.data
-        name = data['argv']
-        vm = data['VM']
+        name = data['argv'][:255]
+        vm = data['VM'][:32]
         user = request.user if request.user.is_authenticated() else None
         runtime = self.queryset.create(user=user, vm=vm, name=name, completed=True)
         data = json.dumps(data).encode('utf-8')
@@ -210,8 +210,8 @@ class ObjectNotFound(APIException):
 @permission_classes((AllowAny,))
 def runtime_new(request):
     data = request.data
-    name = data['argv']
-    vm = data['VM']
+    name = data['argv'][:255]
+    vm = data['VM'][:32]
     user = request.user if request.user.is_authenticated() else None
     rdat = RuntimeData.objects.create(user=user, vm=vm, name=name)
     rdat.save()

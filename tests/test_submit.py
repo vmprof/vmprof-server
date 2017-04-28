@@ -7,8 +7,8 @@ from vmprofile.models import RuntimeData, CPUProfile
 
 c = pytest.fixture(lambda: APIClient())
 
-def new_runtime_data(c):
-    data = { 'VM': 'cpython', 'argv': 'test.py' }
+def new_runtime_data(c, argv='test.py'):
+    data = { 'VM': 'cpython', 'argv': argv }
     response = c.post('/api/runtime/new', data=data)
     return response.data['runtime_id']
 
@@ -36,6 +36,13 @@ def test_new_runtime_data(c):
     except Exception:
         pass
 
+@pytest.mark.django_db
+def test_submit_long_argv(c):
+    rid = new_runtime_data(c, argv='hello world!' * 255)
+    assert RuntimeData.objects.count() == 1
+    rd = RuntimeData.objects.get(pk=rid)
+    assert rd.name == ('hello world!'*255)[:255]
+    assert len(rd.name) <= 255
 
 @pytest.mark.django_db
 def test_freeze(c):
