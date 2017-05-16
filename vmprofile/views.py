@@ -3,7 +3,10 @@ import io
 import json
 import hashlib
 import datetime
-from urllib import parse
+try:
+    from urlparse import urlparse as parse
+except ImportError:
+    from urllib import parse
 
 from django.contrib import auth
 from django.http import HttpResponse
