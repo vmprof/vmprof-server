@@ -483,9 +483,13 @@ Stage.prototype.get_groups = function() {
       }
       g[cur].push(op)
     }
-    this.groups = [{'name': 'preamble', 'order': 0, 'ops': g['preamble'] },
-                   {'name': 'loop', 'order': 1, 'ops': g['loop'] },
-                  ]
+    if (this._trace.is_bridge()) {
+      this.groups = [{'name': 'bridge', 'order': 0, 'ops': g['preamble'] }]
+    } else {
+      this.groups = [{'name': 'preamble', 'order': 0, 'ops': g['preamble'] },
+                     {'name': 'loop', 'order': 1, 'ops': g['loop'] },
+                    ]
+    }
   }
 
   return this.groups
