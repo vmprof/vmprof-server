@@ -461,9 +461,34 @@ var Stage = function(name, trace, data, code) {
   for (var key in data.ops) {
     var opdata = data.ops[key]
     var op = new ResOp(this._jitlog, opdata, this, i)
+    op.index = i
     this.ops.push(op)
     i += 1
   }
+}
+
+Stage.prototype.get_groups = function() {
+  if (!this.groups) {
+    var g = { 'preamble': [], 'loop': [] }
+
+    var cur = 'preamble'
+    var label_count = 0;
+    for (var i = 0; i < this.ops.length; i++) {
+      var op = this.ops[i]
+      if (op.is_label()) {
+        label_count++;
+      }
+      if (label_count == 2) {
+        cur = 'loop'
+      }
+      g[cur].push(op)
+    }
+    this.groups = [{'name': 'preamble', 'order': 0, 'ops': g['preamble'] },
+                   {'name': 'loop', 'order': 1, 'ops': g['loop'] },
+                  ]
+  }
+
+  return this.groups
 }
 
 Stage.prototype.list = function() {

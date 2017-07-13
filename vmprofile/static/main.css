@@ -663,3 +663,7 @@ ul.trace-entries {
 .cpu-link-jit {
     float: right;
 }
+
+.group-name {
+    margin-left: 20px;
+}

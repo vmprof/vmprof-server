@@ -87,6 +87,7 @@ app.controller('jit-trace-forest', function ($scope, $http, $routeParams, $timeo
     jitlog.checksum = $routeParams.log
     $scope.jitlog = jitlog
     $scope.gotmeta = false
+    $scope.auto_hide = {'preamble': true}
 
     var error = function(message) {
         $scope.error = {
