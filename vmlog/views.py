@@ -55,8 +55,6 @@ class JsonExceptionHandlerMixin(object):
             msg = exc.args[0]
         return JsonResponse({'code': code, 'message': msg}, status=code)
 
-
-
 def _load_jitlog_model(request, jid):
     try:
         obj = BinaryJitLog.objects.get(pk=jid)

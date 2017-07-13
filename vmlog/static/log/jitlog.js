@@ -224,7 +224,9 @@ JitLog.prototype.filter_and_sort_traces = function(text, type, ordering) {
 
   list.sort(function(a,b){
     if (ordering === 'count') {
-      return b.counter_points[0] - a.counter_points[0]
+      bcounter = b.get_loop_counter()
+      acounter = a.get_loop_counter()
+      return bcounter - acounter
     } else if (ordering === 'name') {
       var aname = a.get_func_name()
       var bname = b.get_func_name()
@@ -259,6 +261,20 @@ Trace = function(jitlog, id, meta) {
   this.recording_stamp = meta.stamp
   this._failing_guard = null
   this._opidx_to_trace = {}
+}
+
+Trace.prototype.get_loop_counter = function() {
+  var cp = this.counter_points
+  var max = -1
+  for (var c in this.counter_points) {
+    if (cp.hasOwnProperty(c)) {
+      var val = cp[c]
+      if (val >= max) {
+        max = val
+      }
+    }
+  }
+  return max
 }
 
 Trace.prototype.link_op_to = function(index, target) {

@@ -152,7 +152,10 @@
                       <span class="trace-jd-name">{{trace.get_driver_name()}}</span>
                   </div>
                   <div class="trace-info">
-                      entered {{numeral(trace.counter_points[0]).format('0')}} times
+                      <strong>entered</strong>
+                      <span ng-repeat="(key, counter) in trace.counter_points">
+                          <span style="font-size: 1.3em;">{{counter}}x</span> line {{key}}{{$last ? '' : ',' }}
+                      </span>
                   </div>
                   <div class="trace-info">
                       <span class="filename">{{trace.get_filename()}}</span>

@@ -51,12 +51,6 @@ class LogMetaSerializer(BaseSerializer):
                     idxtoid[origop.getindex()] = target.get_id()
             if len(links[id]) == 0:
                 del links[id]
-        #for descr_number, pointintrace in forest.labels.items():
-        #    op = pointintrace.get_operation()
-        #    labels[descr_number].append([pointintrace.trace.get_id(), op.getindex()])
-        #for descr_number, pointintrace in forest.jumps.items():
-        #    op = pointintrace.get_operation()
-        #    jumps[descr_number].append([pointintrace.trace.get_id(), op.getindex()])
         return {
             'resops': forest.resops,
             'traces': traces,
