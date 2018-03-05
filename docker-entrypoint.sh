@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/sh -x
 
 if [ -n $SQLITE_DB -a ! -e $SQLITE_DB ]; then
-    RUN python3 manage.py migrate
+    python3 manage.py migrate
 fi
 
+exec $@

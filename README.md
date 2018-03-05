@@ -28,3 +28,15 @@ For new feature requests open a new branch or fork the repository. We use contin
 provided by travis. Before you commit run tests using py.test:
 
 	py.test .
+
+
+## Docker
+
+Build docker image:
+
+	docker docker build -t vmprof-server .
+
+Run the server inside docker container:
+
+	mkdir -p $PWD/data
+	docker run --rm -ti -p 8000:8000 -v $PWD/data:/data vmprof-server
