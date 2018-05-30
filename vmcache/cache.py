@@ -1,3 +1,4 @@
+import psutil
 import re
 import sys
 import gc
@@ -40,25 +41,11 @@ class Cache(object):
         self.cache = {}
         self.decay_delta = timedelta(seconds=seconds)
         self.maxsize = maxsize
-        self._proc_status = '/proc/%d/status' % os.getpid()
-        self._scale = {'kB': 1024.0, 'mB': 1024.0*1024.0,
-                       'KB': 1024.0, 'MB': 1024.0*1024.0}
 
-    def memory_usage(self, key='VmSize:'):
-         # get pseudo file  /proc/<pid>/status
-        try:
-            t = open(self._proc_status)
-            v = t.read()
-            t.close()
-        except:
-            return 0.0  # non-Linux?
-         # get VmKey line e.g. 'VmRSS:  9999  kB\n ...'
-        i = v.index(key)
-        v = v[i:].split(None, 3)  # whitespace
-        if len(v) < 3:
-            return 0.0  # invalid format?
-         # convert Vm value to bytes
-        return float(v[1]) * self._scale[v[2]]
+    def memory_usage(self):
+        process = psutil.Process(os.getpid())
+        mb = process.memory_info()[0] / float(2**20)
+        return mb
 
     def put(self, key, obj):
         current = self.memory_usage()
@@ -66,7 +53,7 @@ class Cache(object):
             self.decay(force=True)
             current = self.memory_usage()
             if current > self.maxsize:
-                log.msg("cannot add profile to the cache, it should not consume more memory")
+                log.msg("cannot add profile to the cache, I shall not consume more memory")
                 return # well, we cannot add this to the cache!
         else:
             self.decay()
@@ -119,7 +106,7 @@ MEMORYGRAPH_SERIALIZER = serializer.MemorygraphSerializer()
 
 META_CPU_SERIALIZER = serializer.CPUMetaSerializer()
 
-CACHE = Cache(4 * 1024 * 1024 * 1024) # 4 GB
+CACHE = Cache(1 * 1024 * 1024 * 1024) # 4 GB
 
 class CacheProtocol(LineReceiver):
     def __init__(self):
