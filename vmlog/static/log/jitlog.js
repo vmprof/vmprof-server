@@ -555,6 +555,10 @@ ResOp.prototype.is_guard = function() {
   return this.opname().indexOf('guard') !== -1
 }
 
+ResOp.prototype.is_call_assembler = function() {
+    return this.opname().startsWith('call_assembler')
+}
+
 ResOp.prototype.has_stitched_trace = function() {
   //return this.get_descr_nmr() && this.get_descr_nmr() in this._jitlog._descrnmr_to_trace
   this.update_link()
@@ -608,20 +612,29 @@ ResOp.prototype.format_resop = function(prefix, suffix, html) {
     }
   }
   if (descr) {
-    var descr_str = descr.replace("<","").replace(">","")
-    descr = (' <span class="resop-descr">' + descr_str + "</span>");
-    if (this.has_descr() && html && this._stage._name === "asm") {
-      var trace = this.get_stitched_trace()
-      if (trace) {
-        var id = trace.id
-        descr = ' <a class="resop-descr" ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">&rarr; '+descr_str+'</a>'
-      }
-    }
+    descr = this.format_descr(descr, html)
   } else {
     descr = '';
   }
   return prefix + '<span class="resop-name">' +
          opname + '</span>(' + arg_str + ')' + descr + suffix
+}
+
+ResOp.prototype.format_descr = function(descr, html) {
+  var descr_str = descr.replace("<","").replace(">","")
+  descr = (' <span class="resop-descr">' + descr_str + "</span>");
+  if (this.has_descr() && html && this._stage._name === "asm") {
+    var trace = this.get_stitched_trace()
+    if (trace) {
+      var id = trace.id
+      return ' <a class="resop-descr" ng-click="switch_trace(\''+id+'\', $storage.trace_type, $storage.show_asm)">&rarr; '+descr_str+'</a>'
+    }
+  }
+  if (this.is_call_assembler() && html) {
+    var trace_id = descr_str.slice(4)
+    return ' <a class="resop-descr" ng-click="switch_trace(\''+ trace_id +'\', $storage.trace_type, $storage.show_asm)">&rarr; '+descr_str+'</a>'
+  }
+  return descr
 }
 
 ResOp.prototype.format_var = function(variable, classes) {
@@ -656,7 +669,7 @@ ResOp.prototype.to_html = function(index) {
     var trace = this._stage._trace
     var count = trace.counter_points[index]
     if (count) {
-      var count = 
+      var count =
       suffix += ' <span class="resop-run-count">passed '+numeral(count).format('0.0 a')+' times</span>'
     }
   }
@@ -824,7 +837,7 @@ ResOp.prototype.get_disassembly = function(jl) {
   var cs = new capstone.Cs(arch_descr.arch, arch_descr.mode);
   var instructions = cs.disasm(buffer, offset);
   instructions.forEach(function (instr) {
-    array.push('<span class="asm-mnemoic">' + 
+    array.push('<span class="asm-mnemoic">' +
                instr.mnemonic + "</span> " + rfmt(instr.op_str));
   });
   cs.delete();
