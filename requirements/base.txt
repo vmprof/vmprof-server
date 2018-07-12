@@ -9,3 +9,4 @@ twisted
 django-appconf
 pandas
 msgpack-python
+psutil
