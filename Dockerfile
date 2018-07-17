@@ -8,7 +8,7 @@ ENV SQLITE_DB=/data/vmprof.db
 
 RUN apk add --no-cache python3 \
         py3-yaml py3-cryptography py3-six py3-requests sqlite py-pysqlite libunwind-dev uwsgi-python3 \
-        gcc g++ musl-dev postgresql-dev python3-dev git
+        gcc g++ musl-dev postgresql-dev python3-dev git linux-headers
 
 COPY requirements /usr/src/requirements
 
