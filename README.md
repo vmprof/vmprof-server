@@ -34,7 +34,7 @@ provided by travis. Before you commit run tests using py.test:
 
 Build docker image:
 
-	docker docker build -t vmprof-server .
+	docker build -t vmprof-server .
 
 Run the server inside docker container:
 
