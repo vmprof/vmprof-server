@@ -40,3 +40,8 @@ Build docker image and apply migrations (for a new setup or version upgrade):
 Run the server inside docker container:
     
     docker-compose up
+
+Generate API token:
+
+    docker-compose run --rm vmprof-server python3 manage.py generate_api_token
+
