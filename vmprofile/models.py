@@ -44,6 +44,7 @@ class RuntimeData(models.Model):
 # rename that model to CPUProfile, add new model 'Upload', ...
 class CPUProfile(models.Model):
     cpuprofile_id = models.CharField(max_length=64, default=uuid.uuid4, primary_key=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, db_index=True)
     file = models.FileField(null=True, upload_to=get_profile_storage_directory)
     # deprecated, do NOT use!
     data = models.TextField(null=True)
