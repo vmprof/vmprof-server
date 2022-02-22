@@ -18,7 +18,7 @@ router.register(r'profile', RuntimeDataViewSet)
 router.register(r'token', TokenViewSet, basename="token")
 
 urlpatterns = [
-    re_path(r'^$', index, name='index'),
+    re_path(r'^$', index),
     re_path(r'^admin/', admin.site.urls),
     #
     re_path(r'^api/', include(router.urls)),

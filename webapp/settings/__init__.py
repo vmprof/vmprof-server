@@ -58,6 +58,7 @@ TEMPLATES = [
 
 ROOT_URLCONF = 'webapp.urls'
 WSGI_APPLICATION = 'webapp.wsgi.app'
+REGISTRATION_ENABLED = True
 
 DATABASES = {
     'default': {

@@ -1,9 +1,12 @@
 import os
 import socket
 from django.shortcuts import render
+from django.conf import settings
 
 def index(request):
-    ctx = {}
+    ctx = {
+        'registration_enabled': settings.REGISTRATION_ENABLED,
+    }
     return render(request, 'webapp/index.html', ctx)
 
 def json_serialize(response, cmd, **kwargs):
