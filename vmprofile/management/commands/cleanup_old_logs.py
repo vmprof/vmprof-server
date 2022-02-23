@@ -16,7 +16,8 @@ class Command(BaseCommand):
         days = options['days']
         delete_older_than = timezone.now() - timedelta(days=days)
         self.stdout.write(f"Deleting profiler logs older than {days} days")
-        to_be_deleted = CPUProfile.objects.filter(created_at__lte=delete_older_than)
+        to_be_deleted = CPUProfile.objects.filter(runtime_data__created__lte=delete_older_than)\
+            .select_related('runtime_data')
         count = len(to_be_deleted)
         self.stdout.write(f"Found {count} logs to be deleted")
         for x, profile in enumerate(to_be_deleted):
