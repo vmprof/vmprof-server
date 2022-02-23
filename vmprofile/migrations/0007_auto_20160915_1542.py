@@ -36,6 +36,7 @@ def backward_func(apps, schema_editor):
     RuntimeData.objects.delete()
 
 class Migration(migrations.Migration):
+    atomic = False
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

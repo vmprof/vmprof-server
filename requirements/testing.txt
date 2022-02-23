@@ -1,2 +1,2 @@
 -r development.txt
-psycopg2==2.7.4
+psycopg2-binary==2.9.3

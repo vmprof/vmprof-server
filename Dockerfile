@@ -28,7 +28,7 @@ RUN set -x \
     python3 -c 'import compileall, os; compileall.compile_dir(os.curdir, force=1)' && \
     export SECRET_KEY='build_secret' && \
     python3 manage.py check && \
-    python3 manage.py compress && \
-    python3 manage.py collectstatic --noinput
+    python3 manage.py collectstatic --noinput && \
+    python3 manage.py compress
 
 CMD ["/usr/bin/gunicorn", "webapp.wsgi:app", "--bind", "0.0.0.0:8000", "--log-file", "-"]

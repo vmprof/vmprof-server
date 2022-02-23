@@ -1,6 +1,6 @@
 -r base.txt
 
-pytest==2.9.1
-pytest-django==2.9.1
+pytest==7.0.1
+pytest-django==4.5.2
 selenium>=2.35.2
 -e git://github.com/vmprof/vmprof-python.git#egg=vmprof

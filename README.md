@@ -32,9 +32,10 @@ provided by travis. Before you commit run tests using py.test:
 
 ## Docker
 
-Build docker image:
+Build docker image and apply migrations (for a new setup or version upgrade):
     
     docker-compose build
+    docker-compose run --rm vmprof-server python3 manage.py migrate
 
 Run the server inside docker container:
     

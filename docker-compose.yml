@@ -5,7 +5,7 @@ x-defaults: &defaults
     driver: "json-file"
     options:
       max-size: "10m"
-  restart: on-failure
+  restart: always
 
 services:
   vmprof-server:
@@ -13,6 +13,7 @@ services:
     build: .
     volumes:
       - ./data:/data
-     # - .:/usr/src/vmprof-server # for debugging
+      - ./cpu:/usr/src/vmprof-server/cpu
+      # - .:/usr/src/vmprof-server # for debugging
     ports:
       - "8000:8000"
