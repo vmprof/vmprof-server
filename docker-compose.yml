@@ -16,4 +16,4 @@ services:
       - ./cpu:/usr/src/vmprof-server/cpu
       # - .:/usr/src/vmprof-server # for debugging
     ports:
-      - "8000:8000"
+      - "${LISTEN_HOST-127.0.0.1}:8000:8000"
