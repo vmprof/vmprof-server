@@ -9,6 +9,7 @@ except ImportError:
     from urllib import parse
 
 from django.contrib import auth
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 
 from rest_framework import views
@@ -19,28 +20,27 @@ from rest_framework import validators
 from rest_framework.response import Response
 from rest_framework import viewsets, serializers
 from rest_framework.authtoken.models import Token
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.decorators import permission_classes
-from rest_framework.exceptions import ValidationError, APIException
+from rest_framework.exceptions import ValidationError, APIException, ParseError
 
 from vmprofile.models import RuntimeData, CPUProfile
-#from vmmemory.models import MemoryProfile
 
 from webapp.views import json_serialize
 
 from vmlog.serializer import STRFTIME_FMT
 
-username_max = auth.models.User._meta.get_field('username').max_length
-password_max = auth.models.User._meta.get_field('password').max_length
-email_max = auth.models.User._meta.get_field('email').max_length
+username_max = User._meta.get_field('username').max_length
+password_max = User._meta.get_field('password').max_length
+email_max = User._meta.get_field('email').max_length
 
 
 class UserSerializer(serializers.ModelSerializer):
     gravatar = serializers.SerializerMethodField()
 
     class Meta:
-        model = auth.models.User
+        model = User
         fields = ['id', 'username', 'gravatar']
 
     def get_gravatar(self, obj):
@@ -56,14 +56,17 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.Serializer):
+    class Meta:
+        fields = '__all__'
+
     username = serializers.CharField(
         min_length=5,
         max_length=username_max,
-        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
+        validators=[validators.UniqueValidator(queryset=User.objects.all())]
     )
     email = serializers.EmailField(
         max_length=email_max,
-        validators=[validators.UniqueValidator(queryset=auth.models.User.objects.all())]
+        validators=[validators.UniqueValidator(queryset=User.objects.all())]
     )
     password = serializers.CharField(min_length=6, max_length=password_max)
 
@@ -74,6 +77,7 @@ class RuntimeDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RuntimeData
+        fields = '__all__'
 
     def get_jitlog_checksum(self, obj):
         if obj.jitlog:
@@ -115,14 +119,14 @@ class RuntimeDataViewSet(viewsets.ModelViewSet):
         data = request.data
         name = data['argv'][:255]
         vm = data['VM'][:32]
-        user = request.user if request.user.is_authenticated() else None
+        user = request.user if request.user.is_authenticated else None
         runtime = self.queryset.create(user=user, vm=vm, name=name, completed=True)
         data = json.dumps(data).encode('utf-8')
         CPUProfile.objects.create(data=data, runtime_data=runtime, file=None)
         return Response(str(runtime.runtime_id))
 
     def get_queryset(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return self.queryset
 
         if not bool(self.request.GET.get('all', False)) and 'pk' not in self.kwargs:
@@ -137,9 +141,9 @@ class UserPermission(permissions.BasePermission):
         if request.method == "PUT":
             return True
         if request.method == "DELETE":
-            return request.user.is_authenticated()
+            return request.user.is_authenticated
         if request.method == "GET":
-            return request.user.is_authenticated()
+            return request.user.is_authenticated
         return False
 
 
@@ -168,7 +172,7 @@ class MeView(views.APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        auth.models.User.objects.create_user(
+        User.objects.create_user(
             serializer.data['username'],
             serializer.data['email'],
             serializer.data['password']
@@ -184,6 +188,7 @@ class MeView(views.APIView):
 class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token
+        fields = '__all__'
 
 
 class TokenViewSet(viewsets.ModelViewSet):
@@ -215,7 +220,7 @@ def runtime_new(request):
     data = request.data
     name = data['argv'][:255]
     vm = data['VM'][:32]
-    user = request.user if request.user.is_authenticated() else None
+    user = request.user if request.user.is_authenticated else None
     rdat = RuntimeData.objects.create(user=user, vm=vm, name=name)
     rdat.save()
     return Response({'status':'ok','runtime_id': str(rdat.runtime_id)})
@@ -258,9 +263,23 @@ def extract_meta(rd):
     rd.os = jsondata.get('os', 'unknown')
     rd.save()
 
+
+class FileUploadLegacyParser(FileUploadParser):
+    """
+    In previous DRF versions, it was possible to send the filename in the POST data as a "name" field
+    when using FileUploadParser. It was changed, but this parser is still needed to support old clients.
+    That's why we fallback on MultiPartParser if the filename is not found in the Content-Disposition header.
+    """
+    def parse(self, stream, media_type=None, parser_context=None):
+        try:
+            return super().parse(stream, media_type, parser_context)
+        except ParseError:
+            return MultiPartParser().parse(stream, media_type, parser_context)
+
+
 @api_view(['POST'])
 @permission_classes((AllowAny,))
-@parser_classes((FileUploadParser,))
+@parser_classes((FileUploadLegacyParser,))
 def upload_cpu(request, rid):
     runtimedata = try_get_runtimedata(request, rid)
     if runtimedata.completed:

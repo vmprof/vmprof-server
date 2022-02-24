@@ -67,3 +67,10 @@ target/
 uploads/
 
 sqlite3.db
+data/vmprof.db
+.idea
+/cpu
+/vmprof3
+/.cache
+debug_*.sh
+.python-version

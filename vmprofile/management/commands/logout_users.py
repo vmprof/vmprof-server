@@ -7,6 +7,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # XXX a bit too dramatic, but will work for now
-        
         Session.objects.all().delete()
-        print "done"
+        self.stdout.write("done")

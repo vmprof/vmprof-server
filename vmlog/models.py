@@ -9,8 +9,10 @@ from vmprofile.models import RuntimeData
 
 from vmcache.cache import get_reader
 
+
 def get_profile_storage_directory(profile, filename):
     return "log/%s/%s" % (profile.pk, filename)
+
 
 class BinaryJitLog(models.Model):
     jitlog_id = models.CharField(max_length=64, primary_key=True)
@@ -19,7 +21,7 @@ class BinaryJitLog(models.Model):
     file = models.FileField(upload_to=get_profile_storage_directory)
     # relations
     profile = models.ForeignKey(RuntimeData, related_name='jitlog',
-                                null=True, blank=False)
+                                null=True, blank=False, on_delete=models.CASCADE)
 
     def decode_forest(self):
         # ultra slow, especially when run on cpython 3.5
@@ -28,6 +30,7 @@ class BinaryJitLog(models.Model):
         with get_reader(self.file.name) as fd:
             forest = _parse_jitlog(fd)
             return forest
+
 
 @admin.register(BinaryJitLog)
 class BinaryJitLogAdmin(admin.ModelAdmin):

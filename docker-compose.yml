@@ -1,0 +1,19 @@
+version: "3.8"
+
+x-defaults: &defaults
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+  restart: always
+
+services:
+  vmprof-server:
+    <<: *defaults
+    build: .
+    volumes:
+      - ./data:/data
+      - ./cpu:/usr/src/vmprof-server/cpu
+      # - .:/usr/src/vmprof-server # for debugging
+    ports:
+      - "8000:8000"
