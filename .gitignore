@@ -73,3 +73,4 @@ data/vmprof.db
 /vmprof3
 /.cache
 debug_*.sh
+.python-version
