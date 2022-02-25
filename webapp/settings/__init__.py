@@ -1,7 +1,11 @@
 import os
+
+import dj_database_url
+from django.core.management.utils import get_random_secret_key
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-SECRET_KEY = 'f$tyieh#&bd_4_&691^ok!#$l+(%y4a8j$z9je9xojr++4n(u1'
+SECRET_KEY = os.environ.get('SECRET_KEY', get_random_secret_key())
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
@@ -61,10 +65,7 @@ WSGI_APPLICATION = 'webapp.wsgi.app'
 REGISTRATION_ENABLED = True
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.environ.get('SQLITE_DB', 'sqlite3.db'),
-    }
+    'default': dj_database_url.config(default='sqlite:///sqlite3.db')
 }
 
 LANGUAGE_CODE = 'en-us'

@@ -1,7 +1,6 @@
 from . import *
 
 DEBUG = False
-ALLOWED_HOSTS = ['*']
 COMPRESS_OFFLINE = True
 REGISTRATION_ENABLED = False
 LOGGING = {

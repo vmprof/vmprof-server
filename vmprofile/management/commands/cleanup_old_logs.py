@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):
-    help = 'Cleans up old profiler logs from the database and file system'
+    help = 'Clean up old profiler logs from the database and file system'
 
     def add_arguments(self, parser):
         parser.add_argument('--days', type=int, help='Number of days to keep logs', default=30)

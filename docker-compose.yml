@@ -11,6 +11,8 @@ services:
   vmprof-server:
     <<: *defaults
     build: .
+    environment:
+      SECRET_KEY:
     volumes:
       - ./data:/data
       - ./cpu:/usr/src/vmprof-server/cpu
