@@ -3,7 +3,8 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from vmprofile.models import CPUProfile
+from vmprofile.models import RuntimeData
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):
@@ -16,11 +17,14 @@ class Command(BaseCommand):
         days = options['days']
         delete_older_than = timezone.now() - timedelta(days=days)
         self.stdout.write(f"Deleting profiler logs older than {days} days")
-        to_be_deleted = CPUProfile.objects.filter(runtime_data__created__lte=delete_older_than)\
-            .select_related('runtime_data')
+        to_be_deleted = RuntimeData.objects.filter(created__lte=delete_older_than).select_related('cpu_profile')
         count = len(to_be_deleted)
         self.stdout.write(f"Found {count} logs to be deleted")
-        for x, profile in enumerate(to_be_deleted):
-            self.stdout.write(f"Removing cpu profile log {x+1} of {count}")
-            profile.file.delete()
-            profile.runtime_data.delete()
+        for x, runtime_data in enumerate(to_be_deleted):
+            self.stdout.write(f"Removing runtime data {x+1} of {count}")
+            try:
+                runtime_data.cpu_profile.file.delete()
+                runtime_data.cpu_profile.delete()
+            except ObjectDoesNotExist:
+                pass
+            runtime_data.delete()
