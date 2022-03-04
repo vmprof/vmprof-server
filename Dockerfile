@@ -3,7 +3,6 @@ FROM amancevice/pandas:0.22.0-python3-alpine
 
 EXPOSE 8000
 VOLUME /data
-ENV SQLITE_DB=/data/vmprof.db
 
 RUN apk add --no-cache python3 \
         py3-yaml py3-cryptography py3-six py3-requests sqlite py-pysqlite libunwind-dev uwsgi-python3 \
@@ -11,7 +10,7 @@ RUN apk add --no-cache python3 \
 
 COPY requirements /usr/src/requirements
 
-RUN pip3 install -r /usr/src/requirements/testing.txt
+RUN pip3 install -r /usr/src/requirements/base.txt
 RUN pip3 install -e git://github.com/vmprof/vmprof-python.git#egg=vmprof
 RUN pip3 install gunicorn
 
@@ -22,6 +21,8 @@ COPY docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 ENV DJANGO_SETTINGS_MODULE=webapp.settings.in_house_docker
+ENV SQLITE_DB=/data/vmprof.db
+ENV DATABASE_URL="sqlite:///$SQLITE_DB"
 
 RUN set -x \
     find . -name '__pycache__' -type d | xargs rm -rf && \

@@ -8,6 +8,7 @@ try:
 except ImportError:
     from urllib import parse
 
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -167,6 +168,9 @@ class MeView(views.APIView):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
     def put(self, request, format=None):
+        if not settings.REGISTRATION_ENABLED:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         serializer = UserRegisterSerializer(data=request.data)
 
         if not serializer.is_valid():

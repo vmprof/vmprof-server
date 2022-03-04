@@ -1,9 +1,8 @@
 from . import *
 
 DEBUG = False
-ALLOWED_HOSTS = ['*']
 COMPRESS_OFFLINE = True
-
+REGISTRATION_ENABLED = False
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

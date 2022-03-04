@@ -4,6 +4,7 @@ import json
 from rest_framework import status
 
 from django.contrib import auth
+from django.test import override_settings
 
 from vmprofile.views import UserRegisterSerializer
 
@@ -117,6 +118,20 @@ def test_user_register_2(client):
     assert len(response.data['username']) > 0
     assert len(response.data['email']) > 0
     assert auth.models.User.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_user_register_if_registration_disabled(client):
+    data = {
+        'username': 'testuser',
+        'email': 'test@gmail.com',
+        'password': 'asdasdaas'
+    }
+    with override_settings(REGISTRATION_ENABLED=False):
+        response = client.put('/api/user/', json.dumps(data), content_type='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert not response.data
+    assert auth.models.User.objects.count() == 0
 
 
 @pytest.mark.django_db

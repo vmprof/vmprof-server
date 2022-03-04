@@ -65,12 +65,15 @@
         <nav class="navbar vmprof-nav" role="navigation">
             <div class="container" style="text-align:center;">
                 <ul class="nav navbar-nav text-uppercase vmprof-navbar">
+                    <li><a href="#/">Profiler logs</a></li>
                     <li><a href="#/about">About</a></li>
                     <li><a target="_blank" href="https://vmprof.readthedocs.org/">Docs</a></li>
                     <li>
-                        <a href="https://vmprof.com">
-                            <img src="/static/images/vmprof-logo.png" class="vmprof-logo-navbar" alt="vmprof logo" /></li>
+                        <a href="#/">
+                            <img src="/static/images/vmprof-logo.png" class="vmprof-logo-navbar" alt="vmprof logo" />
                         </a>
+                    </li>
+                    {% if registration_enabled %}
                     <li ng-hide="user"><a href="#/login">Login</a></li>
                     <li ng-hide="user"><a href="#/register">Register</a></li>
                     <li ng-show="user" class="dropdown">
@@ -83,6 +86,7 @@
                             <li><a href="#/logout">Logout</a></li>
                         </ul>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </nav>

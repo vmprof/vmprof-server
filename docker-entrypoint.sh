@@ -1,6 +1,6 @@
-#!/bin/sh -x
+#!/bin/sh -xu
 
-if [ -n $SQLITE_DB -a ! -e $SQLITE_DB ]; then
+if [ -n "$SQLITE_DB" -a ! -e "$SQLITE_DB" ]; then
     python3 manage.py migrate
 fi
 
