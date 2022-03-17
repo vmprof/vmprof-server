@@ -11,7 +11,7 @@ RUN apk add --no-cache python3 \
 COPY requirements /usr/src/requirements
 
 RUN pip3 install -r /usr/src/requirements/base.txt
-RUN pip3 install -e git://github.com/vmprof/vmprof-python.git#egg=vmprof
+RUN pip3 install -e git+https://github.com/vmprof/vmprof-python.git#egg=vmprof
 RUN pip3 install gunicorn
 
 COPY . /usr/src/vmprof-server
