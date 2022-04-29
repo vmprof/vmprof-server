@@ -88,20 +88,20 @@ class Cache(object):
 
 CACHE = {}
 
-BASE = "([a-zA-Z0-9/.\-_]+) ([a-zA-Z0-9-]+)"
+BASE = r"([a-zA-Z0-9/.\-_]+) ([a-zA-Z0-9-]+)"
 GENERIC_REQ = re.compile('([^ ]+) '+BASE)
 
 META_REQUEST = re.compile('meta '+BASE)
 META_SERIALIZER = serializer.LogMetaSerializer()
 
-TRACE_REQUEST = re.compile('trace '+BASE+' (\d+)')
+TRACE_REQUEST = re.compile('trace ' + BASE + r' (\d+)')
 TRACE_SERIALIZER = serializer.TraceSerializer()
 
-STITCH_REQUEST = re.compile('stitch '+BASE+' (\d+)')
+STITCH_REQUEST = re.compile('stitch ' + BASE + r' (\d+)')
 STITCH_SERIALIZER = serializer.VisualTraceTreeSerializer()
 
 FLAMEGRAPH_SERIALIZER = serializer.FlamegraphSerializer()
-MEMORYGRAPH_REQUEST = re.compile('mem '+BASE+' (\d+.\d+) (\d+.\d+|inf)')
+MEMORYGRAPH_REQUEST = re.compile('mem ' + BASE + r' (\d+.\d+) (\d+.\d+|inf)')
 MEMORYGRAPH_SERIALIZER = serializer.MemorygraphSerializer()
 
 META_CPU_SERIALIZER = serializer.CPUMetaSerializer()
